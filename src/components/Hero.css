@@ -1,0 +1,257 @@
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding-top: calc(var(--header-h) + clamp(24px, 4vh, 48px));
+  padding-bottom: clamp(132px, 16vh, 168px);
+  overflow: hidden;
+}
+
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(58% 70% at 82% 62%, rgb(10 106 130 / 0.34), transparent 70%),
+    radial-gradient(40% 40% at 8% 12%, rgb(163 212 196 / 0.07), transparent 70%),
+    var(--ink);
+}
+
+.hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  align-items: center;
+  gap: clamp(28px, 4vw, 72px);
+}
+
+.hero__eyebrow {
+  color: var(--mint);
+}
+
+.hero__title {
+  margin: 26px 0 30px;
+  font-size: clamp(3.1rem, 7.6vw, 8.2rem);
+  font-weight: 200;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+
+.hero__line {
+  display: block;
+  overflow: hidden;
+  padding: 0.05em 0 0.02em;
+}
+
+.hero__line > span {
+  display: inline-block;
+}
+
+.hero__line--accent {
+  padding-bottom: 0.24em;
+  margin-bottom: -0.16em;
+}
+
+.hero__accent {
+  position: relative;
+  color: var(--mint);
+}
+
+.hero__swash {
+  position: absolute;
+  left: 0;
+  bottom: -0.14em;
+  width: 100%;
+  height: 0.22em;
+  overflow: visible;
+  color: var(--mint);
+}
+
+.hero__lead {
+  max-width: 30rem;
+  color: var(--on-ink-muted);
+}
+
+.hero__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px 32px;
+  margin-top: 40px;
+}
+
+/* ---------- colagem ---------- */
+
+.hero__visual {
+  position: relative;
+  height: clamp(460px, 72vh, 760px);
+}
+
+.hero__main {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 64%;
+  height: 94%;
+  background: var(--sand);
+}
+
+.hero__reveal {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.hero__main img,
+.hero__second img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero__main img {
+  object-position: 50% 8%;
+}
+
+.hero__second {
+  position: absolute;
+  left: 2%;
+  bottom: 0;
+  width: 40%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--ink-soft);
+  box-shadow:
+    0 0 0 8px var(--ink),
+    0 30px 60px rgb(0 0 0 / 0.4);
+}
+
+.hero__second img {
+  object-position: 50% 14%;
+}
+
+.hero__badge {
+  position: absolute;
+  top: 4%;
+  left: 7%;
+  width: clamp(104px, 9.5vw, 144px);
+}
+
+.hero__note {
+  position: absolute;
+  right: -1%;
+  bottom: -4%;
+  font-size: clamp(2.3rem, 3.3vw, 3.4rem);
+  line-height: 0.82;
+  text-align: right;
+  color: var(--cream);
+  text-shadow: 0 2px 24px rgb(0 0 0 / 0.55);
+  transform: rotate(-7deg);
+}
+
+/* ---------- rodapé do hero ---------- */
+
+.hero__foot-wrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(56px, 8vh, 84px);
+}
+
+.hero__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--on-ink-faint);
+}
+
+.hero__scroll {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 56px;
+}
+
+.hero__scroll span {
+  position: relative;
+  display: block;
+  width: 1px;
+  height: 48px;
+  overflow: hidden;
+  background: var(--line-ink);
+}
+
+.hero__scroll span::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--mint);
+  transform: translateY(-100%);
+  animation: hero-scroll 2.4s var(--ease-io) infinite;
+}
+
+@keyframes hero-scroll {
+  0% {
+    transform: translateY(-100%);
+  }
+  60%,
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@media (max-width: 899px) {
+  .hero {
+    min-height: auto;
+    padding-bottom: 88px;
+  }
+
+  .hero__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero__title {
+    font-size: clamp(3rem, 13.2vw, 5.8rem);
+    font-weight: 250;
+  }
+
+  .hero__visual {
+    height: auto;
+    aspect-ratio: 1 / 1.16;
+    margin-top: 28px;
+  }
+
+  .hero__main {
+    width: 70%;
+    height: 100%;
+  }
+
+  .hero__second {
+    left: 0;
+    width: 44%;
+  }
+
+  .hero__badge {
+    top: 3%;
+    left: 1%;
+    width: 92px;
+  }
+
+  .hero__note {
+    right: 1%;
+    bottom: -7%;
+    font-size: 2.2rem;
+  }
+
+  .hero__foot-wrap {
+    display: none;
+  }
+}

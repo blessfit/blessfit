@@ -1,0 +1,142 @@
+.community__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px 48px;
+}
+
+.community__head .h2 {
+  margin-top: 20px;
+}
+
+.community__side {
+  display: grid;
+  justify-items: start;
+  gap: 22px;
+  max-width: 38ch;
+}
+
+.community__side strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.community__grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(8px, 1vw, 14px);
+  margin-top: clamp(40px, 5vw, 72px);
+}
+
+.community__tile a {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--sand);
+}
+
+.community__tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.2s var(--ease);
+}
+
+.community__overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgb(5 5 14 / 0.45);
+  color: var(--cream);
+  opacity: 0;
+  transition: opacity 0.5s var(--ease);
+}
+
+.community__overlay svg {
+  width: 28px;
+  height: 28px;
+}
+
+.community__tile a:hover img {
+  transform: scale(1.08);
+}
+
+.community__tile a:hover .community__overlay,
+.community__tile a:focus-visible .community__overlay {
+  opacity: 1;
+}
+
+/* ---------- lista VIP ---------- */
+
+.vip {
+  --accent: var(--mint);
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+  align-items: end;
+  gap: 40px;
+  margin-top: clamp(72px, 9vw, 140px);
+  padding: clamp(36px, 6vw, 88px);
+  overflow: hidden;
+  border-radius: 32px;
+  background: var(--petrol-deep);
+  color: var(--cream);
+}
+
+.vip__mono {
+  position: absolute;
+  right: -6%;
+  bottom: -30%;
+  z-index: -1;
+  width: 52%;
+  color: var(--cream);
+  opacity: 0.06;
+}
+
+.vip .eyebrow {
+  color: var(--mint);
+}
+
+.vip__title {
+  margin-top: 22px;
+  font-size: clamp(2rem, 4vw, 3.8rem);
+}
+
+.vip__text {
+  max-width: 44ch;
+  margin-top: 20px;
+  color: var(--on-ink-muted);
+}
+
+.vip__actions {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+}
+
+.vip__note {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--on-ink-faint);
+}
+
+@media (max-width: 899px) {
+  .community__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .vip {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .community__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

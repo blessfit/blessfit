@@ -1,0 +1,95 @@
+.verse {
+  position: relative;
+  height: 280vh;
+  background: var(--ink);
+}
+
+.verse__sticky {
+  position: sticky;
+  top: 0;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.verse__glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(50% 45% at 50% 55%, rgb(10 106 130 / 0.32), transparent 72%);
+}
+
+.verse__sticky .grain {
+  z-index: -1;
+}
+
+.verse__mono {
+  position: absolute;
+  z-index: -1;
+  width: min(78vw, 1000px);
+  color: var(--cream);
+  opacity: 0.035;
+}
+
+.verse__mono svg {
+  width: 100%;
+  height: auto;
+}
+
+.verse__inner {
+  max-width: 1120px;
+  text-align: center;
+}
+
+.verse__eyebrow {
+  justify-content: center;
+  color: var(--mint);
+}
+
+.verse__eyebrow::after {
+  content: '';
+  width: 32px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+.verse__text {
+  margin-top: clamp(28px, 4vh, 44px);
+  font-size: clamp(1.55rem, 3.4vw, 3.2rem);
+  font-weight: 250;
+  line-height: 1.24;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+
+.lit--em {
+  color: var(--mint);
+}
+
+.verse__ref {
+  margin-top: clamp(28px, 4vh, 44px);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--on-ink-muted);
+}
+
+.verse__ref cite {
+  font-style: normal;
+  color: var(--cream);
+}
+
+.verse--static {
+  height: auto;
+}
+
+.verse--static .verse__sticky {
+  position: relative;
+  height: auto;
+  padding-block: var(--section-y);
+}
