@@ -43,21 +43,28 @@ export const Grid = styled(Container)`
   }
 `
 
-export const Text = styled(motion.div)``
+// container de referência para o tamanho do título (unidade cqi)
+export const Text = styled(motion.div)`
+  container-type: inline-size;
+`
 
 export const Eyebrow = styled(BaseEyebrow)`
   color: var(--mint);
 `
 
+/*
+ * A coluna para de crescer junto com o container (--container), mas o vw não:
+ * o limite em cqi garante que "Movimento" (~5.24em) caiba sempre na largura da coluna.
+ */
 export const Title = styled.h1`
   margin: 26px 0 30px;
-  font-size: clamp(3.1rem, 7.6vw, 8.2rem);
+  font-size: min(clamp(3.1rem, 7.6vw, 8.2rem), 18.5cqi);
   font-weight: 200;
   line-height: 0.98;
   letter-spacing: -0.045em;
 
   ${media.md} {
-    font-size: clamp(3rem, 13.2vw, 5.8rem);
+    font-size: min(clamp(3rem, 13.2vw, 5.8rem), 18.5cqi);
     font-weight: 250;
   }
 `
