@@ -1,0 +1,12 @@
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import '@fontsource-variable/montserrat/wght.css'
+import '@fontsource/allison/latin-400.css'
+import 'lenis/dist/lenis.css'
+import App from '@/app/App'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
