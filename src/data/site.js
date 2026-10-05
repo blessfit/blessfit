@@ -2,22 +2,22 @@
  * Conteúdo da landing page da blessfit.
  * Edite textos, produtos e contatos aqui — os componentes só leem estes dados.
  */
-import backBlack from '../assets/img/back-black.webp'
-import backMen from '../assets/img/back-men.webp'
-import fabricTeal from '../assets/img/fabric-teal.webp'
-import legsBlack from '../assets/img/legs-black.webp'
-import modelBlack from '../assets/img/model-black.webp'
-import modelMen from '../assets/img/model-men.webp'
-import modelTeal from '../assets/img/model-teal.webp'
-import shortsMen from '../assets/img/shorts-men.webp'
-import shortsTeal from '../assets/img/shorts-teal.webp'
-import strapsTeal from '../assets/img/straps-teal.webp'
-import tankBlack from '../assets/img/tank-black.webp'
-import teeMen from '../assets/img/tee-men.webp'
-import topTeal from '../assets/img/top-teal.webp'
-import waistBlack from '../assets/img/waist-black.webp'
-import waistMen from '../assets/img/waist-men.webp'
-import waistTeal from '../assets/img/waist-teal.webp'
+import backBlack from '@/assets/img/back-black.webp'
+import backMen from '@/assets/img/back-men.webp'
+import fabricTeal from '@/assets/img/fabric-teal.webp'
+import legsBlack from '@/assets/img/legs-black.webp'
+import modelBlack from '@/assets/img/model-black.webp'
+import modelMen from '@/assets/img/model-men.webp'
+import modelTeal from '@/assets/img/model-teal.webp'
+import shortsMen from '@/assets/img/shorts-men.webp'
+import shortsTeal from '@/assets/img/shorts-teal.webp'
+import strapsTeal from '@/assets/img/straps-teal.webp'
+import tankBlack from '@/assets/img/tank-black.webp'
+import teeMen from '@/assets/img/tee-men.webp'
+import topTeal from '@/assets/img/top-teal.webp'
+import waistBlack from '@/assets/img/waist-black.webp'
+import waistMen from '@/assets/img/waist-men.webp'
+import waistTeal from '@/assets/img/waist-teal.webp'
 
 export const SITE = {
   name: 'blessfit',

@@ -1,4 +1,4 @@
-import { SITE } from '../data/site'
+import { SITE } from '@/data/site'
 
 const DEFAULT_MESSAGE = 'Olá! Vim pelo site da blessfit e quero saber mais sobre as peças.'
 
