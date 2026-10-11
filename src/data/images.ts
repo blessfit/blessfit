@@ -114,6 +114,12 @@ const templo = folder(
 )
 
 const TEMPLO = {
+  conjuntoPretoFrente: templo('conjunto-preto-frente', 'Modelo de frente com o Conjunto Templo preto: regata 1 Co 6:19-20 e legging', '50% 30%'),
+  conjuntoPretoCostas: templo('conjunto-preto-costas', 'Modelo de costas com o Conjunto Templo preto e o logo blessfit no cós', '50% 30%'),
+  conjuntoMarinhoFrente: templo('conjunto-marinho-frente', 'Modelo de frente com o Conjunto Templo azul marinho: regata 1 Co 6:19-20 e legging', '50% 30%'),
+  conjuntoMarinhoCostas: templo('conjunto-marinho-costas', 'Modelo de costas com o Conjunto Templo azul marinho e o logo blessfit no cós', '50% 30%'),
+  conjuntoBrancoFrente: templo('conjunto-branco-frente', 'Modelo de frente com a regata branca 1 Co 6:19-20 e legging preta', '50% 30%'),
+  conjuntoBrancoCostas: templo('conjunto-branco-costas', 'Modelo de costas com a regata branca e legging preta com o logo blessfit', '50% 30%'),
   regataPretoFrente: templo('regata-preto-frente', 'Regata preta com estampa blessfit 1 Co 6:19-20, de frente', '50% 25%'),
   regataPretoCostas: templo('regata-preto-costas', 'Costas da regata preta com cava aberta', '50% 25%'),
   regataMarinhoFrente: templo('regata-marinho-frente', 'Regata azul marinho com estampa blessfit 1 Co 6:19-20, de frente', '50% 25%'),
@@ -172,19 +178,24 @@ export const IMAGES = {
       hover: stock('photo-1628970937415-72e1677309c6', 'Duas modelos com conjuntos fitness coloridos', '50% 40%'),
     },
     'conjunto-templo-preto': {
-      main: TEMPLO.regataPretoFrente,
-      hover: TEMPLO.regataPretoCostas,
-      gallery: [TEMPLO.leggingPretoFrente, TEMPLO.leggingPretoCostas],
+      main: TEMPLO.conjuntoPretoFrente,
+      hover: TEMPLO.conjuntoPretoCostas,
+      gallery: [TEMPLO.regataPretoFrente, TEMPLO.regataPretoCostas, TEMPLO.leggingPretoFrente, TEMPLO.leggingPretoCostas],
     },
     'conjunto-templo-marinho': {
-      main: TEMPLO.regataMarinhoFrente,
-      hover: TEMPLO.regataMarinhoCostas,
-      gallery: [TEMPLO.leggingMarinhoFrente, TEMPLO.leggingMarinhoCostas],
+      main: TEMPLO.conjuntoMarinhoFrente,
+      hover: TEMPLO.conjuntoMarinhoCostas,
+      gallery: [
+        TEMPLO.regataMarinhoFrente,
+        TEMPLO.regataMarinhoCostas,
+        TEMPLO.leggingMarinhoFrente,
+        TEMPLO.leggingMarinhoCostas,
+      ],
     },
     'conjunto-templo-branco': {
-      main: TEMPLO.regataBrancoFrente,
-      hover: TEMPLO.regataBrancoCostas,
-      gallery: [TEMPLO.leggingPretoFrente, TEMPLO.leggingPretoCostas],
+      main: TEMPLO.conjuntoBrancoFrente,
+      hover: TEMPLO.conjuntoBrancoCostas,
+      gallery: [TEMPLO.regataBrancoFrente, TEMPLO.regataBrancoCostas, TEMPLO.leggingPretoFrente, TEMPLO.leggingPretoCostas],
     },
 
     // ——— Conjuntos masculinos ———
@@ -213,11 +224,19 @@ export const IMAGES = {
     'camiseta-forca-preto': { main: FORCA.camisetaPreto, hover: FORCA.pretoCostas, gallery: [FORCA.pretoFrente] },
     'camiseta-forca-marinho': { main: FORCA.camisetaMarinho, hover: FORCA.marinhoFrente },
     'shorts-forca-preto': { main: FORCA.shortsPretoFrente, hover: FORCA.shortsPretoCostas, gallery: [FORCA.pretoFrente] },
-    'regata-templo-preto': { main: TEMPLO.regataPretoFrente, hover: TEMPLO.regataPretoCostas },
-    'regata-templo-marinho': { main: TEMPLO.regataMarinhoFrente, hover: TEMPLO.regataMarinhoCostas },
-    'regata-templo-branco': { main: TEMPLO.regataBrancoFrente, hover: TEMPLO.regataBrancoCostas },
-    'legging-templo-preto': { main: TEMPLO.leggingPretoFrente, hover: TEMPLO.leggingPretoCostas },
-    'legging-templo-marinho': { main: TEMPLO.leggingMarinhoFrente, hover: TEMPLO.leggingMarinhoCostas },
+    'regata-templo-preto': { main: TEMPLO.regataPretoFrente, hover: TEMPLO.regataPretoCostas, gallery: [TEMPLO.conjuntoPretoFrente] },
+    'regata-templo-marinho': {
+      main: TEMPLO.regataMarinhoFrente,
+      hover: TEMPLO.regataMarinhoCostas,
+      gallery: [TEMPLO.conjuntoMarinhoFrente],
+    },
+    'regata-templo-branco': { main: TEMPLO.regataBrancoFrente, hover: TEMPLO.regataBrancoCostas, gallery: [TEMPLO.conjuntoBrancoFrente] },
+    'legging-templo-preto': { main: TEMPLO.leggingPretoFrente, hover: TEMPLO.leggingPretoCostas, gallery: [TEMPLO.conjuntoPretoFrente] },
+    'legging-templo-marinho': {
+      main: TEMPLO.leggingMarinhoFrente,
+      hover: TEMPLO.leggingMarinhoCostas,
+      gallery: [TEMPLO.conjuntoMarinhoFrente],
+    },
     'shorts-forca-marinho': {
       main: FORCA.shortsMarinhoFrente,
       hover: FORCA.shortsMarinhoCostas,
