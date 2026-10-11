@@ -7,6 +7,8 @@ type PictureProps = {
   sizes?: string
   /** Imagem acima da dobra: carrega na hora e com prioridade. */
   priority?: boolean
+  /** Carrega já, sem esperar entrar na tela (ex.: slides do carrossel), mas sem prioridade alta. */
+  eager?: boolean
   /** Imagem só decorativa (alt vazio). */
   decorative?: boolean
   className?: string
@@ -20,7 +22,7 @@ const Cover = styled.img`
 `
 
 /** Foto que preenche o contêiner, com srcset, lazy-loading e ponto focal vindos de data/images.ts. */
-export function Picture({ image, sizes = '100vw', priority, decorative, className }: PictureProps) {
+export function Picture({ image, sizes = '100vw', priority, eager, decorative, className }: PictureProps) {
   return (
     <Cover
       className={className}
@@ -28,7 +30,7 @@ export function Picture({ image, sizes = '100vw', priority, decorative, classNam
       srcSet={image.srcSet}
       sizes={image.srcSet ? sizes : undefined}
       alt={decorative ? '' : image.alt}
-      loading={priority ? 'eager' : 'lazy'}
+      loading={priority || eager ? 'eager' : 'lazy'}
       fetchPriority={priority ? 'high' : 'auto'}
       decoding="async"
       style={image.position ? { objectPosition: image.position } : undefined}

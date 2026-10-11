@@ -8,13 +8,14 @@ type Filter = 'Todas' | Exclude<Kind, 'Conjunto'>
 /** Abas com âncora: as categorias “Blusas” e “Shorts” (#blusas/#shorts) rolam até aqui e abrem a aba certa. */
 const TABS: { id: string; filter: Filter; label: string }[] = [
   { id: 'pecas-todas', filter: 'Todas', label: 'Todas' },
-  { id: 'blusas', filter: 'Blusa', label: 'Blusas e tops' },
+  { id: 'blusas', filter: 'Blusa', label: 'Blusas' },
   { id: 'shorts', filter: 'Shorts', label: 'Shorts' },
+  { id: 'leggings', filter: 'Legging', label: 'Leggings' },
 ]
 
 const fromHash = (): Filter | null => TABS.find((t) => `#${t.id}` === window.location.hash)?.filter ?? null
 
-/** “Peças avulsas”: tops, camisetas e shorts vendidos separadamente, com troca de cor e fotos. */
+/** “Peças avulsas”: tops, regatas, camisetas, shorts e leggings vendidos separadamente, com troca de cor e fotos. */
 export function Pieces() {
   const [filter, setFilter] = useState<Filter>(() => fromHash() ?? 'Todas')
 
@@ -36,7 +37,7 @@ export function Pieces() {
           id="pecas-title"
           eyebrow="Monte do seu jeito"
           title="Peças avulsas"
-          text="Prefere combinar? Compre o top, a camiseta ou o shorts separadamente, na cor que quiser."
+          text="Prefere combinar? Compre o top, a regata, a camiseta, o shorts ou a legging separadamente, na cor que quiser."
           actions={
             <TabList role="tablist" aria-label="Tipo de peça">
               {TABS.map((tab) => (

@@ -85,6 +85,47 @@ function sized(small: string, large: string, alt: string, position?: string): Im
   return { src: small, srcSet: `${small} 900w, ${large} 1600w`, alt, position }
 }
 
+/**
+ * Fotos de uma pasta de src/assets/img salvas em várias larguras (nome-900.webp, nome-1600.webp, ...).
+ * Todas as larguras encontradas entram no srcset; a menor vira o `src` padrão.
+ */
+function folder(files: Record<string, string>, dir: string) {
+  return (name: string, alt: string, position?: string): Img => {
+    const prefix = `../assets/img/${dir}/${name}-`
+    const sizes = Object.entries(files)
+      .filter(([path]) => path.startsWith(prefix) && /^\d+\.webp$/.test(path.slice(prefix.length)))
+      .map(([path, url]) => ({ width: Number.parseInt(path.slice(prefix.length), 10), url }))
+      .sort((a, b) => a.width - b.width)
+    if (!sizes.length) throw new Error(`Foto não encontrada: src/assets/img/${dir}/${name}-<largura>.webp`)
+    return { src: sizes[0].url, srcSet: sizes.map((s) => `${s.url} ${s.width}w`).join(', '), alt, position }
+  }
+}
+
+// Banner principal — fotos de campanha geradas no Google Flow (16:9)
+const banner = folder(
+  import.meta.glob<string>('../assets/img/banner/*.webp', { eager: true, import: 'default' }),
+  'banner',
+)
+
+// Conjunto Templo (regata + legging) — fotos geradas no Google Flow a partir das peças reais
+const templo = folder(
+  import.meta.glob<string>('../assets/img/templo/*.webp', { eager: true, import: 'default' }),
+  'templo',
+)
+
+const TEMPLO = {
+  regataPretoFrente: templo('regata-preto-frente', 'Regata preta com estampa blessfit 1 Co 6:19-20, de frente', '50% 25%'),
+  regataPretoCostas: templo('regata-preto-costas', 'Costas da regata preta com cava aberta', '50% 25%'),
+  regataMarinhoFrente: templo('regata-marinho-frente', 'Regata azul marinho com estampa blessfit 1 Co 6:19-20, de frente', '50% 25%'),
+  regataMarinhoCostas: templo('regata-marinho-costas', 'Costas da regata azul marinho com o logo blessfit na barra', '50% 25%'),
+  regataBrancoFrente: templo('regata-branco-frente', 'Regata branca com estampa blessfit 1 Co 6:19-20, de frente', '50% 25%'),
+  regataBrancoCostas: templo('regata-branco-costas', 'Costas da regata branca com barra arredondada', '50% 25%'),
+  leggingPretoFrente: templo('legging-preto-frente', 'Legging preta de cós alto com logo b.f, de frente', '50% 55%'),
+  leggingPretoCostas: templo('legging-preto-costas', 'Legging preta de costas com o logo blessfit no cós', '50% 55%'),
+  leggingMarinhoFrente: templo('legging-marinho-frente', 'Legging azul marinho de cós alto com logo b.f, de frente', '50% 55%'),
+  leggingMarinhoCostas: templo('legging-marinho-costas', 'Legging azul marinho de costas com o logo blessfit no cós', '50% 55%'),
+}
+
 const GRACA = {
   frente: sized(gracaFrente900, gracaFrente1600, 'Modelo de frente com o Conjunto Graça azul petróleo: top de alças finas e shorts de cós alto', '50% 30%'),
   costas: sized(gracaCostas900, gracaCostas1600, 'Modelo de costas com o Conjunto Graça, mostrando as alças cruzadas e o logo blessfit', '50% 30%'),
@@ -107,11 +148,16 @@ const FORCA = {
 }
 
 export const IMAGES = {
-  hero: stock(
-    'photo-1574680096145-d05b474e2155',
-    'Atleta segurando a barra nas costas durante o agachamento',
-    '62% 30%',
-  ),
+  /**
+   * Slides do banner principal (carrossel), na mesma ordem de HERO_SLIDES (src/data/shop.ts).
+   * Fotos horizontais 16:9 em src/assets/img/banner (nome-900/1600/2400.webp).
+   */
+  heroSlides: [
+    banner('colecao', 'Casal caminhando à beira-mar com os conjuntos Graça azul petróleo e Força preto', '65% 50%'),
+    banner('masculino', 'Homem sentado em escadaria de pedra com o Conjunto Força azul marinho', '30% 50%'),
+    banner('feminino', 'Mulher se alongando em um deck de frente para o mar com o Conjunto Graça azul petróleo', '68% 50%'),
+    banner('pecas', 'Amigos descansando em um terraço ensolarado com top Graça e camiseta Força', '35% 50%'),
+  ],
 
   /** Uma entrada por produto + cor. */
   products: {
@@ -125,9 +171,20 @@ export const IMAGES = {
       main: stock('photo-1628971021877-37187fde57f4', 'Modelo com top grafite e shorts coral em fundo claro', '50% 30%'),
       hover: stock('photo-1628970937415-72e1677309c6', 'Duas modelos com conjuntos fitness coloridos', '50% 40%'),
     },
-    'conjunto-renovo-preto': {
-      main: stock('photo-1649345946706-afbf86eee046', 'Modelo correndo com top e shorts pretos', '50% 40%'),
-      hover: stock('photo-1584380931214-dbb5b72e7fd0', 'Modelo com top e shorts pretos treinando com cordas', '50% 40%'),
+    'conjunto-templo-preto': {
+      main: TEMPLO.regataPretoFrente,
+      hover: TEMPLO.regataPretoCostas,
+      gallery: [TEMPLO.leggingPretoFrente, TEMPLO.leggingPretoCostas],
+    },
+    'conjunto-templo-marinho': {
+      main: TEMPLO.regataMarinhoFrente,
+      hover: TEMPLO.regataMarinhoCostas,
+      gallery: [TEMPLO.leggingMarinhoFrente, TEMPLO.leggingMarinhoCostas],
+    },
+    'conjunto-templo-branco': {
+      main: TEMPLO.regataBrancoFrente,
+      hover: TEMPLO.regataBrancoCostas,
+      gallery: [TEMPLO.leggingPretoFrente, TEMPLO.leggingPretoCostas],
     },
 
     // ——— Conjuntos masculinos ———
@@ -156,6 +213,11 @@ export const IMAGES = {
     'camiseta-forca-preto': { main: FORCA.camisetaPreto, hover: FORCA.pretoCostas, gallery: [FORCA.pretoFrente] },
     'camiseta-forca-marinho': { main: FORCA.camisetaMarinho, hover: FORCA.marinhoFrente },
     'shorts-forca-preto': { main: FORCA.shortsPretoFrente, hover: FORCA.shortsPretoCostas, gallery: [FORCA.pretoFrente] },
+    'regata-templo-preto': { main: TEMPLO.regataPretoFrente, hover: TEMPLO.regataPretoCostas },
+    'regata-templo-marinho': { main: TEMPLO.regataMarinhoFrente, hover: TEMPLO.regataMarinhoCostas },
+    'regata-templo-branco': { main: TEMPLO.regataBrancoFrente, hover: TEMPLO.regataBrancoCostas },
+    'legging-templo-preto': { main: TEMPLO.leggingPretoFrente, hover: TEMPLO.leggingPretoCostas },
+    'legging-templo-marinho': { main: TEMPLO.leggingMarinhoFrente, hover: TEMPLO.leggingMarinhoCostas },
     'shorts-forca-marinho': {
       main: FORCA.shortsMarinhoFrente,
       hover: FORCA.shortsMarinhoCostas,

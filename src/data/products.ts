@@ -12,7 +12,7 @@
 import { IMAGES, type ProductImageKey, type ProductImages } from './images'
 
 export type Gender = 'Feminino' | 'Masculino'
-export type Kind = 'Conjunto' | 'Blusa' | 'Shorts'
+export type Kind = 'Conjunto' | 'Blusa' | 'Shorts' | 'Legging'
 export type Size = 'PP' | 'P' | 'M' | 'G' | 'GG'
 export type Color = { name: string; hex: string }
 export type Variant = { color: Color; images: ProductImages }
@@ -43,6 +43,7 @@ const C = {
   grafite: { name: 'Grafite', hex: '#3d3f45' },
   petroleo: { name: 'Azul Petróleo', hex: '#0a6a82' },
   coral: { name: 'Coral', hex: '#e8553a' },
+  branco: { name: 'Branco', hex: '#f6f4ef' },
 } satisfies Record<string, Color>
 
 /** Cor + a chave das fotos dela em IMAGES.products. */
@@ -81,16 +82,21 @@ export const PRODUCTS: Product[] = [
     badge: 'Últimas peças',
   },
   {
-    id: 'conjunto-renovo',
+    id: 'conjunto-templo',
     ref: 'BF-F03',
-    name: 'Conjunto Renovo',
+    name: 'Conjunto Templo',
     gender: 'Feminino',
     kind: 'Conjunto',
     category: 'Conjunto feminino',
-    variants: [v(C.preto, 'conjunto-renovo-preto')],
-    pieces: ['Top cropped', 'Shorts com cordão'],
-    description: 'Top cropped de alta sustentação e shorts com cordão ajustável para correr e treinar.',
-    price: 209.9,
+    variants: [
+      v(C.preto, 'conjunto-templo-preto'),
+      v(C.marinho, 'conjunto-templo-marinho'),
+      v(C.branco, 'conjunto-templo-branco'),
+    ],
+    pieces: ['Regata 1 Co 6:19-20', 'Legging cós alto'],
+    description:
+      'Regata leve com a estampa 1 Co 6:19-20 e barra arredondada, com legging de cós alto que não marca. Na cor Branco, a regata vem com legging preta.',
+    price: 219.9,
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
     badge: 'Lançamento',
   },
@@ -142,6 +148,38 @@ export const PRODUCTS: Product[] = [
   },
 
   // ——— Peças avulsas ———
+  {
+    id: 'regata-templo',
+    ref: 'BF-F03-R',
+    name: 'Regata Templo',
+    gender: 'Feminino',
+    kind: 'Blusa',
+    category: 'Regata feminina',
+    variants: [
+      v(C.preto, 'regata-templo-preto'),
+      v(C.marinho, 'regata-templo-marinho'),
+      v(C.branco, 'regata-templo-branco'),
+    ],
+    pieces: ['Estampa 1 Co 6:19-20', 'Barra arredondada'],
+    description: 'Regata de cava aberta e caimento solto, com a estampa blessfit 1 Co 6:19-20 no peito.',
+    price: 89.9,
+    sizes: ['PP', 'P', 'M', 'G', 'GG'],
+    badge: 'Lançamento',
+  },
+  {
+    id: 'legging-templo',
+    ref: 'BF-F03-L',
+    name: 'Legging Templo',
+    gender: 'Feminino',
+    kind: 'Legging',
+    category: 'Legging feminina',
+    variants: [v(C.preto, 'legging-templo-preto'), v(C.marinho, 'legging-templo-marinho')],
+    pieces: ['Cós alto', 'Não marca nem fica transparente'],
+    description: 'Legging de cós alto com logo b.f na lateral e blessfit nas costas, do agachamento ao cardio.',
+    price: 139.9,
+    sizes: ['PP', 'P', 'M', 'G', 'GG'],
+    badge: 'Lançamento',
+  },
   {
     id: 'top-graca',
     ref: 'BF-F01-T',
