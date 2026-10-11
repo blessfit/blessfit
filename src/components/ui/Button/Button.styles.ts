@@ -1,6 +1,44 @@
 import styled, { css } from 'styled-components'
 
 const variants = {
+  /** Preto sólido — ação principal da loja (Comprar). */
+  primary: css`
+    --btn-hover: var(--olive-deep);
+    background: var(--ink);
+    color: var(--white);
+  `,
+  petrol: css`
+    --btn-hover: var(--petrol-deep);
+    background: var(--petrol);
+    color: var(--white);
+  `,
+  /** Branco sólido — sobre fotos e fundos escuros. */
+  light: css`
+    --btn-hover: var(--mint);
+    background: var(--white);
+    color: var(--ink);
+  `,
+  outline: css`
+    --btn-hover: var(--ink);
+    border: 1.5px solid var(--ink);
+    color: var(--ink);
+
+    &:hover {
+      color: var(--white);
+    }
+  `,
+  outlineLight: css`
+    --btn-hover: var(--white);
+    border: 1.5px solid rgb(255 255 255 / 0.7);
+    color: var(--white);
+
+    &:hover {
+      color: var(--ink);
+      border-color: var(--white);
+    }
+  `,
+
+  // variantes da versão anterior
   cream: css`
     background: var(--cream);
     color: var(--ink);
@@ -37,6 +75,7 @@ const sizes = {
     --h: 44px;
     padding: 0 20px;
     font-size: 11px;
+    letter-spacing: 0.14em;
   `,
 }
 
@@ -58,22 +97,22 @@ export const Icon = styled.svg`
 export type ButtonVariant = keyof typeof variants
 export type ButtonSize = keyof typeof sizes
 
-export const Root = styled.a<{ $variant: ButtonVariant; $size: ButtonSize }>`
-  --h: 56px;
+export const Root = styled.a<{ $variant: ButtonVariant; $size: ButtonSize; $block?: boolean }>`
+  --h: 52px;
   --btn-hover: var(--mint);
   position: relative;
   isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   height: var(--h);
-  padding: 0 30px;
+  padding: 0 28px;
   border-radius: 999px;
   overflow: hidden;
   font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
+  font-weight: 650;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   white-space: nowrap;
   transition:
@@ -99,6 +138,21 @@ export const Root = styled.a<{ $variant: ButtonVariant; $size: ButtonSize }>`
     transform: translateX(4px);
   }
 
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  &:disabled::before {
+    display: none;
+  }
+
   ${({ $variant }) => variants[$variant]}
   ${({ $size }) => sizes[$size]}
+  ${({ $block }) =>
+    $block &&
+    css`
+      display: flex;
+      width: 100%;
+    `}
 `

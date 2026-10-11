@@ -1,0 +1,196 @@
+import styled from 'styled-components'
+
+/* ——— Menu ——— */
+
+export const Menu = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  min-height: 100%;
+  padding: 24px;
+`
+
+export const MenuLinks = styled.ul`
+  a {
+    display: block;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+`
+
+export const MenuGroup = styled.div`
+  h3 {
+    margin-bottom: 10px;
+    color: var(--text-faint);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 16px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+`
+
+export const MenuFoot = styled.div`
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+
+  p {
+    margin-top: 8px;
+    color: var(--text-faint);
+    font-size: 12px;
+    text-align: center;
+  }
+`
+
+/* ——— Sacola e favoritos ——— */
+
+export const Empty = styled.div`
+  display: grid;
+  justify-items: center;
+  gap: 20px;
+  padding: 64px 24px;
+  color: var(--text-muted);
+  text-align: center;
+`
+
+export const Lines = styled.ul`
+  padding: 8px 24px;
+`
+
+export const Line = styled.li`
+  display: grid;
+  grid-template-columns: 88px 1fr auto;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+`
+
+export const Thumb = styled.div`
+  aspect-ratio: 4 / 5;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+`
+
+export const LineName = styled.p`
+  font-weight: 700;
+  line-height: 1.3;
+`
+
+export const LineMeta = styled.p`
+  color: var(--text-muted);
+  font-size: 13px;
+`
+
+export const Qty = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  span {
+    min-width: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+  }
+`
+
+export const LineEnd = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin: -6px -8px 0 0;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  strong {
+    margin-right: 8px;
+    font-size: 14px;
+  }
+`
+
+export const TextButton = styled.button`
+  margin-top: 10px;
+  min-height: 32px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+`
+
+export const Summary = styled.div`
+  display: grid;
+  gap: 8px;
+`
+
+export const Shipping = styled.div`
+  margin-bottom: 8px;
+  font-size: 13px;
+
+  span {
+    position: relative;
+    display: block;
+    height: 4px;
+    margin-top: 8px;
+    border-radius: 4px;
+    background: var(--line);
+    overflow: hidden;
+  }
+
+  i {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: var(--petrol);
+    transition: width 0.4s var(--ease);
+  }
+`
+
+export const Total = styled.p`
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+
+  strong {
+    font-size: 1.2rem;
+  }
+`
+
+export const Pix = styled.p`
+  margin: -6px 0 8px;
+  color: var(--petrol);
+  font-size: 13px;
+  font-weight: 650;
+  text-align: right;
+`
