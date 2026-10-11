@@ -35,6 +35,19 @@ const Card = styled.article`
   }
 `
 
+/** A foto inteira abre o “visualizar” (no celular é onde as pessoas tocam). */
+const ImageButton = styled.button`
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  cursor: zoom-in;
+
+  &:focus-visible {
+    outline-offset: -4px;
+  }
+`
+
 const Media = styled.div`
   position: relative;
   aspect-ratio: 1 / 1;
@@ -156,7 +169,9 @@ export function SetCard({ product }: { product: Product }) {
   return (
     <Card aria-labelledby={`set-${product.id}`}>
       <Media>
-        <Picture image={p.variant.images.main} sizes="(max-width: 639px) 100vw, (max-width: 1023px) 45vw, 30vw" />
+        <ImageButton type="button" onClick={p.view} aria-label={`Visualizar ${product.name}`}>
+          <Picture image={p.variant.images.main} sizes="(max-width: 639px) 100vw, (max-width: 1023px) 45vw, 30vw" />
+        </ImageButton>
         <Color>
           <i style={{ background: color.hex }} />
           {color.name}

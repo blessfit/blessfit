@@ -31,15 +31,27 @@ export function Dialog({ open, onClose, title, variant = 'modal', footer, width,
   useEffect(() => {
     const dialog = ref.current
     if (!dialog) return
-    if (open && !dialog.open) dialog.showModal()
-    if (!open && dialog.open) dialog.close()
+    const isOpen = dialog.hasAttribute('open')
+    // navegadores sem <dialog> nativo (iOS < 15.4): abre só pelo atributo `open`
+    const native = typeof dialog.showModal === 'function'
+    if (open && !isOpen) {
+      if (native) dialog.showModal()
+      else dialog.setAttribute('open', '')
+    }
+    if (!open && isOpen) {
+      if (native) dialog.close()
+      else dialog.removeAttribute('open')
+    }
     syncScrollLock()
   }, [open])
 
   useEffect(() => {
     const dialog = ref.current
     return () => {
-      if (dialog?.open) dialog.close()
+      if (dialog?.hasAttribute('open')) {
+        if (typeof dialog.close === 'function') dialog.close()
+        else dialog.removeAttribute('open')
+      }
       syncScrollLock()
     }
   }, [])

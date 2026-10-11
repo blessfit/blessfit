@@ -53,7 +53,16 @@ export type DialogVariant = keyof typeof variants
 
 export const Root = styled.dialog<{ $variant: DialogVariant; $width?: number }>`
   --w: ${({ $width = 960 }) => $width}px;
+  /* iguais ao padrão do navegador; garantem a janela fixa também onde <dialog> não é nativo */
+  position: fixed;
+  inset: 0;
+  z-index: 100;
   padding: 0;
+
+  &:not([open]) {
+    display: none;
+  }
+
   border: 0;
   max-width: 100%;
   background: var(--white);
