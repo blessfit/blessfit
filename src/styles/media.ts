@@ -6,12 +6,14 @@ const { xs, sm, md } = theme.breakpoints
 export const media = {
   /** até 419px */
   xs: `@media (max-width: ${xs - 1}px)`,
-  /** até 559px */
+  /** celular: até 639px */
   sm: `@media (max-width: ${sm - 1}px)`,
-  /** tablet e mobile: até 899px */
+  /** tablet e celular: até 1023px */
   md: `@media (max-width: ${md - 1}px)`,
-  /** desktop: a partir de 900px */
+  /** desktop: a partir de 1024px */
   desktop: `@media (min-width: ${md}px)`,
+  /** só dispositivos com mouse (evita hover "grudado" no toque) */
+  hover: '@media (hover: hover) and (pointer: fine)',
   reducedMotion: '@media (prefers-reduced-motion: reduce)',
 }
 

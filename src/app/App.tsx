@@ -1,25 +1,31 @@
-import { AnimatePresence } from 'motion/react'
-import { Footer, Loader, Navbar, SkipLink, WhatsAppFab } from '@/components/layout'
-import { useIntro } from '@/hooks/useIntro'
-import { useSmoothScroll } from '@/hooks/useSmoothScroll'
-import { HomePage } from '@/pages/Home'
+import {
+  AnnouncementBar,
+  Header,
+  InfoDialog,
+  Panels,
+  SiteFooter,
+  SkipLink,
+  WhatsAppFab,
+} from '@/components/layout'
+import { QuickView } from '@/components/product'
+import { StorePage } from '@/pages/Store'
 import { AppProviders } from './providers/AppProviders'
 
 export default function App() {
-  const [introDone, finishIntro] = useIntro()
-  useSmoothScroll()
-
   return (
     <AppProviders>
-      <AnimatePresence>{!introDone && <Loader key="loader" onDone={finishIntro} />}</AnimatePresence>
-
-      <SkipLink href="#conteudo" data-skip-link>
-        Pular para o conteúdo
-      </SkipLink>
-      <Navbar />
-      <HomePage introDone={introDone} />
-      <Footer />
+      <div id="top" />
+      <SkipLink href="#conteudo">Pular para o conteúdo</SkipLink>
+      <AnnouncementBar />
+      <Header />
+      <StorePage />
+      <SiteFooter />
       <WhatsAppFab />
+
+      {/* janelas: visualizar produto, sacola/favoritos/menu e páginas de ajuda */}
+      <QuickView />
+      <Panels />
+      <InfoDialog />
     </AppProviders>
   )
 }

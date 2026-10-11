@@ -1,10 +1,26 @@
 import styled, { css } from 'styled-components'
 
 const tones = {
-  ink: css`
-    background: var(--ink);
+  white: css`
+    background: var(--white);
   `,
-  // seções claras: muda a cor de destaque e o texto secundário do contexto
+  /** creme bem claro, para alternar com as seções brancas */
+  paper: css`
+    background: var(--paper);
+  `,
+  /** azul-petróleo profundo (seção de propósito) */
+  petrol: css`
+    --accent: var(--mint);
+    --muted: var(--on-ink-muted);
+    background: var(--petrol-dark);
+    color: var(--cream);
+  `,
+  ink: css`
+    --accent: var(--mint);
+    --muted: var(--on-ink-muted);
+    background: var(--ink);
+    color: var(--cream);
+  `,
   cream: css`
     --accent: var(--petrol);
     --muted: var(--on-cream-muted);
@@ -13,7 +29,7 @@ const tones = {
   `,
 }
 
-/** Seção padrão da página. `$tone`: 'ink' | 'cream'. */
+/** Seção padrão da página. `$tone` define fundo, cor de texto e de destaque. */
 export type SectionTone = keyof typeof tones
 
 export const Section = styled.section<{ $tone?: SectionTone }>`

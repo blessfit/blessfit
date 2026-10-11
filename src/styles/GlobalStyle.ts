@@ -13,9 +13,9 @@ export const GlobalStyle = createGlobalStyle`
     ${toVars('', theme.easings)}
     ${toVars('', theme.layout)}
 
-    /* cor de destaque e texto secundário do contexto (sobrescritos nas seções claras) */
-    --accent: var(--mint);
-    --muted: var(--on-ink-muted);
+    /* cor de destaque e texto secundário do contexto (sobrescritos nas seções escuras) */
+    --accent: var(--petrol);
+    --muted: var(--text-muted);
   }
 
   *,
@@ -27,6 +27,9 @@ export const GlobalStyle = createGlobalStyle`
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    /* âncoras param abaixo do header fixo */
+    scroll-padding-top: 132px;
   }
 
   html.is-locked {
@@ -36,12 +39,12 @@ export const GlobalStyle = createGlobalStyle`
   body {
     margin: 0;
     min-height: 100vh;
-    background: var(--ink);
-    color: var(--cream);
+    background: var(--white);
+    color: var(--text);
     font-family: var(--font-sans);
     font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.65;
+    font-weight: 450;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -67,8 +70,17 @@ export const GlobalStyle = createGlobalStyle`
   ul,
   ol,
   figure,
-  blockquote {
+  blockquote,
+  fieldset,
+  dl,
+  dd {
     margin: 0;
+  }
+
+  fieldset {
+    padding: 0;
+    border: 0;
+    min-width: 0;
   }
 
   ul,
@@ -82,9 +94,13 @@ export const GlobalStyle = createGlobalStyle`
     text-decoration: none;
   }
 
-  button {
+  button,
+  input {
     font: inherit;
     color: inherit;
+  }
+
+  button {
     background: none;
     border: 0;
     padding: 0;
@@ -92,13 +108,13 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   ::selection {
-    background: var(--mint);
-    color: var(--ink);
+    background: var(--sage);
+    color: var(--text);
   }
 
   :focus-visible {
     outline: 2px solid var(--accent);
-    outline-offset: 4px;
+    outline-offset: 3px;
     border-radius: 4px;
   }
 
@@ -107,6 +123,10 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
     *,
     *::before,
     *::after {
