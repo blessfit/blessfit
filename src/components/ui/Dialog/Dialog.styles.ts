@@ -63,6 +63,15 @@ export const Root = styled.dialog<{ $variant: DialogVariant; $width?: number }>`
     display: none;
   }
 
+  /*
+   * A própria janela organiza o conteúdo em coluna. Não use height: 100% na caixa interna:
+   * no Safari/iOS a porcentagem sobre uma janela de altura automática vira 0 e nada aparece.
+   */
+  &[open] {
+    display: flex;
+    flex-direction: column;
+  }
+
   border: 0;
   max-width: 100%;
   background: var(--white);
@@ -79,9 +88,9 @@ export const Root = styled.dialog<{ $variant: DialogVariant; $width?: number }>`
 
 export const Box = styled.div`
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
-  height: 100%;
-  max-height: inherit;
+  min-height: 0;
 `
 
 export const Head = styled.div`
