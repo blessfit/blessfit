@@ -147,6 +147,19 @@ const PROPOSITO = {
   conjuntoMarinhoCostas: proposito('conjunto-marinho-costas', 'Modelo de costas com regata e shorts azul marinho Blessfit', '50% 30%'),
 }
 
+// Conjunto Aurora (preto: top nadador + legging) — fotos geradas no Google Flow a partir das peças reais
+const aurora = folder(
+  import.meta.glob<string>('../assets/img/aurora/*.webp', { eager: true, import: 'default' }),
+  'aurora',
+)
+
+const AURORA = {
+  conjuntoFrente: aurora('conjunto-preto-frente', 'Modelo de frente com o Conjunto Aurora preto: top nadador e legging', '50% 30%'),
+  conjuntoCostas: aurora('conjunto-preto-costas', 'Modelo de costas com o Conjunto Aurora preto e o logo blessfit no top e no cós', '50% 30%'),
+  topFrente: aurora('top-preto-frente', 'Top nadador preto com o logo b.f, de frente', '50% 30%'),
+  topCostas: aurora('top-preto-costas', 'Costas do top nadador preto com o logo blessfit', '50% 30%'),
+}
+
 const GRACA = {
   frente: sized(gracaFrente900, gracaFrente1600, 'Modelo de frente com o Conjunto Graça azul petróleo: top de alças finas e shorts de cós alto', '50% 30%'),
   costas: sized(gracaCostas900, gracaCostas1600, 'Modelo de costas com o Conjunto Graça, mostrando as alças cruzadas e o logo blessfit', '50% 30%'),
@@ -188,9 +201,10 @@ export const IMAGES = {
       hover: GRACA.costas,
       gallery: [GRACA.topFrente, GRACA.topCostas, GRACA.shortsFrente, GRACA.shortsCostas],
     },
-    'conjunto-aurora-coral': {
-      main: stock('photo-1628971021877-37187fde57f4', 'Modelo com top grafite e shorts coral em fundo claro', '50% 30%'),
-      hover: stock('photo-1628970937415-72e1677309c6', 'Duas modelos com conjuntos fitness coloridos', '50% 40%'),
+    'conjunto-aurora-preto': {
+      main: AURORA.conjuntoFrente,
+      hover: AURORA.conjuntoCostas,
+      gallery: [AURORA.topFrente, AURORA.topCostas],
     },
     'conjunto-templo-preto': {
       main: TEMPLO.conjuntoPretoFrente,
