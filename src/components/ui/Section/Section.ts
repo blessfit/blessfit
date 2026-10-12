@@ -8,7 +8,7 @@ const tones = {
   paper: css`
     background: var(--paper);
   `,
-  /** azul-petróleo profundo (seção de propósito) */
+  /** azul-petróleo profundo (seção “Sobre a Blessfit”) */
   petrol: css`
     --accent: var(--mint);
     --muted: var(--on-ink-muted);

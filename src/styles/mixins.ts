@@ -1,36 +1,5 @@
 import { css } from 'styled-components'
 
-/** Recorte em arco, como nas peças da marca. */
-export const arch = css`
-  border-radius: 1000px 1000px 0 0;
-  overflow: hidden;
-`
-
-/** Palavra de destaque em caligrafia. */
-export const scriptAccent = css`
-  font-family: var(--font-script);
-  font-style: normal;
-  font-weight: 400;
-  font-size: 1.5em;
-  line-height: 0.5;
-  letter-spacing: 0;
-  color: var(--accent);
-  padding-right: 0.04em;
-`
-
-export const script = css`
-  font-family: var(--font-script);
-  font-weight: 400;
-  letter-spacing: 0;
-`
-
-/** Rótulo pequeno em caixa alta (eyebrows, numerações, legendas). */
-export const label = css`
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-`
-
 /** Carrossel horizontal com scroll-snap e sem barra de rolagem. */
 export const snapScroller = css`
   overflow-x: auto;

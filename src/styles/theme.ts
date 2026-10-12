@@ -40,7 +40,6 @@ export const theme = {
   },
   fonts: {
     sans: "'Montserrat Variable', 'Montserrat', ui-sans-serif, system-ui, sans-serif",
-    script: "'Allison', 'Brush Script MT', cursive",
   },
   easings: {
     ease: 'cubic-bezier(0.22, 1, 0.36, 1)',

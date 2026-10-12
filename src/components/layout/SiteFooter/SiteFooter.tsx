@@ -38,7 +38,7 @@ export function SiteFooter() {
         <S.Cols>
           <S.Brand>
             <Wordmark title="Blessfit" />
-            <p>Moda fitness com propósito. Conforto e performance para quem treina com fé, força e propósito.</p>
+            <p>Moda fitness com conforto, performance e estilo — do treino ao dia a dia.</p>
             <S.Social>
               <a href={instagramUrl} {...external} aria-label={`Instagram @${SHOP.instagram}`}>
                 <Instagram />
@@ -109,7 +109,7 @@ export function SiteFooter() {
             © {year} {SHOP.name}. Todos os direitos reservados.
           </span>
           <span>
-            {SHOP.tagline} — {SHOP.verseRef}
+            {SHOP.tagline}
           </span>
         </S.Bottom>
       </Container>

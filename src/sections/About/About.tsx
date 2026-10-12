@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { Button, Container, Monogram, Picture, Section, SectionEyebrow, SectionTitle } from '@/components/ui'
-import { PURPOSE } from '@/data/content'
+import { ABOUT } from '@/data/content'
 import { media } from '@/styles/media'
 
 const Intro = styled.div`
@@ -22,7 +22,7 @@ const Text = styled.p`
   font-size: clamp(1rem, 1.2vw, 1.1rem);
 `
 
-const Verse = styled.blockquote`
+const Quote = styled.blockquote`
   position: relative;
   padding-left: 28px;
   border-left: 2px solid var(--mint);
@@ -118,36 +118,36 @@ const PillarText = styled.p`
   font-size: 15px;
 `
 
-/** Sobre a Blessfit: propósito da marca e os pilares Faith, Strength e Purpose. */
+/** Sobre a Blessfit: a proposta da marca e os pilares conforto, performance e estilo. */
 export function About() {
   return (
-    <Section id="proposito" $tone="petrol" aria-labelledby="proposito-title">
+    <Section id="sobre" $tone="petrol" aria-labelledby="sobre-title">
       <Container>
         <Intro>
           <div>
-            <SectionEyebrow>{PURPOSE.eyebrow}</SectionEyebrow>
-            <SectionTitle id="proposito-title">{PURPOSE.title}</SectionTitle>
-            <Text>{PURPOSE.text}</Text>
+            <SectionEyebrow>{ABOUT.eyebrow}</SectionEyebrow>
+            <SectionTitle id="sobre-title">{ABOUT.title}</SectionTitle>
+            <Text>{ABOUT.text}</Text>
             <div style={{ marginTop: 28 }}>
               <Button variant="light" href="#lancamentos">
-                Vista o propósito
+                Ver a coleção
               </Button>
             </div>
           </div>
-          <Verse>
+          <Quote>
             <Monogram />
-            <p>{PURPOSE.verse}</p>
-            <cite>{PURPOSE.verseRef}</cite>
-          </Verse>
+            <p>{ABOUT.quote}</p>
+            <cite>{ABOUT.quoteBy}</cite>
+          </Quote>
         </Intro>
 
         <Pillars>
-          {PURPOSE.pillars.map((pillar) => (
-            <Pillar key={pillar.en}>
+          {ABOUT.pillars.map((pillar) => (
+            <Pillar key={pillar.title}>
               <Picture image={pillar.image} decorative sizes="(max-width: 1023px) 100vw, 33vw" />
               <PillarTitle>
-                {pillar.en}
-                <small>{pillar.pt}</small>
+                {pillar.title}
+                <small>{pillar.label}</small>
               </PillarTitle>
               <PillarText>{pillar.text}</PillarText>
             </Pillar>

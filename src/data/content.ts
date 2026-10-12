@@ -1,5 +1,5 @@
 /*
- * Textos das seções da loja (categorias, benefícios, propósito, avaliações, FAQ e rodapé).
+ * Textos das seções da loja (categorias, benefícios, sobre, avaliações, FAQ e rodapé).
  * Edite aqui — os componentes só leem estes dados.
  */
 import { IMAGES, type Img } from './images'
@@ -48,32 +48,32 @@ export const BENEFITS: Benefit[] = [
   },
 ]
 
-export type Pillar = { en: string; pt: string; text: string; image: Img }
+export type Pillar = { title: string; label: string; text: string; image: Img }
 
-export const PURPOSE = {
+export const ABOUT = {
   eyebrow: 'Sobre a Blessfit',
-  title: 'Vestimos quem treina com fé.',
-  text: 'A Blessfit nasceu da vontade de unir cuidado com o corpo e gratidão a Deus. Cada peça é desenhada para performar no treino e carregar uma mensagem: o corpo é templo, e cuidar dele também é adoração.',
-  verse: '“Glorifiquem a Deus com o corpo de vocês.”',
-  verseRef: '1 Coríntios 6:20',
+  title: 'Feita para acompanhar o seu movimento.',
+  text: 'A Blessfit nasceu para unir conforto, performance e estilo em peças que vão do treino ao dia a dia. Cada modelagem é testada em movimento, com tecidos que respiram e acabamento pensado nos detalhes — para todo mundo que se movimenta, do jeito que for.',
+  quote: '“Peças que acompanham você do primeiro agachamento ao último compromisso do dia.”',
+  quoteBy: 'Blessfit',
   pillars: [
     {
-      en: 'Faith',
-      pt: 'Fé',
-      text: 'Tudo começa por dentro. Treinamos com gratidão por cada fôlego, cada conquista e cada novo dia.',
-      image: IMAGES.purpose.faith,
+      title: 'Conforto',
+      label: 'Toque macio',
+      text: 'Tecidos leves e respiráveis, que vestem bem do aquecimento ao fim do dia.',
+      image: IMAGES.about.comfort,
     },
     {
-      en: 'Strength',
-      pt: 'Força',
-      text: 'Força se constrói todos os dias: uma repetição de cada vez, com disciplina e constância.',
-      image: IMAGES.purpose.strength,
+      title: 'Performance',
+      label: 'Feita para treinar',
+      text: 'Elasticidade, secagem rápida e cós que não enrola, para você focar só no movimento.',
+      image: IMAGES.about.performance,
     },
     {
-      en: 'Purpose',
-      pt: 'Propósito',
-      text: 'Cuidar do corpo é honrar quem o criou. Movimento também é propósito.',
-      image: IMAGES.purpose.purpose,
+      title: 'Estilo',
+      label: 'Do treino à rua',
+      text: 'Design minimalista e cores versáteis para sair da academia direto para a rotina.',
+      image: IMAGES.about.style,
     },
   ] satisfies Pillar[],
 }
@@ -85,14 +85,14 @@ export const REVIEWS: Review[] = [
   {
     name: 'Camila R.',
     city: 'Belo Horizonte, MG',
-    product: 'Conjunto Graça',
+    product: 'Conjunto Maré',
     rating: 5,
     text: 'O shorts não sobe nem enrola no agachamento, e o top segura de verdade. Já estou de olho na próxima cor!',
   },
   {
     name: 'Rafael M.',
     city: 'Curitiba, PR',
-    product: 'Conjunto Força',
+    product: 'Conjunto Impulso',
     rating: 5,
     text: 'Tecido leve e seca muito rápido. Comprei pelo WhatsApp, me ajudaram com o tamanho e chegou em 3 dias.',
   },
@@ -101,19 +101,19 @@ export const REVIEWS: Review[] = [
     city: 'São Paulo, SP',
     product: 'Conjunto Aurora',
     rating: 5,
-    text: 'Além de lindo, tem propósito. Treinar com uma peça que lembra que meu corpo é templo faz diferença.',
+    text: 'O top segura muito bem e a legging não fica transparente no agachamento. Lindo e confortável o dia todo.',
   },
   {
     name: 'Lucas A.',
     city: 'Recife, PE',
-    product: 'Conjunto Propósito',
+    product: 'Conjunto Fôlego',
     rating: 4,
     text: 'A regata é super leve, perfeita para treinar no calor. Caimento ótimo e acabamento caprichado.',
   },
 ]
 
 export const COMMUNITY = {
-  title: 'Comunidade #TreineComPropósito',
+  title: `Comunidade ${SHOP.hashtag}`,
   text: `Marque @${SHOP.instagram} nos seus treinos e apareça por aqui.`,
   images: IMAGES.community,
 }
@@ -143,8 +143,8 @@ export const FAQ: FaqItem[] = [
     a: 'Pode, sim. A primeira troca é por nossa conta: fale com a gente em até 7 dias após o recebimento. A peça precisa estar sem uso e com a etiqueta.',
   },
   {
-    q: 'O que significa “1 Co 6:19-20”?',
-    a: 'É o versículo que inspira a Blessfit: 1 Coríntios 6:19-20 lembra que o nosso corpo é templo do Espírito Santo. Por isso cuidamos dele com gratidão — e vestimos essa mensagem em cada peça.',
+    q: 'Como cuidar das minhas peças?',
+    a: 'Lave do avesso, à mão ou em ciclo delicado com água fria. Evite alvejante e amaciante, seque à sombra e não passe ferro sobre a estampa — assim o tecido mantém a elasticidade e a cor por muito mais tempo.',
   },
 ]
 

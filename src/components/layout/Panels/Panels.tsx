@@ -64,7 +64,7 @@ function MobileMenu() {
           @{SHOP.instagram}
         </Button>
         <p>
-          {SHOP.tagline} · {SHOP.verseRef}
+          {SHOP.tagline}
         </p>
       </S.MenuFoot>
     </S.Menu>

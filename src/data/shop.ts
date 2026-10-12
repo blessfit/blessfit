@@ -10,9 +10,8 @@ export const SHOP = {
   whatsapp: '5500000000000',
   // TODO: confirme o @ oficial do Instagram
   instagram: 'blessfit',
-  hashtag: '#TreineComPropósito',
-  tagline: 'Faith · Strength · Purpose',
-  verseRef: '1 Co 6:19-20',
+  hashtag: '#MovimentoBlessfit',
+  tagline: 'Conforto · Performance · Estilo',
 
   /** Condições comerciais usadas nos cards, na sacola e na barra de benefícios. */
   freeShippingFrom: 299,
@@ -36,7 +35,7 @@ export const NAV: NavItem[] = [
   { href: '#masculino', label: 'Masculino' },
   { href: '#lancamentos', label: 'Lançamentos' },
   { href: '#categorias', label: 'Coleções' },
-  { href: '#proposito', label: 'Propósito' },
+  { href: '#sobre', label: 'Sobre' },
 ]
 
 export type HeroSlide = {
@@ -57,19 +56,19 @@ export const HERO_SLIDES: HeroSlide[] = [
   {
     image: IMAGES.heroSlides[0],
     mobileFocus: '68% 50%',
-    eyebrow: 'Coleção Propósito · 2026',
-    title: 'Movimento também é propósito.',
-    text: 'Roupas fitness para quem treina com fé, força e propósito.',
+    eyebrow: 'Nova coleção · 2026',
+    title: 'Feita para o seu movimento.',
+    text: 'Roupas fitness com conforto, performance e estilo — do treino ao dia a dia.',
     primary: { label: 'Comprar coleção', href: '#lancamentos' },
-    secondary: { label: 'Conheça nosso propósito', href: '#proposito' },
+    secondary: { label: 'Conheça a Blessfit', href: '#sobre' },
     align: 'left',
   },
   {
     image: IMAGES.heroSlides[1],
     mobileFocus: '30% 50%',
     eyebrow: 'Linha masculina',
-    title: 'Força que vem de dentro.',
-    text: 'Conjunto Força em preto e azul marinho: leve, respirável e pronto para o treino pesado.',
+    title: 'Leve para treinar pesado.',
+    text: 'Conjuntos Impulso e Fôlego em preto e azul marinho: respiráveis, com secagem rápida e caimento certo.',
     primary: { label: 'Ver masculino', href: '#masculino' },
     align: 'right',
   },
@@ -77,8 +76,8 @@ export const HERO_SLIDES: HeroSlide[] = [
     image: IMAGES.heroSlides[2],
     mobileFocus: '72% 50%',
     eyebrow: 'Linha feminina',
-    title: 'Graça em cada movimento.',
-    text: 'Top de alças cruzadas e shorts de cós alto que não marca nem enrola.',
+    title: 'Leveza em cada movimento.',
+    text: 'Conjunto Maré: top de alças cruzadas e shorts de cós alto que não marca nem enrola.',
     primary: { label: 'Ver feminino', href: '#feminino' },
     align: 'left',
   },
