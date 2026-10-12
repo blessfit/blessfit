@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import styled from 'styled-components'
 import {
   Bag,
   Button,
   Check,
+  ChevronLeft,
+  ChevronRight,
   Eye,
   Heart,
   HeartFilled,
@@ -13,7 +16,7 @@ import {
   Swatches,
   WhatsApp,
 } from '@/components/ui'
-import type { Product } from '@/data/products'
+import type { Product, Variant } from '@/data/products'
 import { external } from '@/lib/links'
 import { media } from '@/styles/media'
 import { usePurchase } from '../usePurchase'
@@ -45,6 +48,44 @@ const ImageButton = styled.button`
 
   &:focus-visible {
     outline-offset: -4px;
+  }
+`
+
+/** Setas para passar as fotos do conjunto sem abrir o “visualizar”. */
+const PhotoArrow = styled(IconButton)<{ $side: 'left' | 'right' }>`
+  position: absolute;
+  top: 50%;
+  ${({ $side }) => $side}: 10px;
+  transform: translateY(-50%);
+  background: rgb(255 255 255 / 0.9);
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+`
+
+/** Bolinhas que mostram qual foto está aparecendo. */
+const PhotoDots = styled.span`
+  position: absolute;
+  right: 14px;
+  bottom: 24px;
+  display: flex;
+  gap: 5px;
+  pointer-events: none;
+
+  i {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.6);
+    box-shadow: 0 0 0 1px rgb(11 11 15 / 0.15);
+    transition: width 0.3s var(--ease);
+  }
+
+  i[data-active] {
+    width: 16px;
+    background: var(--white);
   }
 `
 
@@ -165,13 +206,52 @@ const Hint = styled.p`
 export function SetCard({ product }: { product: Product }) {
   const p = usePurchase(product)
   const color = p.variant.color
+  const { images } = p.variant
+  const photos = [images.main, images.hover, ...(images.gallery ?? [])]
+  const [photo, setPhoto] = useState(0)
+  const current = Math.min(photo, photos.length - 1)
+  const step = (delta: number) => setPhoto((current + delta + photos.length) % photos.length)
+
+  const changeColor = (variant: Variant) => {
+    p.setVariant(variant)
+    setPhoto(0)
+  }
 
   return (
     <Card aria-labelledby={`set-${product.id}`}>
       <Media>
         <ImageButton type="button" onClick={p.view} aria-label={`Visualizar ${product.name}`}>
-          <Picture image={p.variant.images.main} sizes="(max-width: 639px) 100vw, (max-width: 1023px) 45vw, 30vw" />
+          <Picture image={photos[current]} sizes="(max-width: 639px) 100vw, (max-width: 1023px) 45vw, 30vw" />
         </ImageButton>
+        {photos.length > 1 && (
+          <>
+            <PhotoArrow
+              $side="left"
+              $variant="float"
+              $size={38}
+              type="button"
+              aria-label="Foto anterior"
+              onClick={() => step(-1)}
+            >
+              <ChevronLeft />
+            </PhotoArrow>
+            <PhotoArrow
+              $side="right"
+              $variant="float"
+              $size={38}
+              type="button"
+              aria-label="Próxima foto"
+              onClick={() => step(1)}
+            >
+              <ChevronRight />
+            </PhotoArrow>
+            <PhotoDots aria-hidden="true">
+              {photos.map((img, i) => (
+                <i key={img.src} data-active={i === current || undefined} />
+              ))}
+            </PhotoDots>
+          </>
+        )}
         <Color>
           <i style={{ background: color.hex }} />
           {color.name}
@@ -199,7 +279,7 @@ export function SetCard({ product }: { product: Product }) {
         </Ref>
         <Name id={`set-${product.id}`}>{product.name}</Name>
         <Text>{product.description}</Text>
-        <Swatches variants={product.variants} value={p.variant} onChange={p.setVariant} />
+        <Swatches variants={product.variants} value={p.variant} onChange={changeColor} />
 
         <Pieces aria-label="Peças do conjunto">
           {product.pieces.map((piece) => (
