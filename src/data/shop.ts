@@ -6,10 +6,10 @@ import { IMAGES, type Img } from './images'
 
 export const SHOP = {
   name: 'Blessfit',
-  // TODO: número oficial do WhatsApp com DDI + DDD, só dígitos (ex.: 5511999999999)
-  whatsapp: '5500000000000',
-  // TODO: confirme o @ oficial do Instagram
-  instagram: 'blessfit',
+  /** WhatsApp com DDI + DDD, só dígitos: (37) 99959-9655 */
+  whatsapp: '5537999599655',
+  /** @ do Instagram, sem o @ */
+  instagram: 'blessfit_ep',
   hashtag: '#MovimentoBlessfit',
   tagline: 'Conforto · Performance · Estilo',
 

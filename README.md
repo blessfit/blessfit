@@ -64,7 +64,7 @@ src/
 
 ## Antes de divulgar
 
-- [ ] Trocar o número de WhatsApp em `SHOP.whatsapp` (DDI + DDD + número, só dígitos)
-- [ ] Confirmar o @ do Instagram em `SHOP.instagram`
+- [x] Número de WhatsApp em `SHOP.whatsapp`: (37) 99959-9655
+- [x] Instagram em `SHOP.instagram`: @blessfit_ep
 - [ ] Revisar preços, avaliações, FAQ, política de troca, entrega e guia de tamanhos com os dados reais
 - [ ] Em `index.html`, trocar `/og.jpg` pela URL absoluta do domínio
