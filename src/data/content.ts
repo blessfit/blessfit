@@ -106,9 +106,9 @@ export const REVIEWS: Review[] = [
   {
     name: 'Lucas A.',
     city: 'Recife, PE',
-    product: 'Conjunto Fundamento',
+    product: 'Conjunto Propósito',
     rating: 4,
-    text: 'O 2 em 1 é perfeito para correr. Caimento ótimo e acabamento caprichado.',
+    text: 'A regata é super leve, perfeita para treinar no calor. Caimento ótimo e acabamento caprichado.',
   },
 ]
 

@@ -132,6 +132,21 @@ const TEMPLO = {
   leggingMarinhoCostas: templo('legging-marinho-costas', 'Legging azul marinho de costas com o logo blessfit no cós', '50% 55%'),
 }
 
+// Regata masculina Propósito (preto e azul marinho) — fotos geradas no Google Flow a partir das peças reais
+const proposito = folder(
+  import.meta.glob<string>('../assets/img/proposito/*.webp', { eager: true, import: 'default' }),
+  'proposito',
+)
+
+const PROPOSITO = {
+  regataPretoFrente: proposito('regata-preto-frente', 'Regata masculina preta com o logo b.f no peito', '50% 20%'),
+  regataPretoCostas: proposito('regata-preto-costas', 'Costas da regata masculina preta com o logo blessfit', '50% 20%'),
+  regataMarinhoFrente: proposito('regata-marinho-frente', 'Regata masculina azul marinho com o logo b.f no peito', '50% 20%'),
+  regataMarinhoCostas: proposito('regata-marinho-costas', 'Costas da regata masculina azul marinho com o logo blessfit', '50% 20%'),
+  conjuntoPretoCostas: proposito('conjunto-preto-costas', 'Modelo de costas com regata e shorts pretos Blessfit', '50% 30%'),
+  conjuntoMarinhoCostas: proposito('conjunto-marinho-costas', 'Modelo de costas com regata e shorts azul marinho Blessfit', '50% 30%'),
+}
+
 const GRACA = {
   frente: sized(gracaFrente900, gracaFrente1600, 'Modelo de frente com o Conjunto Graça azul petróleo: top de alças finas e shorts de cós alto', '50% 30%'),
   costas: sized(gracaCostas900, gracaCostas1600, 'Modelo de costas com o Conjunto Graça, mostrando as alças cruzadas e o logo blessfit', '50% 30%'),
@@ -209,16 +224,29 @@ export const IMAGES = {
       hover: FORCA.camisetaMarinho,
       gallery: [FORCA.shortsMarinhoFrente, FORCA.shortsMarinhoCostas],
     },
-    'conjunto-fundamento-grafite': {
-      main: stock('photo-1594737625785-a6cbdabd333c', 'Modelo com camiseta grafite fazendo flexão com halteres', '68% 50%'),
-      hover: stock('photo-1601422407692-ec4eeec1d9b3', 'Modelo fazendo flexão apoiado em halteres', '50% 60%'),
-    },
+    // Propósito = regata nova + o mesmo Shorts Força
     'conjunto-proposito-preto': {
-      main: stock('photo-1608138278545-366680accc66', 'Modelo com camiseta e bermuda treinando agilidade', '36% 50%'),
-      hover: stock('photo-1623946724822-ba48a838f3da', 'Modelo com camiseta e shorts pretos fazendo levantamento terra', '42% 50%'),
+      main: PROPOSITO.regataPretoFrente,
+      hover: PROPOSITO.conjuntoPretoCostas,
+      gallery: [PROPOSITO.regataPretoCostas, FORCA.shortsPretoFrente, FORCA.shortsPretoCostas],
+    },
+    'conjunto-proposito-marinho': {
+      main: PROPOSITO.regataMarinhoFrente,
+      hover: PROPOSITO.conjuntoMarinhoCostas,
+      gallery: [PROPOSITO.regataMarinhoCostas, FORCA.shortsMarinhoFrente, FORCA.shortsMarinhoCostas],
     },
 
     // ——— Peças avulsas ———
+    'regata-proposito-preto': {
+      main: PROPOSITO.regataPretoFrente,
+      hover: PROPOSITO.regataPretoCostas,
+      gallery: [PROPOSITO.conjuntoPretoCostas],
+    },
+    'regata-proposito-marinho': {
+      main: PROPOSITO.regataMarinhoFrente,
+      hover: PROPOSITO.regataMarinhoCostas,
+      gallery: [PROPOSITO.conjuntoMarinhoCostas],
+    },
     'top-graca-petroleo': { main: GRACA.topFrente, hover: GRACA.topCostas, gallery: [GRACA.frente, GRACA.costas] },
     'shorts-graca-petroleo': { main: GRACA.shortsFrente, hover: GRACA.shortsCostas, gallery: [GRACA.frente] },
     'camiseta-forca-preto': { main: FORCA.camisetaPreto, hover: FORCA.pretoCostas, gallery: [FORCA.pretoFrente] },
