@@ -3,7 +3,7 @@ import { CATEGORIES } from '@/data/content'
 import { NAV, SHOP } from '@/data/shop'
 import { external, instagramUrl, whatsappUrl } from '@/lib/links'
 import { checkoutUrl } from '@/lib/orders'
-import { formatBRL, pixPrice } from '@/lib/price'
+import { formatBRL } from '@/lib/price'
 import { useStore } from '@/store/storeContext'
 import * as S from './Panels.styles'
 
@@ -72,7 +72,7 @@ function MobileMenu() {
 }
 
 function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { bag, bagTotal, bagCount, setQty } = useStore()
+  const { bag, bagTotal, bagPixTotal, bagCount, setQty } = useStore()
   const missing = Math.max(0, SHOP.freeShippingFrom - bagTotal)
 
   const footer =
@@ -96,7 +96,7 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
           <span>Subtotal</span>
           <strong>{formatBRL(bagTotal)}</strong>
         </S.Total>
-        <S.Pix>ou {formatBRL(pixPrice(bagTotal))} no Pix</S.Pix>
+        <S.Pix>ou {formatBRL(bagPixTotal)} no Pix</S.Pix>
         <Button variant="primary" block glyph={WhatsApp} href={checkoutUrl(bag)} {...external}>
           Finalizar pelo WhatsApp
         </Button>

@@ -186,7 +186,7 @@ function QuickViewContent({ product, initialVariant }: { product: Product; initi
           {product.category} · Ref. {product.ref}
         </Meta>
         <Name>{product.name}</Name>
-        <PriceTag price={product.price} compareAt={product.compareAt} large />
+        <PriceTag price={product.price} pix={product.pix} compareAt={product.compareAt} large />
         <Swatches variants={product.variants} value={p.variant} onChange={changeColor} />
         <p>{product.description}</p>
         <Pieces>

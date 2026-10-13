@@ -68,7 +68,7 @@ export function ProductCard({ product }: { product: Product }) {
           compact
         />
 
-        <PriceTag price={product.price} compareAt={product.compareAt} />
+        <PriceTag price={product.price} pix={product.pix} compareAt={product.compareAt} />
 
         <S.Actions>
           <Button

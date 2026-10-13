@@ -7,7 +7,9 @@
  *
  * `kind` define onde o produto aparece: 'Conjunto' (Lançamentos e Escolha seu conjunto)
  * ou 'Blusa' / 'Shorts' (Peças avulsas).
- * Preços em reais; `compareAt` é o preço “de” (opcional) e gera o selo de desconto.
+ * Preços em reais, iguais aos da planilha “Estoque BlessFit” (coluna Nome no site):
+ * `price` é o preço no cartão e `pix` o preço no Pix. `compareAt` é o preço “de” (opcional) e gera o
+ * selo de desconto — nos conjuntos é a soma das peças avulsas.
  */
 import { IMAGES, type ProductImageKey, type ProductImages } from './images'
 
@@ -29,7 +31,10 @@ export type Product = {
   /** Peças que compõem o conjunto (ou detalhes da peça avulsa). */
   pieces: string[]
   description: string
+  /** Preço no cartão (em até 6x sem juros). */
   price: number
+  /** Preço à vista no Pix. */
+  pix: number
   compareAt?: number
   sizes: Size[]
   /** Tamanhos esgotados (aparecem riscados). */
@@ -61,8 +66,9 @@ export const PRODUCTS: Product[] = [
     variants: [v(C.petroleo, 'conjunto-mare-petroleo')],
     pieces: ['Top alças finas cruzadas', 'Shorts cós alto'],
     description: 'Top de alças finas que se cruzam em Y nas costas e shorts de cós alto que não marca nem enrola.',
-    price: 199.9,
-    compareAt: 229.9,
+    price: 139.9,
+    pix: 129.9,
+    compareAt: 154.8,
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
     badge: 'Lançamento',
   },
@@ -76,7 +82,9 @@ export const PRODUCTS: Product[] = [
     variants: [v(C.preto, 'conjunto-aurora-preto')],
     pieces: ['Top nadador', 'Legging cós alto'],
     description: 'Top nadador de sustentação média com logo b.f e legging de cós alto, com blessfit nas costas das duas peças.',
-    price: 199.9,
+    price: 164.9,
+    pix: 154.9,
+    compareAt: 184.8,
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
     badge: 'Lançamento',
   },
@@ -95,7 +103,9 @@ export const PRODUCTS: Product[] = [
     pieces: ['Regata estampada', 'Legging cós alto'],
     description:
       'Regata leve com a estampa blessfit e barra arredondada, com legging de cós alto que não marca. Na cor Branco, a regata vem com legging preta.',
-    price: 219.9,
+    price: 159.9,
+    pix: 149.9,
+    compareAt: 179.8,
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
     badge: 'Lançamento',
   },
@@ -111,8 +121,9 @@ export const PRODUCTS: Product[] = [
     variants: [v(C.preto, 'conjunto-impulso-preto'), v(C.marinho, 'conjunto-impulso-marinho')],
     pieces: ['Camiseta raglan Dry', 'Shorts com cordão e bolsos'],
     description: 'Camiseta raglan leve com o logo b.f e shorts com cós elástico, cordão e bolsos laterais.',
-    price: 229.9,
-    compareAt: 259.9,
+    price: 154.9,
+    pix: 144.9,
+    compareAt: 174.8,
     sizes: ['P', 'M', 'G', 'GG'],
     badge: 'Lançamento',
   },
@@ -126,7 +137,9 @@ export const PRODUCTS: Product[] = [
     variants: [v(C.preto, 'conjunto-folego-preto'), v(C.marinho, 'conjunto-folego-marinho')],
     pieces: ['Regata cava aberta', 'Shorts com cordão e bolsos'],
     description: 'Regata leve e ventilada com o logo b.f, combinada com o shorts de cós elástico, cordão e bolsos.',
-    price: 209.9,
+    price: 147.9,
+    pix: 137.9,
+    compareAt: 164.8,
     sizes: ['P', 'M', 'G', 'GG'],
     badge: 'Lançamento',
   },
@@ -146,7 +159,8 @@ export const PRODUCTS: Product[] = [
     ],
     pieces: ['Estampa blessfit', 'Barra arredondada'],
     description: 'Regata de cava aberta e caimento solto, com a estampa blessfit no peito.',
-    price: 89.9,
+    price: 74.9,
+    pix: 69.9,
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
     badge: 'Lançamento',
   },
@@ -160,7 +174,8 @@ export const PRODUCTS: Product[] = [
     variants: [v(C.preto, 'legging-brisa-preto'), v(C.marinho, 'legging-brisa-marinho')],
     pieces: ['Cós alto', 'Não marca nem fica transparente'],
     description: 'Legging de cós alto com logo b.f na lateral e blessfit nas costas, do agachamento ao cardio.',
-    price: 139.9,
+    price: 104.9,
+    pix: 99.9,
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
     badge: 'Lançamento',
   },
@@ -174,7 +189,8 @@ export const PRODUCTS: Product[] = [
     variants: [v(C.petroleo, 'top-mare-petroleo')],
     pieces: ['Alças finas cruzadas em Y', 'Bojo removível'],
     description: 'Top de alças finas que se cruzam nas costas, com elástico largo na base e logo b.f no peito.',
-    price: 99.9,
+    price: 79.9,
+    pix: 74.9,
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
   },
   {
@@ -187,7 +203,8 @@ export const PRODUCTS: Product[] = [
     variants: [v(C.petroleo, 'shorts-mare-petroleo')],
     pieces: ['Cós alto', 'Comprimento meia-coxa'],
     description: 'Shorts de cós alto que não marca nem enrola, com logo b.f na frente e blessfit nas costas.',
-    price: 109.9,
+    price: 74.9,
+    pix: 69.9,
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
   },
   {
@@ -200,7 +217,8 @@ export const PRODUCTS: Product[] = [
     variants: [v(C.preto, 'camiseta-impulso-preto'), v(C.marinho, 'camiseta-impulso-marinho')],
     pieces: ['Manga raglan', 'Tecido Dry'],
     description: 'Camiseta raglan leve e respirável, com logo b.f no peito e blessfit nas costas.',
-    price: 119.9,
+    price: 84.9,
+    pix: 79.9,
     sizes: ['P', 'M', 'G', 'GG'],
   },
   {
@@ -213,7 +231,8 @@ export const PRODUCTS: Product[] = [
     variants: [v(C.preto, 'regata-folego-preto'), v(C.marinho, 'regata-folego-marinho')],
     pieces: ['Cava aberta', 'Tecido leve e ventilado'],
     description: 'Regata masculina de cava aberta, com logo b.f no peito e blessfit nas costas.',
-    price: 89.9,
+    price: 74.9,
+    pix: 69.9,
     sizes: ['P', 'M', 'G', 'GG'],
     badge: 'Lançamento',
   },
@@ -227,7 +246,8 @@ export const PRODUCTS: Product[] = [
     variants: [v(C.preto, 'shorts-impulso-preto'), v(C.marinho, 'shorts-impulso-marinho')],
     pieces: ['Cós elástico com cordão', 'Bolsos laterais'],
     description: 'Shorts com cós elástico, cordão ajustável, bolsos laterais e logo b.f na perna.',
-    price: 119.9,
+    price: 89.9,
+    pix: 84.9,
     sizes: ['P', 'M', 'G', 'GG'],
   },
 ]

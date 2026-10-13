@@ -13,6 +13,8 @@ export type StoreState = {
   bag: BagLine[]
   bagCount: number
   bagTotal: number
+  /** Total da sacola pagando no Pix. */
+  bagPixTotal: number
   addToBag: (product: Product, variant: Variant, size: Size) => void
   setQty: (line: BagLine, qty: number) => void
 

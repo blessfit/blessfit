@@ -77,6 +77,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       bag,
       bagCount: bag.reduce((n, l) => n + l.qty, 0),
       bagTotal: bag.reduce((sum, l) => sum + l.product.price * l.qty, 0),
+      bagPixTotal: bag.reduce((sum, l) => sum + l.product.pix * l.qty, 0),
       addToBag,
       setQty,
       panel,

@@ -132,7 +132,7 @@ export const FAQ: FaqItem[] = [
   },
   {
     q: 'Quais são as formas de pagamento?',
-    a: `Pix com ${Math.round(SHOP.pixDiscount * 100)}% de desconto, cartão de crédito em até ${SHOP.installments}x sem juros ou link de pagamento.`,
+    a: `Pix com desconto em cada peça, cartão de crédito em até ${SHOP.installments}x sem juros ou link de pagamento.`,
   },
   {
     q: 'Como funciona a entrega?',
@@ -180,7 +180,7 @@ export const INFO_PAGES: InfoPage[] = [
     id: 'pagamento',
     title: 'Formas de pagamento',
     paragraphs: [
-      `Pix: ${Math.round(SHOP.pixDiscount * 100)}% de desconto, com confirmação na hora.`,
+      'Pix: preço com desconto em cada peça, com confirmação na hora.',
       `Cartão de crédito: em até ${SHOP.installments}x sem juros pelo link de pagamento seguro.`,
       `Primeira compra? Use o cupom ${SHOP.firstPurchaseCoupon.code} e ganhe ${SHOP.firstPurchaseCoupon.percent}% OFF.`,
     ],

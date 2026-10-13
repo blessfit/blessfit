@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { SHOP } from '@/data/shop'
-import { discountPercent, formatBRL, installment, pixPrice } from '@/lib/price'
+import { discountPercent, formatBRL, installment } from '@/lib/price'
 import { srOnly } from '@/styles/mixins'
 
 const Root = styled.div<{ $large?: boolean }>`
@@ -48,10 +48,10 @@ const Sr = styled.span`
   ${srOnly}
 `
 
-type PriceTagProps = { price: number; compareAt?: number; large?: boolean }
+type PriceTagProps = { price: number; pix: number; compareAt?: number; large?: boolean }
 
 /** Preço, preço “de”, parcelamento e valor no Pix. */
-export function PriceTag({ price, compareAt, large }: PriceTagProps) {
+export function PriceTag({ price, pix, compareAt, large }: PriceTagProps) {
   const off = discountPercent(price, compareAt)
   return (
     <Root $large={large}>
@@ -72,7 +72,7 @@ export function PriceTag({ price, compareAt, large }: PriceTagProps) {
         ou {SHOP.installments}x de {formatBRL(installment(price))} sem juros
       </p>
       <Pix>
-        {formatBRL(pixPrice(price))} no Pix ({Math.round(SHOP.pixDiscount * 100)}% OFF)
+        {formatBRL(pix)} no Pix{price > pix && ` (economize ${formatBRL(price - pix)})`}
       </Pix>
     </Root>
   )

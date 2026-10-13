@@ -15,16 +15,14 @@ export const SHOP = {
 
   /** Condições comerciais usadas nos cards, na sacola e na barra de benefícios. */
   freeShippingFrom: 299,
-  installments: 3,
-  /** 0.05 = 5% de desconto no Pix */
-  pixDiscount: 0.05,
+  installments: 6,
   firstPurchaseCoupon: { code: 'BLESS10', percent: 10 },
 } as const
 
 export const ANNOUNCEMENTS: string[] = [
   `Frete grátis nas compras acima de R$ ${SHOP.freeShippingFrom}`,
   `${SHOP.firstPurchaseCoupon.percent}% OFF na primeira compra com o cupom ${SHOP.firstPurchaseCoupon.code}`,
-  `${SHOP.installments}x sem juros no cartão · ${Math.round(SHOP.pixDiscount * 100)}% OFF no Pix`,
+  `${SHOP.installments}x sem juros no cartão · mais barato no Pix`,
 ]
 
 export type NavItem = { href: `#${string}`; label: string }
@@ -86,7 +84,7 @@ export const HERO_SLIDES: HeroSlide[] = [
     mobileFocus: '36% 50%',
     eyebrow: 'Peças avulsas',
     title: 'Monte do seu jeito.',
-    text: `Tops, regatas, camisetas, shorts e leggings vendidos separadamente. ${SHOP.installments}x sem juros ou ${Math.round(SHOP.pixDiscount * 100)}% OFF no Pix.`,
+    text: `Tops, regatas, camisetas, shorts e leggings vendidos separadamente. ${SHOP.installments}x sem juros ou mais barato no Pix.`,
     primary: { label: 'Montar meu look', href: '#pecas' },
     align: 'right',
   },
