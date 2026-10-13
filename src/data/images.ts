@@ -12,10 +12,7 @@
  *
  * As fotos `stock(...)` são do Unsplash (licença livre) e servem só como placeholder nesta primeira versão.
  */
-import backBlack from '@/assets/img/back-black.webp'
-import backMen from '@/assets/img/back-men.webp'
 import fabricTeal from '@/assets/img/fabric-teal.webp'
-import legsBlack from '@/assets/img/legs-black.webp'
 import modelBlack from '@/assets/img/model-black.webp'
 import modelMen from '@/assets/img/model-men.webp'
 import modelTeal from '@/assets/img/model-teal.webp'
@@ -54,6 +51,13 @@ import impulsoShortsPretoCostas900 from '@/assets/img/impulso/shorts-preto-costa
 import impulsoShortsPretoCostas1600 from '@/assets/img/impulso/shorts-preto-costas-1600.webp'
 import impulsoShortsPretoFrente900 from '@/assets/img/impulso/shorts-preto-frente-900.webp'
 import impulsoShortsPretoFrente1600 from '@/assets/img/impulso/shorts-preto-frente-1600.webp'
+// Pilares Conforto · Performance · Estilo (seção “Sobre a Blessfit”) — fotos geradas no Google Flow
+import sobreConforto900 from '@/assets/img/sobre/conforto-900.webp'
+import sobreConforto1600 from '@/assets/img/sobre/conforto-1600.webp'
+import sobreEstilo900 from '@/assets/img/sobre/estilo-900.webp'
+import sobreEstilo1600 from '@/assets/img/sobre/estilo-1600.webp'
+import sobrePerformance900 from '@/assets/img/sobre/performance-900.webp'
+import sobrePerformance1600 from '@/assets/img/sobre/performance-1600.webp'
 
 export type Img = {
   src: string
@@ -298,9 +302,24 @@ export const IMAGES = {
 
   /** Fotos dos três pilares da seção “Sobre a Blessfit”. */
   about: {
-    comfort: local(backBlack, 'Costas da regata preta Blessfit', '50% 30%'),
-    performance: local(backMen, 'Costas da camiseta e bermuda pretas Blessfit', '50% 30%'),
-    style: local(legsBlack, 'Legging preta Blessfit em movimento', '50% 50%'),
+    comfort: sized(
+      sobreConforto900,
+      sobreConforto1600,
+      'Mulher de costas com regata preta e legging preta Blessfit, com o logo blessfit no cós',
+      '50% 25%',
+    ),
+    performance: sized(
+      sobrePerformance900,
+      sobrePerformance1600,
+      'Homem com camiseta preta Blessfit fazendo rosca martelo com halter na academia',
+      '50% 25%',
+    ),
+    style: sized(
+      sobreEstilo900,
+      sobreEstilo1600,
+      'Pernas de mulher com legging preta e tênis branco subindo um degrau de concreto',
+      '50% 55%',
+    ),
   },
 
   community: [
