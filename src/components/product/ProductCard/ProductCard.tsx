@@ -8,10 +8,8 @@ import {
   PriceTag,
   SizePicker,
   Swatches,
-  WhatsApp,
 } from '@/components/ui'
 import type { Product } from '@/data/products'
-import { external } from '@/lib/links'
 import { discountPercent } from '@/lib/price'
 import { usePurchase } from '../usePurchase'
 import * as S from './ProductCard.styles'
@@ -73,17 +71,17 @@ export function ProductCard({ product }: { product: Product }) {
         <PriceTag price={product.price} compareAt={product.compareAt} />
 
         <S.Actions>
-          <Button variant="primary" size="sm" block glyph={WhatsApp} href={p.buyUrl} {...external}>
-            Comprar
-          </Button>
-          <S.BagButton
-            $variant="outline"
-            type="button"
+          <Button
+            as="button"
+            variant="primary"
+            size="sm"
+            block
+            glyph={Bag}
             aria-label={`Adicionar ${product.name} à sacola`}
             onClick={p.addToBag}
           >
-            <Bag />
-          </S.BagButton>
+            Adicionar à sacola
+          </Button>
         </S.Actions>
         <S.Hint role="status">{p.needSize ? 'Escolha um tamanho para adicionar à sacola.' : ''}</S.Hint>
       </S.Info>

@@ -100,6 +100,9 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
         <Button variant="primary" block glyph={WhatsApp} href={checkoutUrl(bag)} {...external}>
           Finalizar pelo WhatsApp
         </Button>
+        <Button as="button" variant="outline" size="sm" block onClick={onClose}>
+          Continuar comprando
+        </Button>
       </S.Summary>
     ) : undefined
 

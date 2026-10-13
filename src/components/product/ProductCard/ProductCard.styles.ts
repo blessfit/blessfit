@@ -121,13 +121,6 @@ export const Actions = styled.div`
   padding-top: 4px;
 `
 
-export const BagButton = styled(IconButton)`
-  svg {
-    width: 20px;
-    height: 20px;
-  }
-`
-
 export const Hint = styled.p`
   min-height: 1.2em;
   color: var(--petrol);

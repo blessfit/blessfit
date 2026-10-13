@@ -107,7 +107,7 @@ export const REVIEWS: Review[] = [
     name: 'Lucas A.',
     city: 'Recife, PE',
     product: 'Conjunto Fôlego',
-    rating: 4,
+    rating: 5,
     text: 'A regata é super leve, perfeita para treinar no calor. Caimento ótimo e acabamento caprichado.',
   },
 ]
@@ -124,7 +124,7 @@ export type FaqItem = { q: string; a: string }
 export const FAQ: FaqItem[] = [
   {
     q: 'Como faço para comprar?',
-    a: 'Escolha o tamanho e toque em “Comprar”, ou monte sua sacola e finalize pelo WhatsApp. A conversa já abre com o produto, a cor e o tamanho — a gente confirma o estoque, o frete e o pagamento com você.',
+    a: 'Escolha a cor e o tamanho, adicione à sacola e toque em “Finalizar pelo WhatsApp”. A conversa já abre com o nome, a cor, o tamanho e a quantidade de cada peça — a gente confirma o estoque, o frete e o pagamento com você.',
   },
   {
     q: 'Como escolher o tamanho certo?',

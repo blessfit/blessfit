@@ -14,10 +14,8 @@ import {
   PriceTag,
   SizePicker,
   Swatches,
-  WhatsApp,
 } from '@/components/ui'
 import type { Product, Variant } from '@/data/products'
-import { external } from '@/lib/links'
 import { media } from '@/styles/media'
 import { usePurchase } from '../usePurchase'
 
@@ -295,18 +293,16 @@ export function SetCard({ product }: { product: Product }) {
         <PriceTag price={product.price} compareAt={product.compareAt} />
 
         <Actions>
-          <Button variant="primary" block glyph={WhatsApp} href={p.buyUrl} {...external}>
-            Comprar
-          </Button>
-          <IconButton
-            $variant="outline"
-            $size={52}
-            type="button"
+          <Button
+            as="button"
+            variant="primary"
+            block
+            glyph={Bag}
             aria-label={`Adicionar ${product.name} à sacola`}
             onClick={p.addToBag}
           >
-            <Bag />
-          </IconButton>
+            Adicionar à sacola
+          </Button>
         </Actions>
         <Hint role="status">{p.needSize ? 'Escolha um tamanho para adicionar à sacola.' : ''}</Hint>
       </Body>

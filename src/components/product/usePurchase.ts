@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import type { Product, Size, Variant } from '@/data/products'
-import { buyNowUrl } from '@/lib/orders'
 import { useStore } from '@/store/storeContext'
 
-/** Estado de compra de um produto: cor e tamanho escolhidos, link do WhatsApp, sacola e favorito. */
+/** Estado de compra de um produto: cor e tamanho escolhidos, sacola e favorito. */
 export function usePurchase(product: Product, initialVariant?: Variant) {
   const store = useStore()
   const [variant, setVariant] = useState<Variant>(initialVariant ?? product.variants[0])
@@ -31,7 +30,6 @@ export function usePurchase(product: Product, initialVariant?: Variant) {
     choose,
     /** true quando a pessoa tentou adicionar à sacola sem escolher tamanho */
     needSize,
-    buyUrl: buyNowUrl(product, variant, size ?? undefined),
     addToBag,
     favorite: store.isFavorite(product.id),
     toggleFavorite: () => store.toggleFavorite(product),

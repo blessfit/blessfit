@@ -34,7 +34,7 @@ export function Launches() {
           id="lancamentos-title"
           eyebrow="Nova coleção"
           title="Lançamentos"
-          text="Conjuntos pensados para treinar com liberdade — escolha o tamanho e compre direto pelo WhatsApp."
+          text="Conjuntos pensados para treinar com liberdade — escolha o tamanho, adicione à sacola e finalize pelo WhatsApp."
           actions={
             <AllLink href="#conjuntos">
               Ver todos os conjuntos <ArrowRight />

@@ -13,11 +13,9 @@ import {
   SizePicker,
   Swatches,
   Truck,
-  WhatsApp,
 } from '@/components/ui'
 import type { Product, Variant } from '@/data/products'
 import { SHOP } from '@/data/shop'
-import { external } from '@/lib/links'
 import { useStore } from '@/store/storeContext'
 import { media } from '@/styles/media'
 import { usePurchase } from '../usePurchase'
@@ -201,10 +199,7 @@ function QuickViewContent({ product, initialVariant }: { product: Product; initi
         </SizeGuide>
 
         <Actions>
-          <Button variant="primary" block glyph={WhatsApp} href={p.buyUrl} {...external}>
-            Comprar pelo WhatsApp
-          </Button>
-          <Button as="button" variant="outline" block glyph={Bag} onClick={p.addToBag}>
+          <Button as="button" variant="primary" block glyph={Bag} onClick={p.addToBag}>
             Adicionar à sacola
           </Button>
           <Button
