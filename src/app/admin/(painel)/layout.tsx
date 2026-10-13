@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { pendingCounts, restockList } from '@/server/admin'
 import { requireAdmin } from '@/server/auth'
-import { signOut } from '../actions'
+import { getLiveCatalog } from '@/server/supabase'
+import { AdminNav } from '../_components/AdminNav'
 import s from '../admin.module.css'
 
 export const metadata: Metadata = { title: 'Painel Blessfit', robots: { index: false } }
@@ -10,22 +11,15 @@ export const metadata: Metadata = { title: 'Painel Blessfit', robots: { index: f
 /** Moldura do painel. Só abre com login de administrador (ver src/server/auth.ts). */
 export default async function PanelLayout({ children }: { children: ReactNode }) {
   const user = await requireAdmin()
+  const [pending, live] = await Promise.all([pendingCounts(), getLiveCatalog()])
 
   return (
-    <div className={s.shell}>
-      <header className={s.header}>
-        <span className={s.brand}>blessfit · painel</span>
-        <nav className={s.nav} aria-label="Painel">
-          <Link href="/admin">Pedidos</Link>
-          <Link href="/admin/estoque">Estoque e preços</Link>
-        </nav>
-        <form action={signOut}>
-          <button className={`${s.button} ${s.ghost}`} type="submit" title={user.email}>
-            Sair
-          </button>
-        </form>
-      </header>
-      <main className={s.main}>{children}</main>
+    <div className={`${s.root} ${s.shell}`}>
+      <AdminNav
+        email={user.email ?? ''}
+        counts={{ orders: pending.toShip + pending.toReview, restock: restockList(live).length }}
+      />
+      <main className={s.content}>{children}</main>
     </div>
   )
 }

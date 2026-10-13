@@ -72,9 +72,14 @@ Variáveis de ambiente (na Vercel e em `.env.local`; `npm run dev` já lê o `.e
 
 ## Painel /admin
 
-- **Pedidos**: em andamento (pagos, a conferir, enviados) ou por status; itens, cliente, comprovante e troca de status.
-- **Estoque e preços**: preço no cartão, no Pix e “de”, produto à venda ou não, e estoque por cor × tamanho
-  (em branco = sem controle; 0 = esgotado no site). Lista do que repor no topo.
+Menu lateral no computador e barra de navegação embaixo no celular.
+
+- **Início**: vendas de hoje, 7 e 30 dias, ticket médio, pedidos para enviar e tamanhos para repor.
+- **Pedidos**: busca por cliente, produto ou nº do pedido e filtro por status. No detalhe: itens com foto,
+  pagamento, linha do tempo dos status (gravada pelo banco), botão do próximo passo e WhatsApp do cliente.
+- **Estoque**: grade cor × tamanho com fotos e botões +/−, salva sem recarregar
+  (em branco = sem controle; 0 = esgotado no site). Filtros por linha, tipo e “só para repor”.
+- **Preços**: cartão, Pix, preço “de” e produto à venda ou oculto.
 
 O site lê preços e estoque do banco (atualiza na hora em que o painel salva, ou a cada minuto).
 Sem banco configurado, usa os valores de `src/data/catalog.ts`.

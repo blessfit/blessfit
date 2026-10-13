@@ -13,23 +13,34 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { erro } = await searchParams
 
   return (
-    <div className={`${s.shell} ${s.login}`}>
-      <form action={signIn} className={s.loginCard}>
-        <h1>Painel Blessfit</h1>
-        <p className={s.muted}>Entre com o seu e-mail e senha.</p>
-        {erro && ERRORS[erro] && <p className={s.error}>{ERRORS[erro]}</p>}
-        <label className={s.field}>
-          E-mail
-          <input className={s.input} name="email" type="email" autoComplete="email" required />
-        </label>
-        <label className={s.field}>
-          Senha
-          <input className={s.input} name="password" type="password" autoComplete="current-password" required />
-        </label>
-        <button className={s.button} type="submit">
-          Entrar
-        </button>
-      </form>
+    <div className={`${s.root} ${s.login}`}>
+      <aside className={s.loginBrand}>
+        <strong>blessfit</strong>
+        <h2>Pedidos, estoque e preços da loja num lugar só.</h2>
+        <p>Conforto · Performance · Estilo</p>
+      </aside>
+      <main className={s.loginMain}>
+        <form action={signIn} className={s.loginForm}>
+          <h1>Entrar no painel</h1>
+          <p>Use o e-mail e a senha de administrador.</p>
+          {erro && ERRORS[erro] && (
+            <p className={s.error} role="alert">
+              {ERRORS[erro]}
+            </p>
+          )}
+          <label className={s.label}>
+            E-mail
+            <input className={s.input} name="email" type="email" autoComplete="email" required />
+          </label>
+          <label className={s.label}>
+            Senha
+            <input className={s.input} name="password" type="password" autoComplete="current-password" required />
+          </label>
+          <button className={s.button} type="submit">
+            Entrar
+          </button>
+        </form>
+      </main>
     </div>
   )
 }

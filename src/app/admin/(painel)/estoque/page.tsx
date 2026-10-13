@@ -1,139 +1,125 @@
+import Link from 'next/link'
 import { CATALOG } from '@/data/catalog'
+import { IMAGES } from '@/data/images'
 import { stockOf } from '@/data/live'
+import { LOW_STOCK, restockList } from '@/server/admin'
 import { requireAdmin } from '@/server/auth'
 import { getLiveCatalog } from '@/server/supabase'
-import { saveProduct } from '../../actions'
+import { AlertIcon, SearchIcon } from '../../_components/Icons'
+import { StockEditor } from '../../_components/StockEditor'
 import s from '../../admin.module.css'
-import { LOW_STOCK } from '../../labels'
 
-const level = (quantity: number | null) =>
-  quantity === null ? undefined : quantity === 0 ? 'out' : quantity <= LOW_STOCK ? 'low' : undefined
+type Params = { linha?: string; tipo?: string; baixo?: string; q?: string }
 
-/** Valor do campo de preço no formato brasileiro (154,9 → "154,90"). */
-const money = (value: number | null | undefined) => (value == null ? '' : value.toFixed(2).replace('.', ','))
+const normalize = (text: string) =>
+  text
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
 
-export default async function StockPage({ searchParams }: { searchParams: Promise<{ salvo?: string }> }) {
+export default async function StockPage({ searchParams }: { searchParams: Promise<Params> }) {
   await requireAdmin()
-  const { salvo } = await searchParams
+  const params = await searchParams
   const live = await getLiveCatalog()
-  const saved = CATALOG.find((p) => p.id === salvo)
+  const restock = restockList(live)
+  const lowIds = new Set(restock.map((r) => r.product.id))
+  const q = normalize(params.q?.trim() ?? '')
 
-  const alerts = CATALOG.flatMap((product) =>
-    product.variants.flatMap(({ color }) =>
-      product.sizes.flatMap((size) => {
-        const quantity = stockOf(live, product.id, color.name, size)
-        return level(quantity) ? [{ product, color: color.name, size, quantity: quantity! }] : []
-      }),
-    ),
+  const products = CATALOG.filter(
+    (p) =>
+      (!params.linha || p.gender === params.linha) &&
+      (!params.tipo || (params.tipo === 'Conjunto' ? p.kind === 'Conjunto' : p.kind !== 'Conjunto')) &&
+      (!params.baixo || lowIds.has(p.id)) &&
+      (!q || normalize(`${p.name} ${p.ref} ${p.category}`).includes(q)),
   )
 
   return (
     <>
-      <h1 className={s.title}>Estoque e preços</h1>
-      {saved && <p className={s.notice}>{saved.name} salvo. O site atualiza em instantes.</p>}
-      {!live && (
-        <p className={s.alert}>Não foi possível ler o banco. Os valores abaixo são os do catálogo (src/data/catalog.ts).</p>
-      )}
-      {alerts.length > 0 && (
-        <div className={s.alert}>
-          <strong>Repor estoque</strong>
-          <ul>
-            {alerts.map((a) => (
-              <li key={`${a.product.id}-${a.color}-${a.size}`}>
-                <a href={`#${a.product.id}`}>{a.product.name}</a> · {a.color} · {a.size}:{' '}
-                {a.quantity === 0 ? 'esgotado' : `${a.quantity} un.`}
-              </li>
-            ))}
-          </ul>
+      <div className={s.pageHead}>
+        <div>
+          <h1>Estoque</h1>
+          <p>Quantidade de cada cor e tamanho. As vendas pagas dão baixa sozinhas.</p>
         </div>
+      </div>
+
+      {!live && (
+        <p className={s.alert}>
+          <AlertIcon />
+          <span>Não foi possível ler o banco agora. Os números abaixo podem estar desatualizados.</span>
+        </p>
       )}
+
+      <form className={s.filters} role="search">
+        <label className={s.search}>
+          <SearchIcon />
+          <span className={s.srOnly}>Buscar produto</span>
+          <input className={s.input} name="q" defaultValue={params.q} placeholder="Buscar produto ou referência" />
+        </label>
+        <select className={s.select} name="linha" defaultValue={params.linha ?? ''} aria-label="Linha">
+          <option value="">Todas as linhas</option>
+          <option value="Feminino">Feminino</option>
+          <option value="Masculino">Masculino</option>
+        </select>
+        <select className={s.select} name="tipo" defaultValue={params.tipo ?? ''} aria-label="Tipo">
+          <option value="">Conjuntos e peças</option>
+          <option value="Conjunto">Só conjuntos</option>
+          <option value="Pecas">Só peças avulsas</option>
+        </select>
+        <label className={s.check}>
+          <input type="checkbox" name="baixo" value="1" defaultChecked={!!params.baixo} />
+          Só para repor ({restock.length})
+        </label>
+        <button className={`${s.button} ${s.secondary}`} type="submit">
+          Filtrar
+        </button>
+      </form>
+
       <p className={s.hint}>
-        Estoque em branco = sem controle (o tamanho fica sempre disponível). Com 0, o tamanho aparece esgotado no
-        site. As vendas pagas dão baixa sozinhas.
+        Campo vazio (—) = sem controle de estoque: o tamanho fica sempre disponível. Com 0, aparece esgotado no site. Até{' '}
+        {LOW_STOCK} un. fica em destaque para repor.
       </p>
 
+      {products.length === 0 && (
+        <p className={`${s.card} ${s.empty}`}>
+          Nenhum produto com esses filtros. <Link href="/admin/estoque">Limpar filtros</Link>
+        </p>
+      )}
+
       <div className={s.products}>
-        {CATALOG.map((product) => {
-          const row = live?.products[product.id]
-          const active = row?.active ?? true
+        {products.map((product) => {
+          const out = restock.filter((r) => r.product.id === product.id && r.quantity === 0).length
+          const cover = IMAGES.products[product.variants[0].images].main.src
           return (
-            <form key={product.id} id={product.id} action={saveProduct} className={s.product} data-inactive={!active}>
-              <input type="hidden" name="id" value={product.id} />
+            <section key={product.id} id={product.id} className={s.card} style={{ scrollMarginTop: 80 }}>
               <div className={s.productHead}>
-                <h2>{product.name}</h2>
-                <span className={s.muted}>
-                  Ref. {product.ref} · {product.category}
-                </span>
+                <img className={`${s.thumb} ${s.thumbSm}`} src={cover} alt="" />
+                <div>
+                  <h2>{product.name}</h2>
+                  <p>
+                    Ref. {product.ref} · {product.category}
+                  </p>
+                </div>
+                {out > 0 && <span className={s.tag}>{out} esgotado(s)</span>}
               </div>
-
-              <div className={s.prices}>
-                <label className={s.field}>
-                  Cartão (R$)
-                  <input className={s.input} name="price" inputMode="decimal" required defaultValue={money(row?.price ?? product.price)} />
-                </label>
-                <label className={s.field}>
-                  Pix (R$)
-                  <input className={s.input} name="pix" inputMode="decimal" required defaultValue={money(row?.pix ?? product.pix)} />
-                </label>
-                <label className={s.field}>
-                  Preço “de” (R$)
-                  <input
-                    className={s.input}
-                    name="compare_at"
-                    inputMode="decimal"
-                    placeholder="opcional"
-                    defaultValue={money(row ? row.compareAt : product.compareAt)}
-                  />
-                </label>
-                <label className={s.check}>
-                  <input type="checkbox" name="active" defaultChecked={active} />
-                  À venda no site
-                </label>
-              </div>
-
-              <div className={s.tableWrap}>
-                <table className={s.stock}>
-                  <thead>
-                    <tr>
-                      <th scope="col">Cor</th>
-                      {product.sizes.map((size) => (
-                        <th key={size} scope="col">
-                          {size}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {product.variants.map(({ color }) => (
-                      <tr key={color.name}>
-                        <th scope="row">{color.name}</th>
-                        {product.sizes.map((size) => {
-                          const quantity = stockOf(live, product.id, color.name, size)
-                          return (
-                            <td key={size} data-level={level(quantity)}>
-                              <input
-                                className={s.input}
-                                name={`stock:${color.name}:${size}`}
-                                type="number"
-                                min={0}
-                                step={1}
-                                inputMode="numeric"
-                                defaultValue={quantity ?? ''}
-                                aria-label={`Estoque ${color.name} ${size}`}
-                              />
-                            </td>
-                          )
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <button className={s.button} type="submit">
-                Salvar {product.name}
-              </button>
-            </form>
+              <StockEditor
+                productId={product.id}
+                sizes={product.sizes}
+                lowStock={LOW_STOCK}
+                colors={product.variants.map((v) => ({
+                  name: v.color.name,
+                  hex: v.color.hex,
+                  photo: IMAGES.products[v.images].main.src,
+                }))}
+                initial={Object.fromEntries(
+                  product.variants.flatMap((v) =>
+                    product.sizes.map((size) => [
+                      `${v.color.name}|${size}`,
+                      stockOf(live, product.id, v.color.name, size),
+                    ]),
+                  ),
+                )}
+              />
+            </section>
           )
         })}
       </div>

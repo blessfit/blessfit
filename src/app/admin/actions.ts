@@ -12,6 +12,8 @@ import type { OrderStatus } from '@/server/orders'
 import { authClient, db } from '@/server/supabase'
 import { ORDER_STATUSES } from './labels'
 
+export type ActionResult = { ok: true } | { ok: false; error: string }
+
 export async function signIn(form: FormData) {
   const email = String(form.get('email') ?? '').trim()
   const password = String(form.get('password') ?? '')
@@ -39,58 +41,74 @@ export async function updateOrderStatus(form: FormData) {
 
   const { error } = await db().from('orders').update({ status }).eq('id', id)
   if (error) throw error
-  revalidatePath('/admin')
+  revalidatePath('/admin/(painel)', 'layout')
 }
 
-/** "154,90" ou "154.90" → 154.9; vazio → null. */
-function money(value: FormDataEntryValue | null): number | null {
-  const raw = String(value ?? '').trim()
+/** "154,90", "1.154,90" ou "154.90" → número; vazio → null; inválido → NaN. */
+function money(value: string): number | null {
+  const raw = value.trim()
+  if (!raw) return null
   // com vírgula, o ponto é separador de milhar (1.154,90); sem vírgula, o ponto é o decimal (154.90)
-  const text = raw.includes(',') ? raw.replace(/\./g, '').replace(',', '.') : raw
-  if (!text) return null
-  const number = Number(text)
-  if (!Number.isFinite(number) || number <= 0) throw new Error(`Valor inválido: ${String(value)}`)
-  return Math.round(number * 100) / 100
+  const number = Number(raw.includes(',') ? raw.replace(/\./g, '').replace(',', '.') : raw)
+  return Number.isFinite(number) && number > 0 ? Math.round(number * 100) / 100 : Number.NaN
 }
 
-/** Salva preço, “de”, ativo e o estoque de cada cor × tamanho de um produto. */
-export async function saveProduct(form: FormData) {
+/** Estoque de um produto: quantidade por cor × tamanho (null = sem controle). */
+export async function saveStock(
+  productId: string,
+  rows: { color: string; size: string; quantity: number | null }[],
+): Promise<ActionResult> {
   await requireAdmin()
-  const product = CATALOG.find((p) => p.id === form.get('id'))
-  if (!product) throw new Error('Produto não encontrado')
+  const product = CATALOG.find((p) => p.id === productId)
+  if (!product) return { ok: false, error: 'Produto não encontrado' }
 
-  const price = money(form.get('price'))
-  const pix = money(form.get('pix'))
-  if (price === null || pix === null) throw new Error('Preço no cartão e no Pix são obrigatórios')
+  for (const row of rows) {
+    if (!product.variants.some((v) => v.color.name === row.color) || !product.sizes.some((s) => s === row.size)) {
+      return { ok: false, error: `Cor ou tamanho inválido: ${row.color} ${row.size}` }
+    }
+    if (row.quantity !== null && (!Number.isInteger(row.quantity) || row.quantity < 0)) {
+      return { ok: false, error: `Quantidade inválida em ${row.color} ${row.size}` }
+    }
+  }
+
   const now = new Date().toISOString()
-
-  const stock = product.variants.flatMap(({ color }) =>
-    product.sizes.map((size) => {
-      const raw = String(form.get(`stock:${color.name}:${size}`) ?? '').trim()
-      const quantity = raw === '' ? null : Number(raw)
-      if (quantity !== null && (!Number.isInteger(quantity) || quantity < 0)) {
-        throw new Error(`Estoque inválido em ${color.name} ${size}`)
-      }
-      return { product_id: product.id, color: color.name, size, quantity, updated_at: now }
-    }),
-  )
-
-  const [saved, savedStock] = await Promise.all([
-    db()
-      .from('products')
-      .upsert({
-        id: product.id,
-        price,
-        pix,
-        compare_at: money(form.get('compare_at')),
-        active: form.get('active') === 'on',
-        updated_at: now,
-      }),
-    db().from('stock').upsert(stock),
-  ])
-  if (saved.error) throw saved.error
-  if (savedStock.error) throw savedStock.error
+  const { error } = await db()
+    .from('stock')
+    .upsert(rows.map((row) => ({ product_id: product.id, ...row, updated_at: now })))
+  if (error) return { ok: false, error: error.message }
 
   revalidatePath('/')
-  redirect(`/admin/estoque?salvo=${product.id}#${product.id}`)
+  revalidatePath('/admin/(painel)', 'layout')
+  return { ok: true }
+}
+
+/** Preço no cartão, no Pix, preço “de” e se o produto está à venda. Valores como digitados (ex.: "154,90"). */
+export async function savePrices(
+  productId: string,
+  input: { price: string; pix: string; compareAt: string; active: boolean },
+): Promise<ActionResult> {
+  await requireAdmin()
+  const product = CATALOG.find((p) => p.id === productId)
+  if (!product) return { ok: false, error: 'Produto não encontrado' }
+
+  const price = money(input.price)
+  const pix = money(input.pix)
+  const compareAt = money(input.compareAt)
+  if (price === null || Number.isNaN(price)) return { ok: false, error: 'Preço no cartão inválido' }
+  if (pix === null || Number.isNaN(pix)) return { ok: false, error: 'Preço no Pix inválido' }
+  if (compareAt !== null && Number.isNaN(compareAt)) return { ok: false, error: 'Preço “de” inválido' }
+
+  const { error } = await db().from('products').upsert({
+    id: product.id,
+    price,
+    pix,
+    compare_at: compareAt,
+    active: input.active,
+    updated_at: new Date().toISOString(),
+  })
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/')
+  revalidatePath('/admin/(painel)', 'layout')
+  return { ok: true }
 }
