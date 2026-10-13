@@ -22,8 +22,9 @@ export function db(): SupabaseClient {
 }
 
 export async function authClient() {
-  if (!url() || !publishableKey()) throw new Error('NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY não configurados')
+  // ler os cookies primeiro: é isso que marca a página como dinâmica (o build não tenta pré-renderizar o painel)
   const store = await cookies()
+  if (!url() || !publishableKey()) throw new Error('NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY não configurados')
   return createServerClient(url()!, publishableKey()!, {
     cookies: {
       getAll: () => store.getAll(),
