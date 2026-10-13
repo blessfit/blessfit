@@ -8,10 +8,14 @@
  *      (ou `sized(foto900, foto1600, 'texto')` se tiver a foto em dois tamanhos, como as do Maré e do Impulso).
  *
  * Cada COR de produto tem o seu conjunto de fotos em IMAGES.products (ex.: 'conjunto-impulso-preto'
- * e 'conjunto-impulso-marinho'); em src/data/products.ts cada cor aponta para a sua chave.
+ * e 'conjunto-impulso-marinho'); em src/data/catalog.ts cada cor aponta para a sua chave.
  *
  * As fotos `stock(...)` são do Unsplash (licença livre) e servem só como placeholder nesta primeira versão.
+ *
+ * Fotos com várias larguras (nome-900.webp, nome-1600.webp, ...) numa pasta: importe cada arquivo e
+ * passe todos para `folder({ 'nome-900': foto900, 'nome-1600': foto1600 }, 'pasta')`.
  */
+import type { StaticImageData } from 'next/image'
 import fabricTeal from '@/assets/img/fabric-teal.webp'
 import modelBlack from '@/assets/img/model-black.webp'
 import modelMen from '@/assets/img/model-men.webp'
@@ -58,6 +62,72 @@ import sobreEstilo900 from '@/assets/img/sobre/estilo-900.webp'
 import sobreEstilo1600 from '@/assets/img/sobre/estilo-1600.webp'
 import sobrePerformance900 from '@/assets/img/sobre/performance-900.webp'
 import sobrePerformance1600 from '@/assets/img/sobre/performance-1600.webp'
+// Banner principal e Conjunto Brisa: as várias larguras de cada foto (nome-900.webp, nome-1600.webp, ...)
+import bannerColecao1600 from '@/assets/img/banner/colecao-1600.webp'
+import bannerColecao2400 from '@/assets/img/banner/colecao-2400.webp'
+import bannerColecao900 from '@/assets/img/banner/colecao-900.webp'
+import bannerFeminino1600 from '@/assets/img/banner/feminino-1600.webp'
+import bannerFeminino2400 from '@/assets/img/banner/feminino-2400.webp'
+import bannerFeminino900 from '@/assets/img/banner/feminino-900.webp'
+import bannerMasculino1600 from '@/assets/img/banner/masculino-1600.webp'
+import bannerMasculino2400 from '@/assets/img/banner/masculino-2400.webp'
+import bannerMasculino900 from '@/assets/img/banner/masculino-900.webp'
+import bannerPecas1600 from '@/assets/img/banner/pecas-1600.webp'
+import bannerPecas2400 from '@/assets/img/banner/pecas-2400.webp'
+import bannerPecas900 from '@/assets/img/banner/pecas-900.webp'
+import brisaConjuntoBrancoCostas1600 from '@/assets/img/brisa/conjunto-branco-costas-1600.webp'
+import brisaConjuntoBrancoCostas900 from '@/assets/img/brisa/conjunto-branco-costas-900.webp'
+import brisaConjuntoBrancoFrente1600 from '@/assets/img/brisa/conjunto-branco-frente-1600.webp'
+import brisaConjuntoBrancoFrente900 from '@/assets/img/brisa/conjunto-branco-frente-900.webp'
+import brisaConjuntoMarinhoCostas1600 from '@/assets/img/brisa/conjunto-marinho-costas-1600.webp'
+import brisaConjuntoMarinhoCostas900 from '@/assets/img/brisa/conjunto-marinho-costas-900.webp'
+import brisaConjuntoMarinhoFrente1600 from '@/assets/img/brisa/conjunto-marinho-frente-1600.webp'
+import brisaConjuntoMarinhoFrente900 from '@/assets/img/brisa/conjunto-marinho-frente-900.webp'
+import brisaConjuntoPretoCostas1600 from '@/assets/img/brisa/conjunto-preto-costas-1600.webp'
+import brisaConjuntoPretoCostas900 from '@/assets/img/brisa/conjunto-preto-costas-900.webp'
+import brisaConjuntoPretoFrente1600 from '@/assets/img/brisa/conjunto-preto-frente-1600.webp'
+import brisaConjuntoPretoFrente900 from '@/assets/img/brisa/conjunto-preto-frente-900.webp'
+import brisaLeggingMarinhoCostas1600 from '@/assets/img/brisa/legging-marinho-costas-1600.webp'
+import brisaLeggingMarinhoCostas900 from '@/assets/img/brisa/legging-marinho-costas-900.webp'
+import brisaLeggingMarinhoFrente1600 from '@/assets/img/brisa/legging-marinho-frente-1600.webp'
+import brisaLeggingMarinhoFrente900 from '@/assets/img/brisa/legging-marinho-frente-900.webp'
+import brisaLeggingPretoCostas1600 from '@/assets/img/brisa/legging-preto-costas-1600.webp'
+import brisaLeggingPretoCostas900 from '@/assets/img/brisa/legging-preto-costas-900.webp'
+import brisaLeggingPretoFrente1600 from '@/assets/img/brisa/legging-preto-frente-1600.webp'
+import brisaLeggingPretoFrente900 from '@/assets/img/brisa/legging-preto-frente-900.webp'
+import brisaRegataBrancoCostas1600 from '@/assets/img/brisa/regata-branco-costas-1600.webp'
+import brisaRegataBrancoCostas900 from '@/assets/img/brisa/regata-branco-costas-900.webp'
+import brisaRegataBrancoFrente1600 from '@/assets/img/brisa/regata-branco-frente-1600.webp'
+import brisaRegataBrancoFrente900 from '@/assets/img/brisa/regata-branco-frente-900.webp'
+import brisaRegataMarinhoCostas1600 from '@/assets/img/brisa/regata-marinho-costas-1600.webp'
+import brisaRegataMarinhoCostas900 from '@/assets/img/brisa/regata-marinho-costas-900.webp'
+import brisaRegataMarinhoFrente1600 from '@/assets/img/brisa/regata-marinho-frente-1600.webp'
+import brisaRegataMarinhoFrente900 from '@/assets/img/brisa/regata-marinho-frente-900.webp'
+import brisaRegataPretoCostas1600 from '@/assets/img/brisa/regata-preto-costas-1600.webp'
+import brisaRegataPretoCostas900 from '@/assets/img/brisa/regata-preto-costas-900.webp'
+import brisaRegataPretoFrente1600 from '@/assets/img/brisa/regata-preto-frente-1600.webp'
+import brisaRegataPretoFrente900 from '@/assets/img/brisa/regata-preto-frente-900.webp'
+// Fôlego e Aurora: as várias larguras de cada foto (nome-900.webp, nome-1600.webp, ...)
+import folegoConjuntoMarinhoCostas1600 from '@/assets/img/folego/conjunto-marinho-costas-1600.webp'
+import folegoConjuntoMarinhoCostas900 from '@/assets/img/folego/conjunto-marinho-costas-900.webp'
+import folegoConjuntoPretoCostas1600 from '@/assets/img/folego/conjunto-preto-costas-1600.webp'
+import folegoConjuntoPretoCostas900 from '@/assets/img/folego/conjunto-preto-costas-900.webp'
+import folegoRegataMarinhoCostas1600 from '@/assets/img/folego/regata-marinho-costas-1600.webp'
+import folegoRegataMarinhoCostas900 from '@/assets/img/folego/regata-marinho-costas-900.webp'
+import folegoRegataMarinhoFrente1600 from '@/assets/img/folego/regata-marinho-frente-1600.webp'
+import folegoRegataMarinhoFrente900 from '@/assets/img/folego/regata-marinho-frente-900.webp'
+import folegoRegataPretoCostas1600 from '@/assets/img/folego/regata-preto-costas-1600.webp'
+import folegoRegataPretoCostas900 from '@/assets/img/folego/regata-preto-costas-900.webp'
+import folegoRegataPretoFrente1600 from '@/assets/img/folego/regata-preto-frente-1600.webp'
+import folegoRegataPretoFrente900 from '@/assets/img/folego/regata-preto-frente-900.webp'
+import auroraConjuntoPretoCostas1600 from '@/assets/img/aurora/conjunto-preto-costas-1600.webp'
+import auroraConjuntoPretoCostas900 from '@/assets/img/aurora/conjunto-preto-costas-900.webp'
+import auroraConjuntoPretoFrente1600 from '@/assets/img/aurora/conjunto-preto-frente-1600.webp'
+import auroraConjuntoPretoFrente900 from '@/assets/img/aurora/conjunto-preto-frente-900.webp'
+import auroraTopPretoCostas1600 from '@/assets/img/aurora/top-preto-costas-1600.webp'
+import auroraTopPretoCostas900 from '@/assets/img/aurora/top-preto-costas-900.webp'
+import auroraTopPretoFrente1600 from '@/assets/img/aurora/top-preto-frente-1600.webp'
+import auroraTopPretoFrente900 from '@/assets/img/aurora/top-preto-frente-900.webp'
 
 export type Img = {
   src: string
@@ -79,26 +149,31 @@ function stock(id: string, alt: string, position?: string): Img {
   return { src: url(800), srcSet: WIDTHS.map((w) => `${url(w)} ${w}w`).join(', '), alt, position }
 }
 
+/** Arquivo importado de src/assets/img (o Next entrega o objeto da imagem; só a URL interessa). */
+type Asset = StaticImageData | string
+
+const url = (asset: Asset): string => (typeof asset === 'string' ? asset : asset.src)
+
 /** Foto da própria loja (src/assets/img). */
-function local(src: string, alt: string, position?: string): Img {
-  return { src, alt, position }
+function local(src: Asset, alt: string, position?: string): Img {
+  return { src: url(src), alt, position }
 }
 
 /** Foto da própria loja em dois tamanhos (arquivos -900.webp e -1600.webp). */
-function sized(small: string, large: string, alt: string, position?: string): Img {
-  return { src: small, srcSet: `${small} 900w, ${large} 1600w`, alt, position }
+function sized(small: Asset, large: Asset, alt: string, position?: string): Img {
+  return { src: url(small), srcSet: `${url(small)} 900w, ${url(large)} 1600w`, alt, position }
 }
 
 /**
  * Fotos de uma pasta de src/assets/img salvas em várias larguras (nome-900.webp, nome-1600.webp, ...).
  * Todas as larguras encontradas entram no srcset; a menor vira o `src` padrão.
  */
-function folder(files: Record<string, string>, dir: string) {
+function folder(files: Record<string, Asset>, dir: string) {
   return (name: string, alt: string, position?: string): Img => {
-    const prefix = `../assets/img/${dir}/${name}-`
+    const prefix = `${name}-`
     const sizes = Object.entries(files)
-      .filter(([path]) => path.startsWith(prefix) && /^\d+\.webp$/.test(path.slice(prefix.length)))
-      .map(([path, url]) => ({ width: Number.parseInt(path.slice(prefix.length), 10), url }))
+      .filter(([key]) => key.startsWith(prefix) && /^\d+$/.test(key.slice(prefix.length)))
+      .map(([key, asset]) => ({ width: Number.parseInt(key.slice(prefix.length), 10), url: url(asset) }))
       .sort((a, b) => a.width - b.width)
     if (!sizes.length) throw new Error(`Foto não encontrada: src/assets/img/${dir}/${name}-<largura>.webp`)
     return { src: sizes[0].url, srcSet: sizes.map((s) => `${s.url} ${s.width}w`).join(', '), alt, position }
@@ -107,13 +182,59 @@ function folder(files: Record<string, string>, dir: string) {
 
 // Banner principal — fotos de campanha geradas no Google Flow (16:9)
 const banner = folder(
-  import.meta.glob<string>('../assets/img/banner/*.webp', { eager: true, import: 'default' }),
+  {
+    'colecao-1600': bannerColecao1600,
+    'colecao-2400': bannerColecao2400,
+    'colecao-900': bannerColecao900,
+    'feminino-1600': bannerFeminino1600,
+    'feminino-2400': bannerFeminino2400,
+    'feminino-900': bannerFeminino900,
+    'masculino-1600': bannerMasculino1600,
+    'masculino-2400': bannerMasculino2400,
+    'masculino-900': bannerMasculino900,
+    'pecas-1600': bannerPecas1600,
+    'pecas-2400': bannerPecas2400,
+    'pecas-900': bannerPecas900,
+  },
   'banner',
 )
 
 // Conjunto Brisa (regata + legging) — fotos geradas no Google Flow a partir das peças reais
 const brisa = folder(
-  import.meta.glob<string>('../assets/img/brisa/*.webp', { eager: true, import: 'default' }),
+  {
+    'conjunto-branco-costas-1600': brisaConjuntoBrancoCostas1600,
+    'conjunto-branco-costas-900': brisaConjuntoBrancoCostas900,
+    'conjunto-branco-frente-1600': brisaConjuntoBrancoFrente1600,
+    'conjunto-branco-frente-900': brisaConjuntoBrancoFrente900,
+    'conjunto-marinho-costas-1600': brisaConjuntoMarinhoCostas1600,
+    'conjunto-marinho-costas-900': brisaConjuntoMarinhoCostas900,
+    'conjunto-marinho-frente-1600': brisaConjuntoMarinhoFrente1600,
+    'conjunto-marinho-frente-900': brisaConjuntoMarinhoFrente900,
+    'conjunto-preto-costas-1600': brisaConjuntoPretoCostas1600,
+    'conjunto-preto-costas-900': brisaConjuntoPretoCostas900,
+    'conjunto-preto-frente-1600': brisaConjuntoPretoFrente1600,
+    'conjunto-preto-frente-900': brisaConjuntoPretoFrente900,
+    'legging-marinho-costas-1600': brisaLeggingMarinhoCostas1600,
+    'legging-marinho-costas-900': brisaLeggingMarinhoCostas900,
+    'legging-marinho-frente-1600': brisaLeggingMarinhoFrente1600,
+    'legging-marinho-frente-900': brisaLeggingMarinhoFrente900,
+    'legging-preto-costas-1600': brisaLeggingPretoCostas1600,
+    'legging-preto-costas-900': brisaLeggingPretoCostas900,
+    'legging-preto-frente-1600': brisaLeggingPretoFrente1600,
+    'legging-preto-frente-900': brisaLeggingPretoFrente900,
+    'regata-branco-costas-1600': brisaRegataBrancoCostas1600,
+    'regata-branco-costas-900': brisaRegataBrancoCostas900,
+    'regata-branco-frente-1600': brisaRegataBrancoFrente1600,
+    'regata-branco-frente-900': brisaRegataBrancoFrente900,
+    'regata-marinho-costas-1600': brisaRegataMarinhoCostas1600,
+    'regata-marinho-costas-900': brisaRegataMarinhoCostas900,
+    'regata-marinho-frente-1600': brisaRegataMarinhoFrente1600,
+    'regata-marinho-frente-900': brisaRegataMarinhoFrente900,
+    'regata-preto-costas-1600': brisaRegataPretoCostas1600,
+    'regata-preto-costas-900': brisaRegataPretoCostas900,
+    'regata-preto-frente-1600': brisaRegataPretoFrente1600,
+    'regata-preto-frente-900': brisaRegataPretoFrente900,
+  },
   'brisa',
 )
 
@@ -138,7 +259,20 @@ const BRISA = {
 
 // Regata masculina Fôlego (preto e azul marinho) — fotos geradas no Google Flow a partir das peças reais
 const folego = folder(
-  import.meta.glob<string>('../assets/img/folego/*.webp', { eager: true, import: 'default' }),
+  {
+    'conjunto-marinho-costas-1600': folegoConjuntoMarinhoCostas1600,
+    'conjunto-marinho-costas-900': folegoConjuntoMarinhoCostas900,
+    'conjunto-preto-costas-1600': folegoConjuntoPretoCostas1600,
+    'conjunto-preto-costas-900': folegoConjuntoPretoCostas900,
+    'regata-marinho-costas-1600': folegoRegataMarinhoCostas1600,
+    'regata-marinho-costas-900': folegoRegataMarinhoCostas900,
+    'regata-marinho-frente-1600': folegoRegataMarinhoFrente1600,
+    'regata-marinho-frente-900': folegoRegataMarinhoFrente900,
+    'regata-preto-costas-1600': folegoRegataPretoCostas1600,
+    'regata-preto-costas-900': folegoRegataPretoCostas900,
+    'regata-preto-frente-1600': folegoRegataPretoFrente1600,
+    'regata-preto-frente-900': folegoRegataPretoFrente900,
+  },
   'folego',
 )
 
@@ -153,7 +287,16 @@ const FOLEGO = {
 
 // Conjunto Aurora (preto: top nadador + legging) — fotos geradas no Google Flow a partir das peças reais
 const aurora = folder(
-  import.meta.glob<string>('../assets/img/aurora/*.webp', { eager: true, import: 'default' }),
+  {
+    'conjunto-preto-costas-1600': auroraConjuntoPretoCostas1600,
+    'conjunto-preto-costas-900': auroraConjuntoPretoCostas900,
+    'conjunto-preto-frente-1600': auroraConjuntoPretoFrente1600,
+    'conjunto-preto-frente-900': auroraConjuntoPretoFrente900,
+    'top-preto-costas-1600': auroraTopPretoCostas1600,
+    'top-preto-costas-900': auroraTopPretoCostas900,
+    'top-preto-frente-1600': auroraTopPretoFrente1600,
+    'top-preto-frente-900': auroraTopPretoFrente900,
+  },
   'aurora',
 )
 

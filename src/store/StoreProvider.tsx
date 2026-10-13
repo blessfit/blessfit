@@ -28,14 +28,25 @@ function save(key: string, value: unknown) {
 
 /** Estado da loja: favoritos e sacola (salvos no navegador) e as janelas abertas. */
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [favoriteIds, setFavoriteIds] = useState<string[]>(() => load(FAVORITES_KEY, []))
-  const [stored, setStored] = useState<StoredLine[]>(() => load(BAG_KEY, []))
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([])
+  const [stored, setStored] = useState<StoredLine[]>([])
+  const [loaded, setLoaded] = useState(false)
   const [panel, setPanel] = useState<Panel | null>(null)
   const [quickView, setQuickView] = useState<StoreState['quickView']>(null)
   const [info, setInfo] = useState<InfoPage['id'] | null>(null)
 
-  useEffect(() => save(FAVORITES_KEY, favoriteIds), [favoriteIds])
-  useEffect(() => save(BAG_KEY, stored), [stored])
+  // o servidor não tem o localStorage: a sacola salva entra depois da primeira renderização
+  useEffect(() => {
+    setFavoriteIds(load(FAVORITES_KEY, []))
+    setStored(load(BAG_KEY, []))
+    setLoaded(true)
+  }, [])
+  useEffect(() => {
+    if (loaded) save(FAVORITES_KEY, favoriteIds)
+  }, [loaded, favoriteIds])
+  useEffect(() => {
+    if (loaded) save(BAG_KEY, stored)
+  }, [loaded, stored])
 
   const toggleFavorite = useCallback((product: Product) => {
     setFavoriteIds((ids) => (ids.includes(product.id) ? ids.filter((id) => id !== product.id) : [...ids, product.id]))

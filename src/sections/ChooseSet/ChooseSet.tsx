@@ -39,13 +39,14 @@ const Grid = styled.div`
 
 /** “Escolha seu conjunto”: os três conjuntos de cada linha, com peças, tamanhos e compra. */
 export function ChooseSet() {
-  const [gender, setGender] = useState<Gender>(() => fromHash() ?? 'Feminino')
+  const [gender, setGender] = useState<Gender>('Feminino')
 
   useEffect(() => {
     const onHash = () => {
       const next = fromHash()
       if (next) setGender(next)
     }
+    onHash() // aba vinda do link (#...): só dá para ler no navegador, depois da primeira renderização
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [])

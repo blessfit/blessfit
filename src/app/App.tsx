@@ -1,3 +1,5 @@
+'use client'
+
 import {
   AnnouncementBar,
   Header,
@@ -8,7 +10,7 @@ import {
   WhatsAppFab,
 } from '@/components/layout'
 import { QuickView } from '@/components/product'
-import { StorePage } from '@/pages/Store'
+import { StorePage } from '@/views/Store'
 import { AppProviders } from './providers/AppProviders'
 
 export default function App() {

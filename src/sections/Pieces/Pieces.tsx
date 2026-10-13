@@ -17,13 +17,14 @@ const fromHash = (): Filter | null => TABS.find((t) => `#${t.id}` === window.loc
 
 /** “Peças avulsas”: tops, regatas, camisetas, shorts e leggings vendidos separadamente, com troca de cor e fotos. */
 export function Pieces() {
-  const [filter, setFilter] = useState<Filter>(() => fromHash() ?? 'Todas')
+  const [filter, setFilter] = useState<Filter>('Todas')
 
   useEffect(() => {
     const onHash = () => {
       const next = fromHash()
       if (next) setFilter(next)
     }
+    onHash() // aba vinda do link (#...): só dá para ler no navegador, depois da primeira renderização
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
