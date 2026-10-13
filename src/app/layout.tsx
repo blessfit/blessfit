@@ -37,7 +37,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <link rel="preconnect" href="https://images.unsplash.com" />
       </head>
-      <body>
+      {/* margin 0: sem a margem padrão do navegador (o painel não carrega o GlobalStyle da loja) */}
+      <body style={{ margin: 0 }}>
         <StyledRegistry>{children}</StyledRegistry>
       </body>
     </html>
