@@ -74,7 +74,7 @@ export const HERO_SLIDES: HeroSlide[] = [
   },
   {
     image: IMAGES.heroSlides[2],
-    mobileFocus: '72% 50%',
+    mobileFocus: '77% 50%',
     eyebrow: 'Linha feminina',
     title: 'Leveza em cada movimento.',
     text: 'Conjunto Maré: top de alças cruzadas e shorts de cós alto que não marca nem enrola.',

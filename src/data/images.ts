@@ -193,7 +193,7 @@ export const IMAGES = {
   heroSlides: [
     banner('colecao', 'Casal caminhando à beira-mar com os conjuntos Maré azul petróleo e Impulso preto', '65% 50%'),
     banner('masculino', 'Homem sentado em escadaria de pedra com o Conjunto Impulso azul marinho', '30% 50%'),
-    banner('feminino', 'Mulher se alongando em um deck de frente para o mar com o Conjunto Maré azul petróleo', '68% 50%'),
+    banner('feminino', 'Mulher se alongando em um deck de frente para o mar com o Conjunto Maré azul petróleo', '77% 50%'),
     banner('pecas', 'Amigos descansando em um terraço ensolarado com top Maré e camiseta Impulso', '35% 50%'),
   ],
 
