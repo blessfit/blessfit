@@ -1,6 +1,7 @@
 import { useId, useMemo, useRef, useState } from 'react'
 import { Picture, Search } from '@/components/ui'
-import { PRODUCTS, type Product } from '@/data/products'
+import type { Product } from '@/data/products'
+import { useCatalog } from '@/store/catalogContext'
 import { formatBRL } from '@/lib/price'
 import { useStore } from '@/store/storeContext'
 import * as S from './Header.styles'
@@ -17,6 +18,7 @@ const haystack = (p: Product) =>
 /** Busca de produtos com sugestões ao digitar; abre o produto escolhido no “visualizar”. */
 export function SearchBox() {
   const { openQuickView } = useStore()
+  const { products } = useCatalog()
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
   const root = useRef<HTMLFormElement>(null)
@@ -25,11 +27,11 @@ export function SearchBox() {
   const results = useMemo(() => {
     const terms = normalize(query).split(/\s+/).filter(Boolean)
     if (!terms.length) return []
-    return PRODUCTS.filter((p) => {
+    return products.filter((p) => {
       const text = haystack(p)
       return terms.every((t) => text.includes(t))
     })
-  }, [query])
+  }, [query, products])
 
   const pick = (product: Product) => {
     openQuickView(product)

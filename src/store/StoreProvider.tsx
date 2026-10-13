@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { InfoPage } from '@/data/content'
-import { findProduct, findVariant, type Product, type Size, type Variant } from '@/data/products'
+import { findVariant, type Product, type Size, type Variant } from '@/data/products'
+import { useCatalog } from './catalogContext'
 import type { BagLine } from '@/lib/orders'
 import { StoreContext, type Panel, type StoreState } from './storeContext'
 
@@ -28,6 +29,7 @@ function save(key: string, value: unknown) {
 
 /** Estado da loja: favoritos e sacola (salvos no navegador) e as janelas abertas. */
 export function StoreProvider({ children }: { children: ReactNode }) {
+  const { findProduct } = useCatalog()
   const [favoriteIds, setFavoriteIds] = useState<string[]>([])
   const [stored, setStored] = useState<StoredLine[]>([])
   const [loaded, setLoaded] = useState(false)
@@ -101,7 +103,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       openInfo: setInfo,
       closeInfo: () => setInfo(null),
     }
-  }, [favoriteIds, stored, panel, quickView, info, toggleFavorite, addToBag, setQty])
+  }, [findProduct, favoriteIds, stored, panel, quickView, info, toggleFavorite, addToBag, setQty])
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
 }

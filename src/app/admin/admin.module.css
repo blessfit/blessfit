@@ -1,0 +1,365 @@
+/* Painel da loja: visual simples com as cores da marca (src/styles/theme.ts). */
+.shell {
+  --ink: #4a5630;
+  --ink-deep: #2f3820;
+  --paper: #f7f5f0;
+  --surface: #ffffff;
+  --text: #1c2116;
+  --muted: #5c6152;
+  --line: #e6e3dc;
+  --warn: #9a5b00;
+  --warn-bg: #fff4e0;
+  --danger: #a3261a;
+  --danger-bg: #fdecea;
+  --ok-bg: #eef3e3;
+
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--text);
+  font-family: 'Montserrat Variable', system-ui, sans-serif;
+  font-size: 14px;
+}
+
+.shell *,
+.shell *::before,
+.shell *::after {
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+  padding: 14px 16px;
+  background: var(--ink-deep);
+  color: #fff;
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.nav {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.nav a {
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.nav a:hover,
+.nav a[aria-current='page'] {
+  background: rgb(255 255 255 / 0.14);
+}
+
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.title {
+  margin: 0 0 16px;
+  font-size: 22px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--ink);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--ink-deep);
+}
+
+.ghost {
+  background: transparent;
+  border: 1px solid rgb(255 255 255 / 0.5);
+}
+
+.input,
+.select {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+}
+
+.input:focus,
+.select:focus {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+
+/* ——— Avisos ——— */
+.notice {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--ok-bg);
+}
+
+.alert {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.alert ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+/* ——— Pedidos ——— */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.filters a {
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.filters a[aria-current='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.orders {
+  display: grid;
+  gap: 10px;
+}
+
+.order {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.orderHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+}
+
+.orderHead strong {
+  font-size: 15px;
+}
+
+.badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--paper);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badge[data-status='paid'],
+.badge[data-status='delivered'] {
+  background: var(--ok-bg);
+  color: var(--ink-deep);
+}
+
+.badge[data-status='review'] {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.badge[data-status='canceled'] {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.order details {
+  margin-top: 10px;
+}
+
+.order summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.order ul {
+  margin: 8px 0;
+  padding-left: 18px;
+}
+
+.statusForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* ——— Estoque ——— */
+.products {
+  display: grid;
+  gap: 16px;
+}
+
+.product {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  scroll-margin-top: 16px;
+}
+
+.product[data-inactive='true'] {
+  opacity: 0.6;
+}
+
+.productHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin-bottom: 12px;
+}
+
+.productHead h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.prices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.field .input {
+  width: 120px;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  font-weight: 600;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  margin-bottom: 12px;
+}
+
+.stock {
+  border-collapse: collapse;
+}
+
+.stock th,
+.stock td {
+  padding: 4px 6px;
+  text-align: center;
+}
+
+.stock th:first-child {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.stock .input {
+  width: 64px;
+  text-align: center;
+}
+
+.stock td[data-level='low'] .input {
+  background: var(--warn-bg);
+  border-color: var(--warn);
+}
+
+.stock td[data-level='out'] .input {
+  background: var(--danger-bg);
+  border-color: var(--danger);
+}
+
+.hint {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ——— Login ——— */
+.login {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.loginCard {
+  display: grid;
+  gap: 12px;
+  width: min(100%, 360px);
+  padding: 28px 24px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.loginCard h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+}
+
+.loginCard .input {
+  width: 100%;
+}
+
+.error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: var(--danger-bg);
+  color: var(--danger);
+}

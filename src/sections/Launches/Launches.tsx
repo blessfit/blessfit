@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { ProductCard } from '@/components/product'
 import { ArrowRight, Carousel, Container, Section, SectionHeader } from '@/components/ui'
-import { SETS } from '@/data/products'
+import { useCatalog } from '@/store/catalogContext'
 
 const AllLink = styled.a`
   display: inline-flex;
@@ -27,6 +27,7 @@ const AllLink = styled.a`
 
 /** Vitrine “Lançamentos”: carrossel com os seis conjuntos da nova coleção. */
 export function Launches() {
+  const { sets } = useCatalog()
   return (
     <Section id="lancamentos" $tone="white" aria-labelledby="lancamentos-title">
       <Container>
@@ -42,7 +43,7 @@ export function Launches() {
           }
         />
         <Carousel label="Lançamentos" perView={{ desktop: 4, tablet: 2 }}>
-          {SETS.map((product) => (
+          {sets.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </Carousel>

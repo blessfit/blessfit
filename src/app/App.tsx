@@ -11,11 +11,13 @@ import {
 } from '@/components/layout'
 import { QuickView } from '@/components/product'
 import { StorePage } from '@/views/Store'
+import type { LiveCatalog } from '@/data/live'
 import { AppProviders } from './providers/AppProviders'
 
-export default function App() {
+/** A loja inteira. `live`: preços e estoque do painel, lidos no servidor (null = valores do catálogo). */
+export default function App({ live }: { live: LiveCatalog | null }) {
   return (
-    <AppProviders>
+    <AppProviders live={live}>
       <div id="top" />
       <SkipLink href="#conteudo">Pular para o conteúdo</SkipLink>
       <AnnouncementBar />

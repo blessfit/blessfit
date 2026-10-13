@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { SetCard } from '@/components/product'
 import { Container, Section, SectionHeader, Tab, TabList } from '@/components/ui'
-import { SETS, type Gender } from '@/data/products'
+import type { Gender } from '@/data/products'
+import { useCatalog } from '@/store/catalogContext'
 import { snapScroller } from '@/styles/mixins'
 import { media } from '@/styles/media'
 
@@ -39,6 +40,7 @@ const Grid = styled.div`
 
 /** “Escolha seu conjunto”: os três conjuntos de cada linha, com peças, tamanhos e compra. */
 export function ChooseSet() {
+  const catalog = useCatalog()
   const [gender, setGender] = useState<Gender>('Feminino')
 
   useEffect(() => {
@@ -51,7 +53,7 @@ export function ChooseSet() {
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
 
-  const sets = SETS.filter((p) => p.gender === gender)
+  const sets = catalog.sets.filter((p) => p.gender === gender)
 
   return (
     <Section id="conjuntos" $tone="paper" aria-labelledby="conjuntos-title">

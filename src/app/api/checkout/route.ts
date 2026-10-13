@@ -5,7 +5,8 @@
  * Resposta: { orderId, url } — o site manda o cliente para `url`.
  */
 import { createCheckoutLink, type CheckoutCustomer } from '@/server/infinitepay'
-import { db, json, priceCart, type Order, type PayMethod } from '@/server/orders'
+import { json, priceCart, type Order, type PayMethod } from '@/server/orders'
+import { db, getLiveCatalog } from '@/server/supabase'
 
 type Body = {
   method?: unknown
@@ -27,7 +28,7 @@ export async function POST(request: Request): Promise<Response> {
   if (body.method !== 'card' && body.method !== 'pix') return json({ error: 'Forma de pagamento inválida' }, 400)
   const method: PayMethod = body.method
 
-  const priced = priceCart(body.lines, method)
+  const priced = priceCart(body.lines, method, await getLiveCatalog())
   if ('error' in priced) return json({ error: priced.error }, 400)
   const { items } = priced
 

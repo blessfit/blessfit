@@ -27,7 +27,8 @@ npm run typecheck  # só a checagem de tipos (tsc)
 | O quê | Arquivo |
 | --- | --- |
 | WhatsApp, Instagram, frete grátis, parcelas, Pix, cupom, menu e slides do banner | `src/data/shop.ts` |
-| Produtos (conjuntos e peças avulsas), cores, preços e tamanhos | `src/data/catalog.ts` |
+| Preços e estoque | Painel **/admin** → Estoque e preços (valores iniciais em `src/data/catalog.ts`) |
+| Produtos (conjuntos e peças avulsas): nomes, descrições, cores e tamanhos | `src/data/catalog.ts` |
 | Todas as fotos (produtos por cor, banner, categorias) | `src/data/images.ts` + `src/assets/img/` |
 | Categorias, benefícios, “Sobre”, avaliações, FAQ, políticas e guia de tamanhos | `src/data/content.ts` |
 | Cores, fontes e espaçamentos | `src/styles/theme.ts` |
@@ -46,8 +47,8 @@ Para adicionar fotos novas, salve-as como `nome-900.webp` e `nome-1600.webp` num
 
 ## Back-end: pagamento pela InfinitePay
 
-Rotas do Next em `src/app/api/` (lógica em `src/server/`), com os pedidos salvos no Supabase (tabela em `supabase/migrations/`).
-O total é sempre recalculado no servidor com os preços de `src/data/catalog.ts`.
+Rotas do Next em `src/app/api/` (lógica em `src/server/`), com os pedidos salvos no Supabase (tabelas em `supabase/migrations/`).
+O total é sempre recalculado no servidor com os preços e o estoque do painel; cada venda paga dá baixa no estoque.
 
 | Rota | O que faz |
 | --- | --- |
@@ -55,7 +56,7 @@ O total é sempre recalculado no servidor com os preços de `src/data/catalog.ts
 | `POST /api/infinitepay-webhook` | Aviso de pagamento da InfinitePay. Confirma em `/payment_check` antes de marcar o pedido como pago |
 | `GET /api/order?id=…` | Situação do pedido. Na volta do checkout, repasse `transaction_nsu` e `slug` para confirmar na hora |
 
-Status do pedido: `pending` → `paid`; `review` quando o valor ou a forma de pagamento não bate com o
+Status do pedido: `pending` → `paid` → `shipped` → `delivered` (os dois últimos marcados no painel); `review` quando o valor ou a forma de pagamento não bate com o
 pedido (ex.: link com preço de Pix pago no cartão); `canceled` se o link não pôde ser criado.
 
 Variáveis de ambiente (na Vercel e em `.env.local`; `npm run dev` já lê o `.env.local`):
@@ -63,16 +64,30 @@ Variáveis de ambiente (na Vercel e em `.env.local`; `npm run dev` já lê o `.e
 | Variável | Valor |
 | --- | --- |
 | `INFINITEPAY_HANDLE` | InfiniteTag da loja, sem o `$` |
-| `SUPABASE_URL` | URL do projeto no Supabase |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto no Supabase |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Chave pública (`sb_publishable_…`) |
 | `SUPABASE_SECRET_KEY` | Chave secreta (`sb_secret_…`), só no servidor |
+| `ADMIN_EMAILS` | E-mails com acesso ao painel, separados por vírgula |
 | `SITE_URL` | Opcional: domínio público (padrão: o domínio da requisição) |
+
+## Painel /admin
+
+- **Pedidos**: em andamento (pagos, a conferir, enviados) ou por status; itens, cliente, comprovante e troca de status.
+- **Estoque e preços**: preço no cartão, no Pix e “de”, produto à venda ou não, e estoque por cor × tamanho
+  (em branco = sem controle; 0 = esgotado no site). Lista do que repor no topo.
+
+O site lê preços e estoque do banco (atualiza na hora em que o painel salva, ou a cada minuto).
+Sem banco configurado, usa os valores de `src/data/catalog.ts`.
+
+Acesso: crie o usuário em Supabase → Authentication → Users → **Add user** (e desligue “Allow new users to sign up”
+em Authentication → Sign In / Providers) e coloque o e-mail em `ADMIN_EMAILS`.
 
 ## Estrutura
 
 ```
 src/
-├── app/                  # rotas do Next: layout, página da loja e api/ (checkout, webhook, pedidos)
-├── server/               # código só do servidor: InfinitePay e pedidos no Supabase
+├── app/                  # rotas do Next: loja, admin/ (painel) e api/ (checkout, webhook, pedidos)
+├── server/               # código só do servidor: InfinitePay, pedidos, Supabase e login do painel
 ├── views/Store/          # composição das seções da loja
 ├── sections/             # banner, lançamentos, categorias, conjuntos, peças avulsas, sobre, avaliações, FAQ
 ├── components/

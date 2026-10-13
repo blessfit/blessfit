@@ -20,8 +20,8 @@ export type Gender = 'Feminino' | 'Masculino'
 export type Kind = 'Conjunto' | 'Blusa' | 'Shorts' | 'Legging'
 export type Size = 'PP' | 'P' | 'M' | 'G' | 'GG'
 export type Color = { name: string; hex: string }
-/** Cor + a chave das fotos dela em IMAGES.products. */
-export type CatalogVariant = { color: Color; images: ProductImageKey }
+/** Cor + a chave das fotos dela em IMAGES.products (e os tamanhos esgotados nessa cor, vindos do estoque). */
+export type CatalogVariant = { color: Color; images: ProductImageKey; soldOut?: Size[] }
 
 export type CatalogProduct = {
   id: string

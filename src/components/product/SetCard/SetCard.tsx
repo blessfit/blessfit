@@ -288,7 +288,7 @@ export function SetCard({ product }: { product: Product }) {
           ))}
         </Pieces>
 
-        <SizePicker sizes={product.sizes} soldOut={product.soldOut} value={p.size} onChange={p.choose} compact />
+        <SizePicker sizes={product.sizes} soldOut={p.variant.soldOut} value={p.size} onChange={p.choose} compact />
 
         <PriceTag price={product.price} pix={product.pix} compareAt={product.compareAt} />
 

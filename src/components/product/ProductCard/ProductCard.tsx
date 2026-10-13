@@ -60,7 +60,7 @@ export function ProductCard({ product }: { product: Product }) {
 
         <SizePicker
           sizes={product.sizes}
-          soldOut={product.soldOut}
+          soldOut={p.variant.soldOut}
           value={p.size}
           onChange={p.choose}
           label="Tamanho"

@@ -1,16 +1,17 @@
 /*
- * Pedidos: monta o pedido a partir da sacola (com os preços do catálogo, nunca os do navegador),
- * guarda no Supabase e confirma o pagamento com a InfinitePay.
+ * Pedidos: monta o pedido a partir da sacola (com os preços e o estoque do painel, nunca os do navegador),
+ * guarda no Supabase, confirma o pagamento com a InfinitePay e dá baixa no estoque.
  */
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { CATALOG } from '@/data/catalog'
+import { applyLive, stockOf, type LiveCatalog } from '@/data/live'
 import { checkPayment, type CheckoutItem } from './infinitepay'
+import { db } from './supabase'
 
 /** 'card' usa o preço do cartão (`price`), 'pix' o preço do Pix (`pix`). */
 export type PayMethod = 'card' | 'pix'
 
 /** 'review': pago, mas com valor ou forma de pagamento diferente do pedido — conferir à mão. */
-export type OrderStatus = 'pending' | 'paid' | 'review' | 'canceled'
+export type OrderStatus = 'pending' | 'paid' | 'review' | 'shipped' | 'delivered' | 'canceled'
 
 /** Linha da sacola como o site envia (mesmo formato salvo no navegador). */
 export type CartLine = { id: string; color: string; size: string; qty: number }
@@ -33,38 +34,37 @@ export type Order = {
   receipt_url: string | null
   created_at: string
   paid_at: string | null
-}
-
-let client: SupabaseClient | undefined
-
-export function db(): SupabaseClient {
-  const url = process.env.SUPABASE_URL
-  const key = process.env.SUPABASE_SECRET_KEY
-  if (!url || !key) throw new Error('SUPABASE_URL / SUPABASE_SECRET_KEY não configurados')
-  client ??= createClient(url, key, { auth: { persistSession: false } })
-  return client
+  stock_applied: boolean
 }
 
 const MAX_LINES = 30
 const MAX_QTY = 20
 
-/** Valida a sacola contra o catálogo e devolve os itens com preço em centavos, ou o motivo do erro. */
-export function priceCart(lines: unknown, method: PayMethod): { items: OrderItem[] } | { error: string } {
+/** Valida a sacola contra o catálogo e o estoque e devolve os itens com preço em centavos, ou o motivo do erro. */
+export function priceCart(
+  lines: unknown,
+  method: PayMethod,
+  live: LiveCatalog | null,
+): { items: OrderItem[] } | { error: string } {
   if (!Array.isArray(lines) || lines.length === 0) return { error: 'Sacola vazia' }
   if (lines.length > MAX_LINES) return { error: 'Itens demais na sacola' }
 
   const items: OrderItem[] = []
   for (const line of lines as Partial<CartLine>[]) {
-    const product = CATALOG.find((p) => p.id === line.id)
+    const base = CATALOG.find((p) => p.id === line.id)
+    const product = base && applyLive(base, live)
     if (!product) return { error: `Produto não encontrado: ${String(line.id)}` }
-    if (!product.variants.some((v) => v.color.name === line.color)) {
-      return { error: `${product.name} não tem a cor ${String(line.color)}` }
-    }
+    const variant = product.variants.find((v) => v.color.name === line.color)
+    if (!variant) return { error: `${product.name} não tem a cor ${String(line.color)}` }
     const size = product.sizes.find((s) => s === line.size)
     if (!size) return { error: `${product.name} não tem o tamanho ${String(line.size)}` }
-    if (product.soldOut?.includes(size)) return { error: `${product.name} ${size} está esgotado` }
+    if (variant.soldOut?.includes(size)) return { error: `${product.name} ${variant.color.name} ${size} está esgotado` }
     if (!Number.isInteger(line.qty) || line.qty! < 1 || line.qty! > MAX_QTY) {
       return { error: `Quantidade inválida para ${product.name}` }
+    }
+    const left = stockOf(live, product.id, variant.color.name, size)
+    if (left !== null && line.qty! > left) {
+      return { error: `Só ${left === 1 ? 'resta 1 unidade' : `restam ${left} unidades`} de ${product.name} ${variant.color.name} ${size}` }
     }
 
     items.push({
@@ -122,7 +122,12 @@ export async function confirmPayment(
     .maybeSingle<Order>()
   if (error) throw error
   // null: outra chamada confirmou primeiro
-  return data ?? (await findOrder(order.id)) ?? order
+  if (!data) return (await findOrder(order.id)) ?? order
+
+  // baixa no estoque (a função do banco só aplica uma vez por pedido)
+  const stock = await db().rpc('apply_order_stock', { order_id: data.id })
+  if (stock.error) console.error(`[orders] erro na baixa de estoque do pedido ${data.id}`, stock.error)
+  return data
 }
 
 export const json = (body: unknown, status = 200) => Response.json(body, { status })

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { ProductCard } from '@/components/product'
 import { Carousel, Container, Section, SectionHeader, Tab, TabList } from '@/components/ui'
-import { PIECES, type Kind } from '@/data/products'
+import type { Kind } from '@/data/products'
+import { useCatalog } from '@/store/catalogContext'
 
 type Filter = 'Todas' | Exclude<Kind, 'Conjunto'>
 
@@ -17,6 +18,7 @@ const fromHash = (): Filter | null => TABS.find((t) => `#${t.id}` === window.loc
 
 /** “Peças avulsas”: tops, regatas, camisetas, shorts e leggings vendidos separadamente, com troca de cor e fotos. */
 export function Pieces() {
+  const { pieces } = useCatalog()
   const [filter, setFilter] = useState<Filter>('Todas')
 
   useEffect(() => {
@@ -29,7 +31,7 @@ export function Pieces() {
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
 
-  const items = filter === 'Todas' ? PIECES : PIECES.filter((p) => p.kind === filter)
+  const items = filter === 'Todas' ? pieces : pieces.filter((p) => p.kind === filter)
 
   return (
     <Section id="pecas" $tone="white" aria-labelledby="pecas-title">

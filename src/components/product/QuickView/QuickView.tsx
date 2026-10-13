@@ -193,7 +193,7 @@ function QuickViewContent({ product, initialVariant }: { product: Product; initi
           <strong>Inclui:</strong> {product.pieces.join(' + ')}
         </Pieces>
 
-        <SizePicker sizes={product.sizes} soldOut={product.soldOut} value={p.size} onChange={p.choose} />
+        <SizePicker sizes={product.sizes} soldOut={p.variant.soldOut} value={p.size} onChange={p.choose} />
         <SizeGuide type="button" onClick={() => openInfo('tamanhos')}>
           <Ruler /> Guia de tamanhos
         </SizeGuide>
