@@ -6,6 +6,7 @@ import type { ReactNode } from 'react'
 import { signOut } from '../actions'
 import s from '../admin.module.css'
 import { BoxIcon, HomeIcon, LogoutIcon, OrdersIcon, TagIcon } from './Icons'
+import { SubmitButton } from './Pending'
 
 type Counts = { orders: number; restock: number }
 
@@ -27,9 +28,9 @@ const Logo = () => (
 
 const SignOut = ({ label = 'Sair' }: { label?: string }) => (
   <form action={signOut}>
-    <button className={s.signOut} type="submit">
+    <SubmitButton className={s.signOut} pendingLabel="Saindo…">
       <LogoutIcon /> {label}
-    </button>
+    </SubmitButton>
   </form>
 )
 

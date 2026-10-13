@@ -5,6 +5,7 @@ import { getOrderWithEvents } from '@/server/admin'
 import { requireAdmin } from '@/server/auth'
 import { updateOrderStatus } from '../../../actions'
 import { AlertIcon, ArrowLeftIcon, WhatsAppIcon } from '../../../_components/Icons'
+import { SubmitButton } from '../../../_components/Pending'
 import { StatusBadge } from '../../../_components/StatusBadge'
 import s from '../../../admin.module.css'
 import { cents, formatDate, METHOD_LABEL, NEXT_STEP, ORDER_STATUSES, shortId, STATUS_LABEL } from '../../../labels'
@@ -42,9 +43,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           <form action={updateOrderStatus}>
             <input type="hidden" name="id" value={order.id} />
             <input type="hidden" name="status" value={next.status} />
-            <button className={s.button} type="submit">
-              {next.label}
-            </button>
+            <SubmitButton pendingLabel="Salvando…">{next.label}</SubmitButton>
           </form>
         )}
       </div>
@@ -180,7 +179,8 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                   </li>
                 ))}
               </ol>
-              <form action={updateOrderStatus} className={s.inline}>
+              {/* key: o select volta para o status atual depois de cada mudança */}
+              <form key={order.status} action={updateOrderStatus} className={s.inline}>
                 <input type="hidden" name="id" value={order.id} />
                 <label className={s.srOnly} htmlFor="status">
                   Mudar status
@@ -192,9 +192,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                     </option>
                   ))}
                 </select>
-                <button className={`${s.button} ${s.secondary}`} type="submit">
-                  Mudar
-                </button>
+                <SubmitButton className={`${s.button} ${s.secondary}`}>Mudar</SubmitButton>
               </form>
             </div>
           </section>

@@ -1,3 +1,4 @@
+import Form from 'next/form'
 import Link from 'next/link'
 import { CATALOG } from '@/data/catalog'
 import { IMAGES } from '@/data/images'
@@ -6,6 +7,7 @@ import { LOW_STOCK, restockList } from '@/server/admin'
 import { requireAdmin } from '@/server/auth'
 import { getLiveCatalog } from '@/server/supabase'
 import { AlertIcon, SearchIcon } from '../../_components/Icons'
+import { SubmitButton } from '../../_components/Pending'
 import { StockEditor } from '../../_components/StockEditor'
 import s from '../../admin.module.css'
 
@@ -49,7 +51,7 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
         </p>
       )}
 
-      <form className={s.filters} role="search">
+      <Form action="/admin/estoque" className={s.filters} role="search">
         <label className={s.search}>
           <SearchIcon />
           <span className={s.srOnly}>Buscar produto</span>
@@ -69,10 +71,8 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
           <input type="checkbox" name="baixo" value="1" defaultChecked={!!params.baixo} />
           Só para repor ({restock.length})
         </label>
-        <button className={`${s.button} ${s.secondary}`} type="submit">
-          Filtrar
-        </button>
-      </form>
+        <SubmitButton className={`${s.button} ${s.secondary}`}>Filtrar</SubmitButton>
+      </Form>
 
       <p className={s.hint}>
         Campo vazio (—) = sem controle de estoque: o tamanho fica sempre disponível. Com 0, aparece esgotado no site. Até{' '}

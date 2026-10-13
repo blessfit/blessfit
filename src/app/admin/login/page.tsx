@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { PasswordInput } from '../_components/PasswordInput'
+import { SubmitButton } from '../_components/Pending'
 import { signIn } from '../actions'
 import s from '../admin.module.css'
 
@@ -34,11 +36,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           </label>
           <label className={s.label}>
             Senha
-            <input className={s.input} name="password" type="password" autoComplete="current-password" required />
+            <PasswordInput />
           </label>
-          <button className={s.button} type="submit">
-            Entrar
-          </button>
+          <SubmitButton pendingLabel="Entrando…">Entrar</SubmitButton>
         </form>
       </main>
     </div>

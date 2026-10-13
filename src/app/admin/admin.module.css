@@ -186,10 +186,8 @@
 }
 
 .content {
-  width: 100%;
-  max-width: 1280px;
-  margin-inline: auto;
-  padding: 32px 36px 56px;
+  min-width: 0;
+  padding: 32px 40px 56px;
 }
 
 @media (max-width: 900px) {
@@ -1440,4 +1438,98 @@ a.orderRow:hover {
   .colorCell .thumb {
     display: none;
   }
+}
+
+/* ——— Carregando ——— */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  display: inline-block;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.button[aria-busy=true] {
+  opacity: 0.85;
+  cursor: progress;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+.bone {
+  display: block;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #ebe8e0 0%, #f6f4ef 50%, #ebe8e0 100%) 0 0 / 200% 100%;
+  animation: shimmer 1.3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bone,
+  .spinner {
+    animation-duration: 3s;
+  }
+}
+
+.skeletonRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.skeletonRow:last-child {
+  border-bottom: 0;
+}
+
+/* ——— Senha com mostrar/ocultar ——— */
+.password {
+  position: relative;
+  display: block;
+}
+
+.password .input {
+  padding-right: 46px;
+}
+
+.password button {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.password button:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.password svg {
+  width: 20px;
+  height: 20px;
 }

@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { saveStock } from '../actions'
 import s from '../admin.module.css'
 import { AlertIcon, CheckIcon } from './Icons'
+import { Spinner } from './Pending'
 
 export type StockColor = { name: string; hex: string; photo?: string }
 
@@ -126,6 +127,7 @@ export function StockEditor({ productId, sizes, colors, initial, lowStock }: Pro
           dirty && <span className={s.status}>Alterações não salvas</span>
         )}
         <button className={s.button} type="button" onClick={save} disabled={!dirty || pending}>
+          {pending && <Spinner />}
           {pending ? 'Salvando…' : 'Salvar estoque'}
         </button>
       </div>

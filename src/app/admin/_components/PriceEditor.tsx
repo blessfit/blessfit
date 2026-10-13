@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { savePrices } from '../actions'
 import s from '../admin.module.css'
 import { AlertIcon, CheckIcon } from './Icons'
+import { Spinner } from './Pending'
 
 type Values = { price: string; pix: string; compareAt: string; active: boolean }
 
@@ -72,6 +73,7 @@ export function PriceEditor({ productId, name, meta, photo, initial }: Props) {
           </span>
         ) : (
           <button className={`${s.button} ${dirty ? '' : s.secondary}`} type="button" onClick={save} disabled={!dirty || pending}>
+            {pending && <Spinner />}
             {pending ? 'Salvando…' : 'Salvar'}
           </button>
         )}

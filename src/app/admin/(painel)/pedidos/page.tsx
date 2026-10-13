@@ -1,8 +1,10 @@
+import Form from 'next/form'
 import Link from 'next/link'
 import { listOrders } from '@/server/admin'
 import { requireAdmin } from '@/server/auth'
 import type { OrderStatus } from '@/server/orders'
 import { SearchIcon } from '../../_components/Icons'
+import { LinkSpinner, SubmitButton } from '../../_components/Pending'
 import { StatusBadge } from '../../_components/StatusBadge'
 import s from '../../admin.module.css'
 import { cents, formatDate, METHOD_LABEL, ORDER_STATUSES, shortId, STATUS_LABEL } from '../../labels'
@@ -42,22 +44,21 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
         </div>
       </div>
 
-      <form className={s.toolbar} role="search">
+      <Form action="/admin/pedidos" className={s.toolbar} role="search">
         <input type="hidden" name="status" value={filter} />
         <label className={s.search}>
           <SearchIcon />
           <span className={s.srOnly}>Buscar pedidos</span>
           <input className={s.input} name="q" defaultValue={q} placeholder="Cliente, produto ou nº do pedido" />
         </label>
-        <button className={`${s.button} ${s.secondary}`} type="submit">
-          Buscar
-        </button>
-      </form>
+        <SubmitButton className={`${s.button} ${s.secondary}`}>Buscar</SubmitButton>
+      </Form>
 
       <nav className={s.chips} aria-label="Filtrar por status" style={{ marginBottom: 16 }}>
         {TABS.map((tab) => (
           <Link key={tab.id} href={href(tab.id)} className={s.chip} aria-current={tab.id === filter}>
             {tab.label}
+            <LinkSpinner />
           </Link>
         ))}
       </nav>
