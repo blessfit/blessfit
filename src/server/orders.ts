@@ -2,6 +2,7 @@
  * Pedidos: monta o pedido a partir da sacola (com os preços e o estoque do painel, nunca os do navegador),
  * guarda no Supabase, confirma o pagamento com a InfinitePay e dá baixa no estoque.
  */
+import 'server-only'
 import { CATALOG } from '@/data/catalog'
 import { applyLive, stockOf, type LiveCatalog } from '@/data/live'
 import { checkPayment, type CheckoutItem } from './infinitepay'

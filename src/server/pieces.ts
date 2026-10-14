@@ -3,6 +3,7 @@
  * preço de custo e de quais peças cada conjunto é montado.
  * Fica em src/server/ de propósito: o custo nunca vai para o código do site (navegador).
  */
+import 'server-only'
 
 /** Por referência da peça (a mesma do site): nome do produto no fornecedor e preço de custo. */
 export const PIECES: Record<string, { supplier: string; cost: number; name?: string }> = {

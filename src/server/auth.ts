@@ -2,6 +2,7 @@
  * Acesso ao painel: login do Supabase Auth + lista de e-mails liberados em ADMIN_EMAILS
  * (separados por vírgula). Quem não estiver na lista não entra, mesmo com usuário e senha válidos.
  */
+import 'server-only'
 import type { User } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import { authClient } from './supabase'

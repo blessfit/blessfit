@@ -5,6 +5,7 @@
  * A loja é identificada só pela InfiniteTag (INFINITEPAY_HANDLE), sem chave secreta. Por isso o
  * webhook não é assinado e todo pagamento é confirmado de novo em /payment_check antes de valer.
  */
+import 'server-only'
 const API = 'https://api.checkout.infinitepay.io'
 
 /** Valores sempre em centavos (R$ 10,00 = 1000). */

@@ -3,6 +3,7 @@
  * abas Estoque (peças), Conjuntos e Como usar, mais Vendas (totais) e Pedidos.
  * Os números são os do sistema no momento da exportação.
  */
+import 'server-only'
 import ExcelJS from 'exceljs'
 import { CATALOG, type CatalogProduct, type Size } from '@/data/catalog'
 import { stockOf } from '@/data/live'

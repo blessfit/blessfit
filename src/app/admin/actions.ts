@@ -97,6 +97,10 @@ export async function savePrices(
   if (price === null || Number.isNaN(price)) return { ok: false, error: 'Preço no cartão inválido' }
   if (pix === null || Number.isNaN(pix)) return { ok: false, error: 'Preço no Pix inválido' }
   if (compareAt !== null && Number.isNaN(compareAt)) return { ok: false, error: 'Preço “de” inválido' }
+  // travas contra erro de digitação (ex.: 1039,90 no lugar de 139,90), que viram cobrança errada no checkout
+  if (pix > price) return { ok: false, error: 'O preço no Pix não pode ser maior que o do cartão' }
+  if (pix < price / 2) return { ok: false, error: 'O preço no Pix está com mais de 50% de desconto: confira os valores' }
+  if (compareAt !== null && compareAt <= price) return { ok: false, error: 'O preço “de” precisa ser maior que o preço no cartão' }
 
   const { error } = await db().from('products').upsert({
     id: product.id,

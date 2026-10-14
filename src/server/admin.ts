@@ -1,6 +1,7 @@
 /*
  * Consultas do painel /admin (sempre com a chave secreta; as páginas chamam requireAdmin() antes).
  */
+import 'server-only'
 import { CATALOG, type CatalogProduct } from '@/data/catalog'
 import { stockOf, type LiveCatalog } from '@/data/live'
 import type { Order, OrderStatus } from './orders'

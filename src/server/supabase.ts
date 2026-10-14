@@ -4,6 +4,7 @@
  * - db(): chave secreta, ignora o RLS. Só em rotas, server actions e páginas já protegidas.
  * - authClient(): sessão do usuário logado (cookies), para o login do painel.
  */
+import 'server-only'
 import { createServerClient } from '@supabase/ssr'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
