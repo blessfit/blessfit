@@ -1533,3 +1533,9 @@ a.orderRow:hover {
   width: 20px;
   height: 20px;
 }
+
+.exportWrap {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+}

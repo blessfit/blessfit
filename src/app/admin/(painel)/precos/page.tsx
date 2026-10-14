@@ -1,6 +1,7 @@
 import { CATALOG } from '@/data/catalog'
 import { requireAdmin } from '@/server/auth'
 import { getLiveCatalog } from '@/server/supabase'
+import { ExportButton } from '../../_components/ExportButton'
 import { AlertIcon } from '../../_components/Icons'
 import { PriceEditor } from '../../_components/PriceEditor'
 import s from '../../admin.module.css'
@@ -20,6 +21,7 @@ export default async function PricesPage() {
           <h1>Preços</h1>
           <p>Cartão (em até 6x), Pix e preço “de” (gera o selo de desconto). O site atualiza assim que você salva.</p>
         </div>
+        <ExportButton />
       </div>
 
       {!live && (

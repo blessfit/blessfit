@@ -80,6 +80,9 @@ Menu lateral no computador e barra de navegação embaixo no celular.
 - **Estoque**: grade cor × tamanho com fotos e botões +/−, salva sem recarregar
   (em branco = sem controle; 0 = esgotado no site). Filtros por linha, tipo e “só para repor”.
 - **Preços**: cartão, Pix, preço “de” e produto à venda ou oculto.
+- **Exportar Excel** (Início, Estoque e Preços): planilha no formato da “Estoque BlessFit (com conjuntos)” com
+  as abas Estoque, Conjuntos, Vendas (totais por período, forma de pagamento e produto), Pedidos e Como usar.
+  Custo e nome do fornecedor de cada peça ficam em `src/server/pieces.ts` (só no servidor).
 
 O site lê preços e estoque do banco (atualiza na hora em que o painel salva, ou a cada minuto).
 Sem banco configurado, usa os valores de `src/data/catalog.ts`.

@@ -101,6 +101,13 @@ export const ReceiptIcon = () => (
   </Icon>
 )
 
+export const DownloadIcon = () => (
+  <Icon>
+    <path d="M12 4v11M7 10.5l5 5 5-5" />
+    <path d="M5 20h14" />
+  </Icon>
+)
+
 export const EyeIcon = () => (
   <Icon>
     <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" />

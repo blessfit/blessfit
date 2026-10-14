@@ -6,6 +6,7 @@ import { stockOf } from '@/data/live'
 import { LOW_STOCK, restockList } from '@/server/admin'
 import { requireAdmin } from '@/server/auth'
 import { getLiveCatalog } from '@/server/supabase'
+import { ExportButton } from '../../_components/ExportButton'
 import { AlertIcon, SearchIcon } from '../../_components/Icons'
 import { SubmitButton } from '../../_components/Pending'
 import { StockEditor } from '../../_components/StockEditor'
@@ -42,6 +43,7 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
           <h1>Estoque</h1>
           <p>Quantidade de cada cor e tamanho. As vendas pagas dão baixa sozinhas.</p>
         </div>
+        <ExportButton />
       </div>
 
       {!live && (

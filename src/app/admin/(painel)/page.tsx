@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { LOW_STOCK, listOrders, pendingCounts, restockList, salesSummary } from '@/server/admin'
 import { requireAdmin } from '@/server/auth'
 import { getLiveCatalog } from '@/server/supabase'
+import { ExportButton } from '../_components/ExportButton'
 import { AlertIcon, BoxIcon, CashIcon, TruckIcon } from '../_components/Icons'
 import { StatusBadge } from '../_components/StatusBadge'
 import s from '../admin.module.css'
@@ -27,6 +28,7 @@ export default async function DashboardPage() {
           <h1>{greeting()}!</h1>
           <p>{today()}</p>
         </div>
+        <ExportButton />
       </div>
 
       <div className={s.stats}>
