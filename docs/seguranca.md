@@ -40,9 +40,15 @@ Escopo: painel `/admin`, server actions, checkout, webhook da InfinitePay, `/api
   `X-Frame-Options: DENY`, `Content-Security-Policy: frame-ancestors 'none'`,
   `X-Content-Type-Options: nosniff` e `Referrer-Policy: strict-origin-when-cross-origin`.
 
-### Pendente (configuração fora do código)
+### Configuração fora do código — resolvida em 14/10/2026
 
-| Gravidade | Item | Como resolver |
+Conferido depois da configuração:
+- **Supabase:** `/auth/v1/settings` devolve `disable_signup: true` e `mailer_autoconfirm: false`.
+- **Preço:** o Conjunto Maré está em R$ 139,90 no cartão, R$ 129,90 no Pix e R$ 154,80 como preço “de”.
+- **Vercel:** em `POST /api/checkout`, as requisições 1 a 10 do minuto voltam 400 (corpo inválido) e a
+  partir da 11ª voltam **429**. `POST /admin/login` também é bloqueado, e `GET /admin/login` continua 200.
+
+| Gravidade | Item | O que foi feito |
 |---|---|---|
 | ⚠️ Dado | Conjunto Maré com R$ 1.039,90 no cartão | Painel → Preços: corrigir para o valor certo (no catálogo é R$ 139,90). |
 | Médio | Cadastro público do Supabase Auth ligado (`disable_signup: false`). Hoje não dá acesso ao painel porque a confirmação de e-mail é obrigatória e o e-mail precisa estar em `ADMIN_EMAILS`. Mas se a confirmação for desligada, qualquer pessoa poderia criar conta com um e-mail de admin que ainda não tenha usuário e entrar. | Supabase → Authentication → Sign In / Providers → desligar “Allow new users to sign up”. Admins novos são convidados em Authentication → Users → Invite. |
