@@ -45,7 +45,7 @@ export const ImageButton = styled.button`
   inset: 0;
   display: block;
   width: 100%;
-  cursor: zoom-in;
+  cursor: pointer;
 
   &:focus-visible {
     outline-offset: -4px;
@@ -81,8 +81,8 @@ export const Tools = styled.div`
   gap: 8px;
 `
 
-export const Tool = styled(IconButton)<{ $on?: boolean }>`
-  color: ${({ $on }) => ($on ? 'var(--petrol)' : 'var(--ink)')};
+export const Tool = styled(IconButton)`
+  color: var(--ink);
 
   svg {
     width: 20px;

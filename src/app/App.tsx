@@ -26,7 +26,7 @@ export default function App({ live }: { live: LiveCatalog | null }) {
       <SiteFooter />
       <WhatsAppFab />
 
-      {/* janelas: visualizar produto, sacola/favoritos/menu e páginas de ajuda */}
+      {/* janelas: visualizar produto, sacola/menu e páginas de ajuda */}
       <QuickView />
       <Panels />
       <InfoDialog />

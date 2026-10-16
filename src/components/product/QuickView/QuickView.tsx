@@ -4,8 +4,6 @@ import {
   Bag,
   Button,
   Dialog,
-  Heart,
-  HeartFilled,
   Picture,
   PriceTag,
   Repeat,
@@ -201,17 +199,6 @@ function QuickViewContent({ product, initialVariant }: { product: Product; initi
         <Actions>
           <Button as="button" variant="primary" block glyph={Bag} onClick={p.addToBag}>
             Adicionar à sacola
-          </Button>
-          <Button
-            as="button"
-            variant="outline"
-            size="sm"
-            block
-            glyph={p.favorite ? HeartFilled : Heart}
-            aria-pressed={p.favorite}
-            onClick={p.toggleFavorite}
-          >
-            {p.favorite ? 'Nos favoritos' : 'Favoritar'}
           </Button>
         </Actions>
         <Hint role="status">{p.needSize ? 'Escolha um tamanho para adicionar à sacola.' : ''}</Hint>

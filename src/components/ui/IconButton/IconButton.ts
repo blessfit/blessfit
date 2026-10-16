@@ -60,7 +60,7 @@ export const IconButton = styled.button<{ $variant?: keyof typeof variants; $siz
   ${({ $variant = 'plain' }) => variants[$variant]}
 `
 
-/** Contador (sacola, favoritos) no canto do IconButton. */
+/** Contador (sacola) no canto do IconButton. */
 export const CountBadge = styled.span`
   position: absolute;
   top: 3px;

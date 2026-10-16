@@ -1,4 +1,4 @@
-import { Button, Close, Dialog, IconButton, Instagram, Minus, Picture, Plus, WhatsApp } from '@/components/ui'
+import { Button, Dialog, IconButton, Instagram, Minus, Picture, Plus, WhatsApp } from '@/components/ui'
 import { CATEGORIES } from '@/data/content'
 import { NAV, SHOP } from '@/data/shop'
 import { external, instagramUrl, whatsappUrl } from '@/lib/links'
@@ -7,7 +7,7 @@ import { formatBRL } from '@/lib/price'
 import { useStore } from '@/store/storeContext'
 import * as S from './Panels.styles'
 
-/** Gavetas laterais da loja: menu (celular), sacola e favoritos. */
+/** Gavetas laterais da loja: menu (celular) e sacola. */
 export function Panels() {
   const { panel, closePanel } = useStore()
   return (
@@ -16,9 +16,6 @@ export function Panels() {
         <MobileMenu />
       </Dialog>
       <BagPanel open={panel === 'bag'} onClose={closePanel} />
-      <Dialog open={panel === 'favorites'} onClose={closePanel} title="Favoritos" variant="right">
-        <Favorites />
-      </Dialog>
     </>
   )
 }
@@ -72,8 +69,20 @@ function MobileMenu() {
 }
 
 function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { bag, bagTotal, bagPixTotal, bagCount, setQty } = useStore()
+  const {
+    bag,
+    bagTotal,
+    bagPixTotal,
+    bagCount,
+    checkoutLines,
+    checkoutCount,
+    setQty,
+    setSelected,
+    selectAll,
+    removeFromBag,
+  } = useStore()
   const missing = Math.max(0, SHOP.freeShippingFrom - bagTotal)
+  const allSelected = bag.every((l) => l.selected)
 
   const footer =
     bag.length > 0 ? (
@@ -93,13 +102,21 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
           </span>
         </S.Shipping>
         <S.Total>
-          <span>Subtotal</span>
+          <span>
+            Subtotal ({checkoutCount} {checkoutCount === 1 ? 'peça' : 'peças'})
+          </span>
           <strong>{formatBRL(bagTotal)}</strong>
         </S.Total>
         <S.Pix>ou {formatBRL(bagPixTotal)} no Pix</S.Pix>
-        <Button variant="primary" block glyph={WhatsApp} href={checkoutUrl(bag)} {...external}>
-          Finalizar pelo WhatsApp
-        </Button>
+        {checkoutLines.length > 0 ? (
+          <Button variant="primary" block glyph={WhatsApp} href={checkoutUrl(checkoutLines)} {...external}>
+            Finalizar pelo WhatsApp
+          </Button>
+        ) : (
+          <Button as="button" variant="primary" block glyph={WhatsApp} disabled>
+            Selecione itens para finalizar
+          </Button>
+        )}
         <Button as="button" variant="outline" size="sm" block onClick={onClose}>
           Continuar comprando
         </Button>
@@ -117,8 +134,23 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
         </S.Empty>
       ) : (
         <S.Lines>
+          <S.SelectAll>
+            <input type="checkbox" checked={allSelected} onChange={(e) => selectAll(e.target.checked)} />
+            Selecionar todos
+          </S.SelectAll>
           {bag.map((line) => (
-            <S.Line key={`${line.product.id}-${line.variant.color.name}-${line.size}`}>
+            <S.Line
+              key={`${line.product.id}-${line.variant.color.name}-${line.size}`}
+              $muted={!line.selected || line.qty === 0}
+            >
+              <S.Check>
+                <input
+                  type="checkbox"
+                  checked={line.selected}
+                  onChange={(e) => setSelected(line, e.target.checked)}
+                  aria-label={`Selecionar ${line.product.name} (${line.variant.color.name}, tam. ${line.size})`}
+                />
+              </S.Check>
               <S.Thumb>
                 <Picture image={line.variant.images.main} decorative sizes="88px" />
               </S.Thumb>
@@ -132,6 +164,7 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
                     $size={36}
                     type="button"
                     aria-label="Diminuir quantidade"
+                    disabled={line.qty === 0}
                     onClick={() => setQty(line, line.qty - 1)}
                   >
                     <Minus />
@@ -148,70 +181,19 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
                 </S.Qty>
               </div>
               <S.LineEnd>
-                <IconButton
-                  $size={36}
+                <strong>{formatBRL(line.product.price * line.qty)}</strong>
+                <S.TextButton
                   type="button"
                   aria-label={`Remover ${line.product.name} da sacola`}
-                  onClick={() => setQty(line, 0)}
+                  onClick={() => removeFromBag(line)}
                 >
-                  <Close />
-                </IconButton>
-                <strong>{formatBRL(line.product.price * line.qty)}</strong>
+                  Remover
+                </S.TextButton>
               </S.LineEnd>
             </S.Line>
           ))}
         </S.Lines>
       )}
     </Dialog>
-  )
-}
-
-function Favorites() {
-  const { favorites, toggleFavorite, openQuickView, closePanel } = useStore()
-
-  if (favorites.length === 0) {
-    return (
-      <S.Empty>
-        <p>Toque no coração dos produtos para salvar seus favoritos.</p>
-        <Button variant="primary" href="#lancamentos" onClick={closePanel}>
-          Ver lançamentos
-        </Button>
-      </S.Empty>
-    )
-  }
-
-  return (
-    <S.Lines>
-      {favorites.map((product) => (
-        <S.Line key={product.id}>
-          <S.Thumb>
-            <Picture image={product.variants[0].images.main} decorative sizes="88px" />
-          </S.Thumb>
-          <div>
-            <S.LineName>{product.name}</S.LineName>
-            <S.LineMeta>{formatBRL(product.price)}</S.LineMeta>
-            <S.TextButton
-              type="button"
-              onClick={() => {
-                closePanel()
-                openQuickView(product)
-              }}
-            >
-              Ver e comprar
-            </S.TextButton>
-          </div>
-          <S.LineEnd>
-            <IconButton
-              $size={36}
-              type="button"
-              aria-label={`Remover ${product.name} dos favoritos`}
-              onClick={() => toggleFavorite(product)}
-            >
-              <Close />
-            </IconButton>
-          </S.LineEnd>
-        </S.Line>
-      ))}
-    </S.Lines>
   )
 }

@@ -3,22 +3,29 @@ import type { InfoPage } from '@/data/content'
 import type { Product, Size, Variant } from '@/data/products'
 import type { BagLine } from '@/lib/orders'
 
-export type Panel = 'bag' | 'favorites' | 'menu'
+export type Panel = 'bag' | 'menu'
+
+/** Item da sacola. Quantidade 0 não remove: o item fica salvo (a sacola também serve de lista de desejos). */
+export type BagItem = BagLine & { selected: boolean }
 
 export type StoreState = {
-  favorites: Product[]
-  isFavorite: (id: string) => boolean
-  toggleFavorite: (product: Product) => void
-
-  bag: BagLine[]
+  bag: BagItem[]
+  /** Quantos itens diferentes estão salvos na sacola. */
   bagCount: number
+  /** Itens marcados e com quantidade — os que vão para o pedido. */
+  checkoutLines: BagLine[]
+  /** Peças (soma das quantidades) que vão para o pedido. */
+  checkoutCount: number
   bagTotal: number
-  /** Total da sacola pagando no Pix. */
+  /** Total pagando no Pix. */
   bagPixTotal: number
   addToBag: (product: Product, variant: Variant, size: Size) => void
   setQty: (line: BagLine, qty: number) => void
+  setSelected: (line: BagLine, selected: boolean) => void
+  selectAll: (selected: boolean) => void
+  removeFromBag: (line: BagLine) => void
 
-  /** Gaveta aberta (sacola, favoritos ou menu mobile). */
+  /** Gaveta aberta (sacola ou menu mobile). */
   panel: Panel | null
   openPanel: (panel: Panel) => void
   closePanel: () => void

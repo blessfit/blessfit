@@ -6,7 +6,7 @@ import { StoreProvider } from '@/store/StoreProvider'
 import { GlobalStyle } from '@/styles/GlobalStyle'
 import { theme } from '@/styles/theme'
 
-/** Providers globais: tema do styled-components, estilos base, catálogo com preços e estoque do painel e estado da loja (sacola e favoritos). */
+/** Providers globais: tema do styled-components, estilos base, catálogo com preços e estoque do painel e estado da loja (sacola). */
 export function AppProviders({ live, children }: { live: LiveCatalog | null; children: ReactNode }) {
   return (
     <ThemeProvider theme={theme}>

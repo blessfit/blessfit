@@ -62,7 +62,7 @@ export const MenuFoot = styled.div`
   }
 `
 
-/* ——— Sacola e favoritos ——— */
+/* ——— Sacola ——— */
 
 export const Empty = styled.div`
   display: grid;
@@ -77,12 +77,49 @@ export const Lines = styled.ul`
   padding: 8px 24px;
 `
 
-export const Line = styled.li`
+const checkbox = `
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--petrol);
+  cursor: pointer;
+`
+
+export const SelectAll = styled.li`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  font-weight: 700;
+
+  input {
+    ${checkbox}
+  }
+`
+
+/** `$muted`: item desmarcado ou com quantidade 0 — fica salvo, mas fora do pedido. */
+export const Line = styled.li<{ $muted?: boolean }>`
   display: grid;
-  grid-template-columns: 88px 1fr auto;
-  gap: 14px;
+  grid-template-columns: 20px 88px 1fr auto;
+  gap: 12px;
   padding: 16px 0;
   border-bottom: 1px solid var(--line);
+
+  > :not(:first-child) {
+    opacity: ${({ $muted }) => ($muted ? 0.55 : 1)};
+    transition: opacity 0.2s var(--ease);
+  }
+`
+
+export const Check = styled.label`
+  display: flex;
+  padding-top: 2px;
+
+  input {
+    ${checkbox}
+  }
 `
 
 export const Thumb = styled.div`
@@ -128,15 +165,8 @@ export const LineEnd = styled.div`
   flex-direction: column;
   align-items: flex-end;
   justify-content: space-between;
-  margin: -6px -8px 0 0;
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
 
   strong {
-    margin-right: 8px;
     font-size: 14px;
   }
 `

@@ -2,8 +2,6 @@ import {
   Bag,
   Button,
   Eye,
-  Heart,
-  HeartFilled,
   Picture,
   PriceTag,
   SizePicker,
@@ -14,7 +12,7 @@ import { discountPercent } from '@/lib/price'
 import { usePurchase } from '../usePurchase'
 import * as S from './ProductCard.styles'
 
-/** Card de produto da vitrine: foto grande, favoritar, visualizar, cores, tamanhos, preço e compra. */
+/** Card de produto da vitrine: foto grande, visualizar, cores, tamanhos, preço e compra. */
 export function ProductCard({ product }: { product: Product }) {
   const p = usePurchase(product)
   const off = discountPercent(product.price, product.compareAt)
@@ -35,16 +33,6 @@ export function ProductCard({ product }: { product: Product }) {
         </S.Badges>
 
         <S.Tools>
-          <S.Tool
-            $variant="float"
-            type="button"
-            aria-label={p.favorite ? `Remover ${product.name} dos favoritos` : `Favoritar ${product.name}`}
-            aria-pressed={p.favorite}
-            $on={p.favorite}
-            onClick={p.toggleFavorite}
-          >
-            {p.favorite ? <HeartFilled /> : <Heart />}
-          </S.Tool>
           <S.Tool $variant="float" type="button" aria-label={`Visualizar ${product.name}`} onClick={p.view}>
             <Eye />
           </S.Tool>

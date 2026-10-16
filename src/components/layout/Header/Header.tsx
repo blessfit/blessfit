@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Bag, CountBadge, Heart, IconButton, Menu, User, Wordmark } from '@/components/ui'
+import { Bag, CountBadge, IconButton, Menu, User, Wordmark } from '@/components/ui'
 import { NAV } from '@/data/shop'
 import { external, whatsappUrl } from '@/lib/links'
 import { useStore } from '@/store/storeContext'
 import * as S from './Header.styles'
 import { SearchBox } from './SearchBox'
 
-/** Header da loja: busca, logo central, favoritos/conta/sacola e menu de categorias. */
+/** Header da loja: busca, logo central, conta/sacola e menu de categorias. */
 export function Header() {
-  const { favorites, bagCount, openPanel } = useStore()
+  const { bagCount, openPanel } = useStore()
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -35,14 +35,6 @@ export function Header() {
         </S.Logo>
 
         <S.Right>
-          <IconButton
-            type="button"
-            aria-label={`Favoritos (${favorites.length})`}
-            onClick={() => openPanel('favorites')}
-          >
-            <Heart />
-            {favorites.length > 0 && <CountBadge aria-hidden="true">{favorites.length}</CountBadge>}
-          </IconButton>
           <S.Account
             as="a"
             href={whatsappUrl('Olá! Quero acompanhar meu pedido na Blessfit.')}

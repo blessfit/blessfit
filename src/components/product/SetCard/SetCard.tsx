@@ -7,8 +7,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
-  Heart,
-  HeartFilled,
   IconButton,
   Picture,
   PriceTag,
@@ -42,7 +40,7 @@ const ImageButton = styled.button`
   inset: 0;
   display: block;
   width: 100%;
-  cursor: zoom-in;
+  cursor: pointer;
 
   &:focus-visible {
     outline-offset: -4px;
@@ -255,16 +253,6 @@ export function SetCard({ product }: { product: Product }) {
           {color.name}
         </Color>
         <Tools>
-          <IconButton
-            $variant="float"
-            type="button"
-            aria-label={p.favorite ? `Remover ${product.name} dos favoritos` : `Favoritar ${product.name}`}
-            aria-pressed={p.favorite}
-            onClick={p.toggleFavorite}
-            style={p.favorite ? { color: 'var(--petrol)' } : undefined}
-          >
-            {p.favorite ? <HeartFilled /> : <Heart />}
-          </IconButton>
           <IconButton $variant="float" type="button" aria-label={`Visualizar ${product.name}`} onClick={p.view}>
             <Eye />
           </IconButton>
