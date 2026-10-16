@@ -73,7 +73,6 @@ export const CATALOG: CatalogProduct[] = [
     pix: 129.9,
     compareAt: 154.8,
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
-    badge: 'Lançamento',
   },
   {
     id: 'conjunto-aurora',
@@ -89,7 +88,6 @@ export const CATALOG: CatalogProduct[] = [
     pix: 154.9,
     compareAt: 184.8,
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
-    badge: 'Lançamento',
   },
   {
     id: 'conjunto-brisa',
@@ -110,7 +108,6 @@ export const CATALOG: CatalogProduct[] = [
     pix: 149.9,
     compareAt: 179.8,
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
-    badge: 'Lançamento',
   },
 
   // ——— Conjuntos masculinos ———
@@ -128,7 +125,6 @@ export const CATALOG: CatalogProduct[] = [
     pix: 144.9,
     compareAt: 174.8,
     sizes: ['P', 'M', 'G', 'GG'],
-    badge: 'Lançamento',
   },
   {
     id: 'conjunto-folego',
@@ -144,7 +140,6 @@ export const CATALOG: CatalogProduct[] = [
     pix: 137.9,
     compareAt: 164.8,
     sizes: ['P', 'M', 'G', 'GG'],
-    badge: 'Lançamento',
   },
 
   // ——— Peças avulsas ———
@@ -165,7 +160,6 @@ export const CATALOG: CatalogProduct[] = [
     price: 74.9,
     pix: 69.9,
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
-    badge: 'Lançamento',
   },
   {
     id: 'legging-brisa',
@@ -180,7 +174,6 @@ export const CATALOG: CatalogProduct[] = [
     price: 104.9,
     pix: 99.9,
     sizes: ['PP', 'P', 'M', 'G', 'GG'],
-    badge: 'Lançamento',
   },
   {
     id: 'top-mare',
@@ -237,7 +230,6 @@ export const CATALOG: CatalogProduct[] = [
     price: 74.9,
     pix: 69.9,
     sizes: ['P', 'M', 'G', 'GG'],
-    badge: 'Lançamento',
   },
   {
     id: 'shorts-impulso',

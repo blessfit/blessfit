@@ -31,7 +31,7 @@ export type NavItem = { href: `#${string}`; label: string }
 export const NAV: NavItem[] = [
   { href: '#feminino', label: 'Feminino' },
   { href: '#masculino', label: 'Masculino' },
-  { href: '#lancamentos', label: 'Lançamentos' },
+  // { href: '#lancamentos', label: 'Lançamentos' }, // seção oculta; volta junto com <Launches />
   { href: '#categorias', label: 'Coleções' },
   { href: '#sobre', label: 'Sobre' },
 ]
@@ -57,7 +57,7 @@ export const HERO_SLIDES: HeroSlide[] = [
     eyebrow: 'Nova coleção · 2026',
     title: 'Feita para o seu movimento.',
     text: 'Roupas fitness com conforto, performance e estilo — do treino ao dia a dia.',
-    primary: { label: 'Comprar coleção', href: '#lancamentos' },
+    primary: { label: 'Comprar coleção', href: '#conjuntos' },
     secondary: { label: 'Conheça a Blessfit', href: '#sobre' },
     align: 'left',
   },

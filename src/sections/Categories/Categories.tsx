@@ -97,10 +97,14 @@ const Arrow = styled.span`
   }
 `
 
-/** “Compre por categoria”: atalhos com foto para as linhas da loja. */
+/**
+ * “Compre por categoria”: atalhos com foto para as linhas da loja.
+ * Quando <Launches /> (também branca) voltar logo acima, use `style={{ paddingTop: 0 }}`
+ * para as duas seções não somarem o espaçamento.
+ */
 export function Categories() {
   return (
-    <Section id="categorias" $tone="white" aria-labelledby="categorias-title" style={{ paddingTop: 0 }}>
+    <Section id="categorias" $tone="white" aria-labelledby="categorias-title">
       <Container>
         <SectionHeader id="categorias-title" eyebrow="Coleções" title="Compre por categoria" />
         <Grid>

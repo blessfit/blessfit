@@ -128,8 +128,8 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
       {bag.length === 0 ? (
         <S.Empty>
           <p>Sua sacola está vazia.</p>
-          <Button variant="primary" href="#lancamentos" onClick={onClose}>
-            Ver lançamentos
+          <Button variant="primary" href="#conjuntos" onClick={onClose}>
+            Ver conjuntos
           </Button>
         </S.Empty>
       ) : (

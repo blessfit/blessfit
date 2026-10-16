@@ -5,7 +5,7 @@ import {
   Categories,
   ChooseSet,
   HelpFaq,
-  Launches,
+  // Launches, // seção "Nova coleção · Lançamentos" oculta por enquanto
   Pieces,
   Reviews,
 } from '@/sections'
@@ -15,7 +15,7 @@ export function StorePage() {
   return (
     <main id="conteudo" tabIndex={-1}>
       <CampaignHero />
-      <Launches />
+      {/* <Launches /> */}
       <Categories />
       <ChooseSet />
       <Pieces />
