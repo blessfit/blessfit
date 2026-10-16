@@ -129,7 +129,7 @@ export function About() {
             <SectionTitle id="sobre-title">{ABOUT.title}</SectionTitle>
             <Text>{ABOUT.text}</Text>
             <div style={{ marginTop: 28 }}>
-              <Button variant="light" href="#lancamentos">
+              <Button variant="light" href="#conjuntos">
                 Ver a coleção
               </Button>
             </div>
