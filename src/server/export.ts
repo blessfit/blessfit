@@ -331,7 +331,7 @@ export async function buildWorkbook(): Promise<Buffer> {
   help.getColumn(1).width = 120
   const helpLines = [
     'COMO USAR',
-    `1. Esta planilha foi exportada do painel da loja (blessfit.vercel.app/admin) em ${generatedAt}.`,
+    `1. Esta planilha foi exportada do painel da loja (www.blessfitstore.com.br/admin) em ${generatedAt}.`,
     '2. Aba Estoque: peças avulsas. Saldo = estoque atual no painel; Saídas = vendidas pelo site; Entradas = Saldo + Saídas.',
     '3. Aba Conjuntos: no site cada conjunto tem estoque próprio (coluna Disponível) e Vendidos = conjuntos vendidos pelo site.',
     '4. Abas Vendas e Pedidos: só pedidos pagos (pago, a conferir, enviado e entregue). Valor pago inclui juros do parcelamento, quando houver.',

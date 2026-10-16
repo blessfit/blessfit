@@ -3,7 +3,7 @@
 Loja da **Blessfit** — moda fitness com conforto, performance e estilo.
 Venda simples pelo WhatsApp: o botão “Comprar” e a sacola abrem a conversa já com produto, cor, tamanho e valor.
 
-Produção: https://blessfit.vercel.app (deploy automático a cada push na `main`).
+Produção: https://www.blessfitstore.com.br (deploy automático a cada push na `main`).
 
 ## Rodando
 
@@ -114,4 +114,4 @@ src/
 - [x] Número de WhatsApp em `SHOP.whatsapp`: (37) 99959-9655
 - [x] Instagram em `SHOP.instagram`: @blessfit_ep
 - [ ] Revisar preços, avaliações, FAQ, política de troca, entrega e guia de tamanhos com os dados reais
-- [ ] Em `src/app/layout.tsx`, trocar `metadataBase` pelo domínio oficial (ou definir `SITE_URL`)
+- [x] Domínio oficial `www.blessfitstore.com.br` (DNS no Registro.br, `metadataBase` atualizado)

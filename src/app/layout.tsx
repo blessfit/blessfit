@@ -7,7 +7,7 @@ const title = 'Blessfit · Moda fitness'
 
 export const metadata: Metadata = {
   // TODO: trocar pelo domínio oficial quando estiver no ar (vale para as URLs do og:image)
-  metadataBase: new URL(process.env.SITE_URL ?? 'https://blessfit.vercel.app'),
+  metadataBase: new URL(process.env.SITE_URL ?? 'https://www.blessfitstore.com.br'),
   title,
   description:
     'Blessfit é moda fitness com conforto, performance e estilo: conjuntos e peças femininas e masculinas. Compre pelo WhatsApp com frete grátis e desconto no Pix.',
