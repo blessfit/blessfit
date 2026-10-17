@@ -17,9 +17,10 @@ const bySpeed = (a: ShippingOption, b: ShippingOption) => a.days.max - b.days.ma
 
 /**
  * `itemsCents`: valor dos itens no preço do cartão (o frete grátis não muda com a forma de pagamento).
+ * `freeProduct`: o pedido tem um produto com frete grátis (painel → Preços).
  * Devolve no máximo MAX_OPTIONS opções, da mais barata para a mais cara.
  */
-export function applyRules(raw: RawOption[], itemsCents: number): ShippingOption[] {
+export function applyRules(raw: RawOption[], itemsCents: number, freeProduct = false): ShippingOption[] {
   if (raw.length === 0) return []
   const options = raw
     .map<ShippingOption>((o) => ({
@@ -32,8 +33,8 @@ export function applyRules(raw: RawOption[], itemsCents: number): ShippingOption
     }))
     .sort(byPrice)
 
-  // frete grátis: só a opção mais barata
-  if (itemsCents >= SHOP.freeShippingFrom * 100) {
+  // frete grátis (pelo valor ou por um produto marcado): só a opção mais barata
+  if (freeProduct || itemsCents >= SHOP.freeShippingFrom * 100) {
     options[0] = { ...options[0], priceCents: 0, free: true }
   }
 

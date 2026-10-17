@@ -201,7 +201,9 @@ export function CartPage() {
   }, [checkoutLines, coupon, option])
   const current = totals[method]
   const pieces = checkoutLines.reduce((n, l) => n + l.qty, 0)
-  const missing = Math.max(0, SHOP.freeShippingFrom - bagTotal)
+  // produto com frete grátis (painel → Preços) já garante o frete grátis do pedido
+  const freeProduct = checkoutLines.some((l) => l.product.freeShipping)
+  const missing = freeProduct ? 0 : Math.max(0, SHOP.freeShippingFrom - bagTotal)
 
   const applyCoupon = async () => {
     if (!couponInput.trim()) return
@@ -405,7 +407,7 @@ export function CartPage() {
               )}
             </p>
             <span>
-              <i style={{ width: `${Math.min(100, (bagTotal / SHOP.freeShippingFrom) * 100)}%` }} />
+              <i style={{ width: `${missing === 0 ? 100 : Math.min(100, (bagTotal / SHOP.freeShippingFrom) * 100)}%` }} />
             </span>
           </S.FreeShipping>
 

@@ -58,6 +58,12 @@ describe('applyRules', () => {
     expect(shown.filter((o) => o.free)).toHaveLength(1)
   })
 
+  it('produto com frete grátis deixa a mais barata grátis, mesmo abaixo de R$ 299,00', () => {
+    const shown = applyRules(raw, 10000, true)
+    expect(shown[0]).toMatchObject({ serviceId: 17, priceCents: 0, free: true })
+    expect(shown.filter((o) => o.free)).toHaveLength(1)
+  })
+
   it('sem opções devolve lista vazia', () => {
     expect(applyRules([], 10000)).toEqual([])
   })
@@ -88,6 +94,13 @@ describe('quoteShipping', () => {
     expect(quote.source).toBe('fallback')
     expect(quote.options).toHaveLength(1)
     expect(quote.options[0].priceCents).toBe(FALLBACK.Norte.priceCents)
+  })
+
+  it('item com frete grátis zera a opção mais barata', async () => {
+    vi.mocked(melhorEnvio.quote).mockResolvedValue([option(1, 2000, 7), option(2, 3500, 2)])
+    const quote = await quoteShipping('30130010', [{ ...items[0], freeShipping: true }])
+    expect(quote.options.find((o) => o.serviceId === 1)).toMatchObject({ priceCents: 0, free: true })
+    expect(quote.options.find((o) => o.serviceId === 2)?.priceCents).toBe(3500)
   })
 
   it('cai na contingência quando o Melhor Envio não tem nenhuma opção', async () => {

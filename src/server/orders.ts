@@ -18,7 +18,8 @@ export type OrderStatus = 'pending' | 'paid' | 'review' | 'shipped' | 'delivered
 /** Linha da sacola como o site envia (mesmo formato salvo no navegador). */
 export type CartLine = { id: string; color: string; size: string; qty: number }
 
-export type OrderItem = CheckoutItem & { id: string; ref: string; color: string; size: string }
+/** `freeShipping`: produto marcado com frete grátis no painel na hora do pedido. */
+export type OrderItem = CheckoutItem & { id: string; ref: string; color: string; size: string; freeShipping?: true }
 
 export type Order = {
   id: string
@@ -115,6 +116,7 @@ export function priceCart(
       quantity: line.qty!,
       price: Math.round((method === 'pix' ? product.pix : product.price) * 100),
       description: `${product.name} · ${line.color} · ${size}`,
+      ...(product.freeShipping ? { freeShipping: true as const } : {}),
     })
   }
   return { items }

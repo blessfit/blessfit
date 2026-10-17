@@ -19,7 +19,10 @@ export default async function PricesPage() {
       <div className={s.pageHead}>
         <div>
           <h1>Preços</h1>
-          <p>Cartão (em até 6x), Pix e preço “de” (gera o selo de desconto). O site atualiza assim que você salva.</p>
+          <p>
+            Cartão (em até 6x), Pix e preço “de” (gera o selo de desconto). “Frete grátis”: pedido com o produto tem a
+            opção de frete mais barata grátis. O site atualiza assim que você salva.
+          </p>
         </div>
         <ExportButton />
       </div>
@@ -38,7 +41,7 @@ export default async function PricesPage() {
           <span>Cartão</span>
           <span>Pix</span>
           <span>Preço “de”</span>
-          <span>No site</span>
+          <span>No site · frete</span>
           <span />
         </div>
         {CATALOG.map((product) => {
@@ -55,6 +58,7 @@ export default async function PricesPage() {
                 pix: money(row?.pix ?? product.pix),
                 compareAt: money(row ? row.compareAt : product.compareAt),
                 active: row?.active ?? true,
+                freeShipping: row?.freeShipping ?? product.freeShipping ?? false,
               }}
             />
           )
