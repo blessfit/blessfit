@@ -44,6 +44,8 @@ export type CatalogProduct = {
   /** Tamanhos esgotados (aparecem riscados). */
   soldOut?: Size[]
   badge?: 'Lançamento' | 'Mais vendido' | 'Últimas peças'
+  /** Pedido com este produto tem a opção de frete mais barata grátis (o painel → Preços também liga e desliga). */
+  freeShipping?: boolean
 }
 
 const C = {

@@ -81,7 +81,9 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
     selectAll,
     removeFromBag,
   } = useStore()
-  const missing = Math.max(0, SHOP.freeShippingFrom - bagTotal)
+  // produto com frete grátis (painel → Preços) já garante o frete grátis do pedido
+  const freeProduct = checkoutLines.some((l) => l.product.freeShipping)
+  const missing = freeProduct ? 0 : Math.max(0, SHOP.freeShippingFrom - bagTotal)
   const allSelected = bag.every((l) => l.selected)
 
   const footer =
@@ -98,7 +100,7 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
             )}
           </p>
           <span>
-            <i style={{ width: `${Math.min(100, (bagTotal / SHOP.freeShippingFrom) * 100)}%` }} />
+            <i style={{ width: `${missing === 0 ? 100 : Math.min(100, (bagTotal / SHOP.freeShippingFrom) * 100)}%` }} />
           </span>
         </S.Shipping>
         <S.Total>

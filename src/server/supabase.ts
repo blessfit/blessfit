@@ -40,7 +40,7 @@ export async function authClient() {
   })
 }
 
-type ProductRow = { id: string; price: number; pix: number; compare_at: number | null; active: boolean }
+type ProductRow = { id: string; price: number; pix: number; compare_at: number | null; active: boolean; free_shipping: boolean }
 type StockRow = { product_id: string; color: string; size: string; quantity: number | null }
 
 /** Preços e estoque do painel. null se o banco não estiver configurado ou não responder. */
@@ -48,7 +48,7 @@ export async function getLiveCatalog(): Promise<LiveCatalog | null> {
   if (!url() || !publishableKey()) return null
   const client = createClient(url()!, publishableKey()!, { auth: { persistSession: false } })
   const [products, stock] = await Promise.all([
-    client.from('products').select('id, price, pix, compare_at, active').returns<ProductRow[]>(),
+    client.from('products').select('id, price, pix, compare_at, active, free_shipping').returns<ProductRow[]>(),
     client.from('stock').select('product_id, color, size, quantity').returns<StockRow[]>(),
   ])
   if (products.error || stock.error) {
@@ -60,7 +60,13 @@ export async function getLiveCatalog(): Promise<LiveCatalog | null> {
     products: Object.fromEntries(
       products.data.map((p) => [
         p.id,
-        { price: Number(p.price), pix: Number(p.pix), compareAt: p.compare_at === null ? null : Number(p.compare_at), active: p.active },
+        {
+          price: Number(p.price),
+          pix: Number(p.pix),
+          compareAt: p.compare_at === null ? null : Number(p.compare_at),
+          active: p.active,
+          freeShipping: p.free_shipping,
+        },
       ]),
     ),
     stock: Object.fromEntries(stock.data.map((s) => [stockKey(s.product_id, s.color, s.size), s.quantity])),

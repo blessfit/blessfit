@@ -1156,6 +1156,12 @@ a.orderRow:hover {
   border-bottom: 0;
 }
 
+/* "À venda" e "Frete grátis" empilhados na mesma coluna */
+.switches {
+  display: grid;
+  gap: 8px;
+}
+
 .priceRow[data-inactive='true'] .thumb {
   opacity: 0.4;
 }

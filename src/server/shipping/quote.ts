@@ -72,6 +72,7 @@ export async function quoteShipping(cep: string, items: OrderItem[]): Promise<Qu
     console.error(`[frete] cotação do Melhor Envio falhou para ${cep.slice(0, 5)}***`, err instanceof Error ? err.message : err)
   }
 
-  if (raw.length > 0) return { options: applyRules(raw, itemsCents), source: 'live', parcel }
-  return { options: applyRules(fallback(cep), itemsCents), source: 'fallback', parcel }
+  const freeProduct = items.some((item) => item.freeShipping)
+  if (raw.length > 0) return { options: applyRules(raw, itemsCents, freeProduct), source: 'live', parcel }
+  return { options: applyRules(fallback(cep), itemsCents, freeProduct), source: 'fallback', parcel }
 }

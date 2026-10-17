@@ -4,7 +4,7 @@
  */
 import type { CatalogProduct, Size } from './catalog'
 
-export type LiveProduct = { price: number; pix: number; compareAt: number | null; active: boolean }
+export type LiveProduct = { price: number; pix: number; compareAt: number | null; active: boolean; freeShipping: boolean }
 
 export type LiveCatalog = {
   products: Record<string, LiveProduct>
@@ -18,7 +18,7 @@ export const stockKey = (productId: string, color: string, size: string) => `${p
 export const stockOf = (live: LiveCatalog | null, productId: string, color: string, size: string) =>
   live?.stock[stockKey(productId, color, size)] ?? null
 
-type Shape = Pick<CatalogProduct, 'id' | 'price' | 'pix' | 'compareAt' | 'sizes' | 'soldOut'> & {
+type Shape = Pick<CatalogProduct, 'id' | 'price' | 'pix' | 'compareAt' | 'sizes' | 'soldOut' | 'freeShipping'> & {
   variants: { color: { name: string }; soldOut?: Size[] }[]
 }
 
@@ -35,6 +35,7 @@ export function applyLive<P extends Shape>(product: P, live: LiveCatalog | null)
     price: row?.price ?? product.price,
     pix: row?.pix ?? product.pix,
     compareAt: row ? (row.compareAt ?? undefined) : product.compareAt,
+    freeShipping: row ? row.freeShipping : product.freeShipping,
     variants: product.variants.map((variant) => ({
       ...variant,
       soldOut: product.sizes.filter(

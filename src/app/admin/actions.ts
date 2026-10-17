@@ -84,10 +84,13 @@ export async function saveStock(
   return { ok: true }
 }
 
-/** Preço no cartão, no Pix, preço “de” e se o produto está à venda. Valores como digitados (ex.: "154,90"). */
+/**
+ * Preço no cartão, no Pix, preço “de”, se o produto está à venda e se tem frete grátis.
+ * Valores como digitados (ex.: "154,90").
+ */
 export async function savePrices(
   productId: string,
-  input: { price: string; pix: string; compareAt: string; active: boolean },
+  input: { price: string; pix: string; compareAt: string; active: boolean; freeShipping: boolean },
 ): Promise<ActionResult> {
   await requireAdmin()
   const product = CATALOG.find((p) => p.id === productId)
@@ -110,6 +113,7 @@ export async function savePrices(
     pix,
     compare_at: compareAt,
     active: input.active,
+    free_shipping: input.freeShipping,
     updated_at: new Date().toISOString(),
   })
   if (error) return { ok: false, error: error.message }

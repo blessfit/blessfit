@@ -6,11 +6,11 @@ import s from '../admin.module.css'
 import { AlertIcon, CheckIcon } from './Icons'
 import { Spinner } from './Pending'
 
-type Values = { price: string; pix: string; compareAt: string; active: boolean }
+type Values = { price: string; pix: string; compareAt: string; active: boolean; freeShipping: boolean }
 
 type Props = { productId: string; name: string; meta: string; photo?: string; initial: Values }
 
-/** Uma linha da tela de preços: cartão, Pix, preço “de” e à venda, salvando sem recarregar. */
+/** Uma linha da tela de preços: cartão, Pix, preço “de”, à venda e frete grátis, salvando sem recarregar. */
 export function PriceEditor({ productId, name, meta, photo, initial }: Props) {
   const [values, setValues] = useState(initial)
   const [saved, setSaved] = useState(initial)
@@ -61,11 +61,23 @@ export function PriceEditor({ productId, name, meta, photo, initial }: Props) {
       {money('price', 'Cartão')}
       {money('pix', 'Pix')}
       {money('compareAt', 'Preço “de”')}
-      <label className={s.switch}>
-        <input type="checkbox" checked={values.active} onChange={(e) => set('active', e.target.checked)} />
-        <i />
-        {values.active ? 'À venda' : 'Oculto'}
-      </label>
+      <div className={s.switches}>
+        <label className={s.switch}>
+          <input type="checkbox" checked={values.active} onChange={(e) => set('active', e.target.checked)} />
+          <i />
+          {values.active ? 'À venda' : 'Oculto'}
+        </label>
+        <label className={s.switch} title="Pedido com este produto tem a opção de frete mais barata grátis">
+          <input
+            type="checkbox"
+            checked={values.freeShipping}
+            onChange={(e) => set('freeShipping', e.target.checked)}
+            aria-label={`Frete grátis em ${name}`}
+          />
+          <i />
+          Frete grátis
+        </label>
+      </div>
       <div className={s.priceSave}>
         {result?.ok && !dirty ? (
           <span className={s.status} data-tone="ok" role="status">
