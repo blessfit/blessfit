@@ -39,6 +39,8 @@ export type Order = {
   stock_applied: boolean
   items_total_cents: number
   shipping_cents: number
+  coupon_code: string | null
+  discount_cents: number
   shipping: OrderShipping | null
   shipping_address: ShippingAddress | null
   customer_cpf: string | null

@@ -224,3 +224,17 @@ export const Pix = styled.p`
   font-weight: 650;
   text-align: right;
 `
+
+/** Alternativa discreta embaixo do botão de finalizar. */
+export const Alt = styled.p`
+  margin-top: -4px;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+
+  a {
+    color: var(--text);
+    font-weight: 600;
+    text-decoration: underline;
+  }
+`

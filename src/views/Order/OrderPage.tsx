@@ -1,0 +1,110 @@
+'use client'
+
+/*
+ * Volta do pagamento (/pedido/<id>): a InfinitePay manda o cliente para cá com transaction_nsu e slug.
+ * A página repassa esses parâmetros para /api/order, que confirma o pagamento na hora.
+ */
+import { useEffect, useState } from 'react'
+import { Button } from '@/components/ui'
+import { formatBRL } from '@/lib/price'
+import { useStore } from '@/store/storeContext'
+import { CheckoutShell } from '@/views/Cart'
+import * as S from '../Cart/Cart.styles'
+
+type OrderView = {
+  id: string
+  status: 'pending' | 'paid' | 'review' | 'shipped' | 'delivered' | 'canceled'
+  total: number
+  shipping: number
+  items: { description: string; quantity: number }[]
+  trackingCode: string | null
+}
+
+const TITLE: Record<OrderView['status'], string> = {
+  pending: 'Aguardando o pagamento',
+  paid: 'Pedido confirmado!',
+  review: 'Pedido recebido!',
+  shipped: 'Pedido enviado!',
+  delivered: 'Pedido entregue',
+  canceled: 'Pedido cancelado',
+}
+
+const TEXT: Record<OrderView['status'], string> = {
+  pending: 'Assim que o pagamento for aprovado, esta página atualiza sozinha. No Pix leva poucos segundos.',
+  paid: 'Recebemos o seu pagamento. Vamos separar e embalar as peças, e você recebe o código de rastreio quando o pedido for postado.',
+  review: 'Recebemos o pagamento e estamos conferindo. Se precisar, falamos com você pelo WhatsApp.',
+  shipped: 'Seu pedido já está a caminho.',
+  delivered: 'Esperamos que você ame as suas peças!',
+  canceled: 'Este pedido foi cancelado. Se foi engano, fale com a gente no WhatsApp.',
+}
+
+export function OrderPage({ id }: { id: string }) {
+  const { checkoutLines, removeFromBag } = useStore()
+  const [order, setOrder] = useState<OrderView | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>
+    const load = async (attempt: number) => {
+      try {
+        const params = new URLSearchParams(window.location.search)
+        params.set('id', id)
+        const r = await fetch(`/api/order?${params}`)
+        const data = (await r.json()) as OrderView & { error?: string }
+        if (!r.ok) throw new Error(data.error ?? 'Pedido não encontrado')
+        setOrder(data)
+        // Pix pode demorar alguns segundos: consulta de novo por até ~2 minutos
+        if (data.status === 'pending' && attempt < 24) timer = setTimeout(() => load(attempt + 1), 5000)
+      } catch (err) {
+        setError((err as Error).message)
+      }
+    }
+    load(0)
+    return () => clearTimeout(timer)
+  }, [id])
+
+  // pedido pago: tira da sacola os itens que foram comprados
+  const paid = order && order.status !== 'pending' && order.status !== 'canceled'
+  useEffect(() => {
+    if (paid) checkoutLines.forEach(removeFromBag)
+  }, [paid, checkoutLines, removeFromBag])
+
+  return (
+    <CheckoutShell>
+      <S.Empty>
+        {error ? (
+          <>
+            <h1>Não encontramos o pedido</h1>
+            <p>{error}</p>
+          </>
+        ) : !order ? (
+          <p>Carregando o pedido…</p>
+        ) : (
+          <>
+            <h1>{TITLE[order.status]}</h1>
+            <p>
+              Pedido <strong>#{order.id.slice(0, 8).toUpperCase()}</strong> · {formatBRL(order.total)}
+              {order.shipping > 0 ? ` (frete ${formatBRL(order.shipping)})` : ' · frete grátis'}
+            </p>
+            <p>{TEXT[order.status]}</p>
+            <ul>
+              {order.items.map((item) => (
+                <li key={item.description}>
+                  {item.quantity}× {item.description}
+                </li>
+              ))}
+            </ul>
+            {order.trackingCode && (
+              <p>
+                Rastreio: <strong>{order.trackingCode}</strong>
+              </p>
+            )}
+          </>
+        )}
+        <Button variant="primary" href="/">
+          Voltar para a loja
+        </Button>
+      </S.Empty>
+    </CheckoutShell>
+  )
+}

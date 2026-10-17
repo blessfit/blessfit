@@ -109,11 +109,19 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
         </S.Total>
         <S.Pix>ou {formatBRL(bagPixTotal)} no Pix</S.Pix>
         {checkoutLines.length > 0 ? (
-          <Button variant="primary" block glyph={WhatsApp} href={checkoutUrl(checkoutLines)} {...external}>
-            Finalizar pelo WhatsApp
-          </Button>
+          <>
+            <Button variant="primary" block href="/carrinho">
+              Finalizar compra
+            </Button>
+            <S.Alt>
+              ou{' '}
+              <a href={checkoutUrl(checkoutLines)} {...external}>
+                finalize pelo WhatsApp
+              </a>
+            </S.Alt>
+          </>
         ) : (
-          <Button as="button" variant="primary" block glyph={WhatsApp} disabled>
+          <Button as="button" variant="primary" block disabled>
             Selecione itens para finalizar
           </Button>
         )}

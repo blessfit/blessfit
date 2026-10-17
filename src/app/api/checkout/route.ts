@@ -6,12 +6,14 @@
  *   lines: [{ id, color, size, qty }],
  *   customer: { name, cpf, phone, email? },
  *   address: { cep, street, number, complement?, district, city, uf },
- *   shipping: { serviceId, price }   // a opção que o cliente viu em /api/shipping/quote
+ *   shipping: { serviceId, price },  // a opção que o cliente viu em /api/shipping/quote
+ *   coupon?: 'BLESS10'               // desconto só nos itens
  * }
  * Resposta: { orderId, url } — o site manda o cliente para `url`.
  * O frete é cotado de novo aqui. Se a opção sumiu ou o preço mudou: 409 { code: 'shipping_changed', options }.
  */
 import { digits, isCpf, normalizeCep } from '@/lib/documents'
+import { checkFirstPurchase, discountOf, findCoupon, unitDiscount } from '@/server/coupons'
 import { createCheckoutLink, type CheckoutCustomer } from '@/server/infinitepay'
 import { json, priceCart, type Order, type OrderShipping, type PayMethod, type ShippingAddress } from '@/server/orders'
 import { publicOption, quoteShipping } from '@/server/shipping/quote'
@@ -23,6 +25,7 @@ type Body = {
   customer?: { name?: unknown; email?: unknown; phone?: unknown; cpf?: unknown }
   address?: Record<string, unknown>
   shipping?: { serviceId?: unknown; price?: unknown }
+  coupon?: unknown
 }
 
 const UFS = 'AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'.split(' ')
@@ -64,6 +67,15 @@ export async function POST(request: Request): Promise<Response> {
   if (!name) return json({ error: 'Informe o nome' }, 400)
   if (!isCpf(cpf)) return json({ error: 'CPF inválido' }, 400)
   if (!phone || phone.length < 10) return json({ error: 'Informe um telefone com DDD' }, 400)
+  const email = text(body.customer?.email, 160)
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: 'E-mail inválido' }, 400)
+
+  const coupon = typeof body.coupon === 'string' && body.coupon.trim() ? findCoupon(body.coupon) : null
+  if (typeof body.coupon === 'string' && body.coupon.trim() && !coupon) return json({ error: 'Cupom inválido' }, 400)
+  if (coupon) {
+    const error = await checkFirstPurchase(coupon, cpf)
+    if (error) return json({ error }, 400)
+  }
 
   const address = parseAddress(body.address)
   if (typeof address === 'string') return json({ error: address }, 400)
@@ -93,7 +105,7 @@ export async function POST(request: Request): Promise<Response> {
 
   const customer: CheckoutCustomer = {
     name,
-    email: text(body.customer?.email, 160),
+    email,
     phone_number: `+${phone.startsWith('55') ? phone : `55${phone}`}`,
   }
   const shipping: OrderShipping = {
@@ -107,6 +119,7 @@ export async function POST(request: Request): Promise<Response> {
     parcel: quote.parcel,
   }
   const itemsTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const discount = discountOf(items, coupon)
 
   const { data: order, error } = await db()
     .from('orders')
@@ -115,7 +128,9 @@ export async function POST(request: Request): Promise<Response> {
       items,
       items_total_cents: itemsTotal,
       shipping_cents: shipping.priceCents,
-      total_cents: itemsTotal + shipping.priceCents,
+      coupon_code: coupon?.code ?? null,
+      discount_cents: discount,
+      total_cents: itemsTotal - discount + shipping.priceCents,
       customer,
       customer_cpf: cpf,
       shipping,
@@ -133,12 +148,17 @@ export async function POST(request: Request): Promise<Response> {
     const url = await createCheckoutLink({
       order_nsu: order.id,
       items: [
-        ...items.map(({ quantity, price, description }) => ({ quantity, price, description })),
+        // com cupom, o desconto já vai no preço de cada unidade (a InfinitePay não tem campo de desconto)
+        ...items.map(({ quantity, price, description }) =>
+          coupon
+            ? { quantity, price: price - unitDiscount(price, coupon), description: `${description} (${coupon.code} -${coupon.percent}%)` }
+            : { quantity, price, description },
+        ),
         ...(shipping.priceCents > 0
           ? [{ quantity: 1, price: shipping.priceCents, description: `Frete — ${shipping.carrier} ${shipping.name}`.trim() }]
           : []),
       ],
-      redirect_url: `${site}/?pedido=${order.id}`,
+      redirect_url: `${site}/pedido/${order.id}`,
       webhook_url: `${site}/api/infinitepay-webhook`,
       customer,
     })
