@@ -505,9 +505,17 @@ export function CartPage() {
           </S.Grand>
 
           <Button as="button" variant="primary" block onClick={submit} disabled={submitting} aria-busy={submitting}>
-            {submitting ? 'Abrindo o pagamento…' : 'Ir para o pagamento'}
+            {submitting
+              ? 'Abrindo o pagamento…'
+              : method === 'pix'
+                ? `Pagar ${formatBRL(current.total / 100)} no Pix`
+                : `Pagar no cartão em até ${SHOP.installments}x`}
           </Button>
-          <S.Alt>O pagamento abre numa nova aba, no ambiente seguro da InfinitePay. Esta página mostra quando ele for aprovado.</S.Alt>
+          <S.Alt>
+            O pagamento abre numa nova aba, no ambiente seguro da InfinitePay. Lá, escolha{' '}
+            <strong>{method === 'pix' ? 'Pix' : 'cartão de crédito'}</strong> para manter este valor. Esta página mostra quando o
+            pagamento for aprovado.
+          </S.Alt>
           {submitError && <S.Error role="alert">{submitError}</S.Error>}
 
           <S.Trust>
