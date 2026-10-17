@@ -465,6 +465,15 @@ export const IMAGES = {
     ),
   },
 
+  /** Fotos das avaliações do Instagram (REVIEWS em data/content.ts), na mesma ordem. */
+  // TODO: troque pelas fotos que as clientes mandaram (ex.: local(fotoCamila, 'Camila com o conjunto Maré'))
+  reviews: [
+    local(modelTeal, 'Cliente com o conjunto Maré Blessfit'),
+    local(modelMen, 'Cliente com o conjunto Impulso Blessfit'),
+    local(modelBlack, 'Cliente com o conjunto Aurora Blessfit'),
+    local(teeMen, 'Cliente com a camiseta Blessfit'),
+  ],
+
   community: [
     local(modelBlack, 'Cliente com regata e legging pretas Blessfit'),
     local(topTeal, 'Top azul petróleo Blessfit'),

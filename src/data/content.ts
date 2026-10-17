@@ -78,37 +78,55 @@ export const ABOUT = {
   ] satisfies Pillar[],
 }
 
-// TODO: troque pelos depoimentos reais das clientes (com autorização)
-export type Review = { name: string; city: string; product: string; rating: number; text: string }
+/*
+ * Avaliações que as clientes mandaram no Instagram (direct, story ou comentário), com foto.
+ * Para adicionar uma: coloque a foto em src/assets/img/avaliacoes/ (.webp, ~900px de largura, em pé,
+ * de preferência 4:5), registre em IMAGES.reviews (data/images.ts) e cole em `url` o link do post ou
+ * do destaque do story (no Instagram: ··· › Copiar link). Sem `url`, o card abre o perfil da loja.
+ * Peça autorização da cliente antes de publicar.
+ */
+export type Review = {
+  name: string
+  /** @ da cliente no Instagram, sem o @ */
+  handle: string
+  /** O que ela comprou (aparece no selo do card). */
+  product: string
+  /** A mensagem, do jeito que ela escreveu. */
+  text: string
+  photo: Img
+  /** Link do post, reel ou destaque no Instagram. */
+  url?: string
+}
 
+// TODO: troque pelas avaliações reais (foto, @ e link do post de cada cliente)
 export const REVIEWS: Review[] = [
   {
     name: 'Camila R.',
-    city: 'Belo Horizonte, MG',
+    handle: 'camila.treina',
     product: 'Conjunto Maré',
-    rating: 5,
     text: 'O shorts não sobe nem enrola no agachamento, e o top segura de verdade. Já estou de olho na próxima cor!',
+    photo: IMAGES.reviews[0],
   },
   {
     name: 'Rafael M.',
-    city: 'Curitiba, PR',
+    handle: 'rafa.move',
     product: 'Conjunto Impulso',
-    rating: 5,
     text: 'Tecido leve e seca muito rápido. Comprei pelo WhatsApp, me ajudaram com o tamanho e chegou em 3 dias.',
+    photo: IMAGES.reviews[1],
   },
   {
     name: 'Juliana S.',
-    city: 'São Paulo, SP',
+    handle: 'ju.fit',
     product: 'Conjunto Aurora',
-    rating: 5,
     text: 'O top segura muito bem e a legging não fica transparente no agachamento. Lindo e confortável o dia todo.',
+    photo: IMAGES.reviews[2],
   },
   {
     name: 'Lucas A.',
-    city: 'Recife, PE',
+    handle: 'lucas.treino',
     product: 'Conjunto Fôlego',
-    rating: 5,
     text: 'A regata é super leve, perfeita para treinar no calor. Caimento ótimo e acabamento caprichado.',
+    photo: IMAGES.reviews[3],
   },
 ]
 

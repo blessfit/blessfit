@@ -6,6 +6,7 @@
  */
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui'
+import { SHOP } from '@/data/shop'
 import { formatBRL } from '@/lib/price'
 import { useStore } from '@/store/storeContext'
 import { CheckoutShell } from '@/views/Cart'
@@ -14,6 +15,7 @@ import * as S from '../Cart/Cart.styles'
 type OrderView = {
   id: string
   status: 'pending' | 'paid' | 'review' | 'shipped' | 'delivered' | 'canceled'
+  method: 'card' | 'pix'
   total: number
   shipping: number
   items: { description: string; quantity: number }[]
@@ -93,6 +95,20 @@ export function OrderPage({ id }: { id: string }) {
             <p role="status" aria-live="polite">
               {TEXT[order.status]}
             </p>
+            {order.status === 'pending' && (
+              <p>
+                Na página da InfinitePay, escolha{' '}
+                {order.method === 'pix' ? (
+                  <>
+                    <strong>Pix</strong> para manter o preço de <strong>{formatBRL(order.total)}</strong>.
+                  </>
+                ) : (
+                  <>
+                    <strong>cartão de crédito</strong> (em até {SHOP.installments}x sem juros).
+                  </>
+                )}
+              </p>
+            )}
             {order.status === 'pending' && order.checkoutUrl && (
               <Button variant="outline" href={order.checkoutUrl} target="_blank" rel="noopener noreferrer">
                 Abrir o pagamento de novo
