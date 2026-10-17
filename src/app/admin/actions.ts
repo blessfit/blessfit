@@ -9,6 +9,7 @@ import { redirect } from 'next/navigation'
 import { CATALOG } from '@/data/catalog'
 import { isAdmin, requireAdmin } from '@/server/auth'
 import type { OrderStatus } from '@/server/orders'
+import { cancelLabel, generateLabel, labelUrl, type LabelResult } from '@/server/shipping/label'
 import { anonymizeSurveyContact } from '@/server/survey'
 import { authClient, db } from '@/server/supabase'
 import { ORDER_STATUSES } from './labels'
@@ -116,6 +117,28 @@ export async function savePrices(
   revalidatePath('/')
   revalidatePath('/admin/(painel)', 'layout')
   return { ok: true }
+}
+
+/** Etiqueta do Melhor Envio: compra com o saldo e gera (`acceptCents` confirma um custo acima da cotação). */
+export async function createShippingLabel(orderId: string, nfeKey: string, acceptCents?: number): Promise<LabelResult> {
+  await requireAdmin()
+  const result = await generateLabel(orderId, nfeKey, acceptCents)
+  revalidatePath('/admin/(painel)', 'layout')
+  return result
+}
+
+export async function printShippingLabel(orderId: string) {
+  await requireAdmin()
+  const result = await labelUrl(orderId)
+  revalidatePath(`/admin/pedidos/${orderId}`)
+  return result
+}
+
+export async function cancelShippingLabel(orderId: string): Promise<ActionResult> {
+  await requireAdmin()
+  const result = await cancelLabel(orderId)
+  revalidatePath('/admin/(painel)', 'layout')
+  return result
 }
 
 /** Pesquisa “Próximas peças”: apaga nome, WhatsApp e e-mail de uma resposta (pedido de exclusão). */

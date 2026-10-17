@@ -30,7 +30,9 @@ export async function GET(request: Request): Promise<Response> {
       status: order.status,
       method: order.method,
       total: order.total_cents / 100,
+      shipping: order.shipping_cents / 100,
       items: order.items.map(({ description, quantity }) => ({ description, quantity })),
+      trackingCode: order.status === 'shipped' || order.status === 'delivered' ? order.tracking_code : null,
       receiptUrl: order.receipt_url,
     })
   } catch (err) {

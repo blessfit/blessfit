@@ -3,9 +3,11 @@ import { notFound } from 'next/navigation'
 import { SHOP } from '@/data/shop'
 import { getOrderWithEvents } from '@/server/admin'
 import { requireAdmin } from '@/server/auth'
+import { walletBalance } from '@/server/shipping/label'
 import { updateOrderStatus } from '../../../actions'
 import { AlertIcon, ArrowLeftIcon, WhatsAppIcon } from '../../../_components/Icons'
 import { SubmitButton } from '../../../_components/Pending'
+import { ShippingCard } from '../../../_components/ShippingCard'
 import { StatusBadge } from '../../../_components/StatusBadge'
 import s from '../../../admin.module.css'
 import { cents, formatDate, METHOD_LABEL, NEXT_STEP, ORDER_STATUSES, shortId, STATUS_LABEL } from '../../../labels'
@@ -26,6 +28,8 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
     : null
   const next = NEXT_STEP[order.status]
   const pieces = order.items.reduce((n, item) => n + item.quantity, 0)
+  // saldo do ME só interessa enquanto a etiqueta não foi gerada
+  const balance = order.status === 'paid' && order.shipping && order.shipping_status !== 'ready' ? await walletBalance() : null
 
   return (
     <>
@@ -80,6 +84,14 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               ))}
             </ul>
             <div className={s.totals}>
+              <div>
+                <span>Itens</span>
+                <span>{cents(order.items_total_cents)}</span>
+              </div>
+              <div>
+                <span>Frete{order.shipping ? ` (${order.shipping.carrier} ${order.shipping.name})` : ''}</span>
+                <span>{order.shipping_cents === 0 ? 'Grátis' : cents(order.shipping_cents)}</span>
+              </div>
               <div>
                 <span>Forma escolhida</span>
                 <span>{METHOD_LABEL[order.method]}</span>
@@ -148,6 +160,12 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                       <dd>{order.customer.phone_number}</dd>
                     </div>
                   )}
+                  {order.customer_cpf && (
+                    <div>
+                      <dt>CPF</dt>
+                      <dd>{order.customer_cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')}</dd>
+                    </div>
+                  )}
                   {order.customer.email && (
                     <div>
                       <dt>E-mail</dt>
@@ -165,6 +183,8 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               )}
             </div>
           </section>
+
+          <ShippingCard order={order} balanceCents={balance} />
 
           <section className={s.card}>
             <div className={s.cardHead}>

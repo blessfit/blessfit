@@ -132,9 +132,10 @@ Front (sacola/checkout):
 
 `POST /api/checkout` (alterado):
 1. `priceCart` como hoje.
-2. **Recotar no servidor** com os mesmos dados e procurar o serviço escolhido pelo cliente. Se o preço mudou,
-   vale o novo; se o serviço sumiu, responde `409 shipping_changed` e o front mostra as opções de novo.
-   Com isso não é preciso guardar a cotação em tabela nem controlar validade.
+2. **Recotar no servidor** com os mesmos dados e procurar o serviço escolhido pelo cliente (o front manda
+   `shipping: { serviceId, price }`). Se o serviço sumiu **ou o preço mudou**, responde
+   `409 shipping_changed` com as opções novas e o front pede para o cliente escolher de novo (ninguém paga um
+   frete diferente do que viu). Com isso não é preciso guardar a cotação em tabela nem controlar validade.
 3. Criar o pedido com `items_total_cents`, `shipping_cents`, `total_cents = itens + frete`, o endereço, o CPF e
    o `shipping` (cópia da opção: serviço, id do serviço no ME, preço, prazo, `source`, pacote).
 4. No link da InfinitePay, o frete vai como item separado (`"Frete — Correios PAC"`, quantidade 1). Com

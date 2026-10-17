@@ -6,6 +6,7 @@ import 'server-only'
 import { CATALOG } from '@/data/catalog'
 import { applyLive, stockOf, type LiveCatalog } from '@/data/live'
 import { checkPayment, type CheckoutItem } from './infinitepay'
+import type { Parcel } from './shipping/package'
 import { db } from './supabase'
 
 /** 'card' usa o preço do cartão (`price`), 'pix' o preço do Pix (`pix`). */
@@ -36,6 +37,42 @@ export type Order = {
   created_at: string
   paid_at: string | null
   stock_applied: boolean
+  items_total_cents: number
+  shipping_cents: number
+  shipping: OrderShipping | null
+  shipping_address: ShippingAddress | null
+  customer_cpf: string | null
+  nfe_key: string | null
+  me_order_id: string | null
+  label_cost_cents: number | null
+  tracking_code: string | null
+  /** Etiqueta no Melhor Envio: comprando, pronta ou com erro (null = ainda não gerada). */
+  shipping_status: 'buying' | 'ready' | 'failed' | null
+  shipping_error: string | null
+}
+
+/** Opção de frete escolhida no checkout, congelada no pedido. */
+export type OrderShipping = {
+  serviceId: number
+  name: string
+  carrier: string
+  /** O que o cliente pagou de frete (0 = frete grátis). */
+  priceCents: number
+  /** Custo da etiqueta na cotação. */
+  costCents: number
+  days: { min: number; max: number }
+  source: 'live' | 'fallback'
+  parcel: Parcel
+}
+
+export type ShippingAddress = {
+  cep: string
+  street: string
+  number: string
+  complement?: string
+  district: string
+  city: string
+  uf: string
 }
 
 const MAX_LINES = 30

@@ -52,7 +52,8 @@ O total é sempre recalculado no servidor com os preços e o estoque do painel; 
 
 | Rota | O que faz |
 | --- | --- |
-| `POST /api/checkout` | Recebe `{ method: "card" ou "pix", lines: [{ id, color, size, qty }] }`, salva o pedido e devolve `{ orderId, url }` com o link de pagamento |
+| `POST /api/shipping/quote` | Recebe `{ cep, lines }` e devolve até 3 opções de frete do Melhor Envio (ou da tabela de contingência, se ele falhar) |
+| `POST /api/checkout` | Recebe `{ method, lines, customer: { name, cpf, phone, email? }, address, shipping: { serviceId, price } }`, cota o frete de novo, salva o pedido e devolve `{ orderId, url }` com o link de pagamento (itens + frete) |
 | `POST /api/infinitepay-webhook` | Aviso de pagamento da InfinitePay. Confirma em `/payment_check` antes de marcar o pedido como pago |
 | `GET /api/order?id=…` | Situação do pedido. Na volta do checkout, repasse `transaction_nsu` e `slug` para confirmar na hora |
 
@@ -69,6 +70,13 @@ Variáveis de ambiente (na Vercel e em `.env.local`; `npm run dev` já lê o `.e
 | `SUPABASE_SECRET_KEY` | Chave secreta (`sb_secret_…`), só no servidor |
 | `ADMIN_EMAILS` | E-mails com acesso ao painel, separados por vírgula |
 | `SITE_URL` | Opcional: domínio público (padrão: o domínio da requisição) |
+| `MELHOR_ENVIO_ENV` | `sandbox` (Preview/Dev) ou `production` |
+| `MELHOR_ENVIO_TOKEN` | Token pessoal gerado no painel do Melhor Envio (um por ambiente) |
+| `MELHOR_ENVIO_USER_AGENT` | Identificação exigida pelo ME, ex.: `Blessfit (email@dominio)` |
+| `SHIPPING_ORIGIN_CEP` | CEP de onde saem os pacotes |
+| `SHIPPING_SENDER_*` | Remetente da etiqueta: `NAME`, `CNPJ`, `IE`, `PHONE`, `EMAIL`, `STREET`, `NUMBER`, `COMPLEMENT`, `DISTRICT`, `CITY`, `UF` |
+
+Frete (docs/spec-frete.md): peso e medidas das peças, embalagens e tabela de contingência em `src/data/shipping.ts`; etiqueta gerada no detalhe do pedido no painel, depois de colar a chave da NF-e. Testes: `npm test`.
 
 ## Painel /admin
 
