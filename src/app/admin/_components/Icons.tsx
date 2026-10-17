@@ -45,6 +45,21 @@ export const TagIcon = () => (
   </Icon>
 )
 
+export const SurveyIcon = () => (
+  <Icon>
+    <path d="M9 4h6v3H9z" />
+    <path d="M15 5h3v16H6V5h3" />
+    <path d="m9 12 2 2 4-4M9 17h6" />
+  </Icon>
+)
+
+export const LinkIcon = () => (
+  <Icon>
+    <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" />
+    <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />
+  </Icon>
+)
+
 export const LogoutIcon = () => (
   <Icon>
     <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" />

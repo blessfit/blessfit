@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { signOut } from '../actions'
 import s from '../admin.module.css'
-import { BoxIcon, HomeIcon, LogoutIcon, OrdersIcon, TagIcon } from './Icons'
+import { BoxIcon, HomeIcon, LogoutIcon, OrdersIcon, SurveyIcon, TagIcon } from './Icons'
 import { SubmitButton } from './Pending'
 
 type Counts = { orders: number; restock: number }
@@ -15,6 +15,7 @@ const LINKS: { href: string; label: string; short: string; icon: ReactNode; coun
   { href: '/admin/pedidos', label: 'Pedidos', short: 'Pedidos', icon: <OrdersIcon />, count: 'orders' },
   { href: '/admin/estoque', label: 'Estoque', short: 'Estoque', icon: <BoxIcon />, count: 'restock' },
   { href: '/admin/precos', label: 'Preços', short: 'Preços', icon: <TagIcon /> },
+  { href: '/admin/proximas-pecas', label: 'Próximas peças', short: 'Pesquisa', icon: <SurveyIcon /> },
 ]
 
 const isActive = (pathname: string, href: string) =>

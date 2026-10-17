@@ -47,6 +47,10 @@ Conferido depois da configuração:
 - **Preço:** o Conjunto Maré está em R$ 139,90 no cartão, R$ 129,90 no Pix e R$ 154,80 como preço “de”.
 - **Vercel:** em `POST /api/checkout`, as requisições 1 a 10 do minuto voltam 400 (corpo inválido) e a
   partir da 11ª voltam **429**. `POST /admin/login` também é bloqueado, e `GET /admin/login` continua 200.
+- **Vercel, 16/10/2026:** `POST /api/proximas-pecas` (pesquisa “Próximas peças”) entrou como condição OR na
+  mesma regra de rate limit. O plano Hobby não permite uma segunda regra de rate limit. Conferido em
+  produção: as requisições 1 a 10 do minuto passam e, a partir da 11ª, voltam **429**. O limite é 10 por
+  minuto por IP, e não os 5 da spec.
 
 | Gravidade | Item | O que foi feito |
 |---|---|---|
@@ -73,3 +77,44 @@ Conferido depois da configuração:
 - **Segredos:** nenhum `.env` versionado. A chave secreta só é lida em `src/server/supabase.ts`.
 - **Exportação Excel:** dados de clientes entram como texto, não como fórmula. A rota exige admin e usa
   `Cache-Control: no-store`.
+
+---
+
+## Revisão de 16/10/2026: pesquisa “Próximas peças”
+
+Escopo: `/proximas-pecas`, `POST /api/proximas-pecas`, `src/server/survey.ts`, tabela `survey_responses`,
+painel `/admin/proximas-pecas` e a exportação Excel da pesquisa. Feita pelo agente `security-reviewer`.
+Não houve achado crítico nem alto.
+
+### Corrigido no código
+
+#### 1. Qualquer pessoa podia sobrescrever a resposta de outra — médio
+- **Problema:** com o WhatsApp ou o e-mail repetido, a API atualizava a resposta anterior. Quem soubesse o
+  contato de outra pessoa podia trocar as respostas e o consentimento dela, apagar o telefone dela ou
+  recriar um contato removido pelo painel.
+- **Correção:** a resposta agora só é inserida (`saveSurvey`). Contato repetido na campanha bate no índice
+  único (`23505`), a resposta nova é ignorada e a API devolve o cupom do mesmo jeito.
+
+#### 2. Contatos ficavam no navegador depois do envio — baixo
+- **Problema:** o rascunho no `localStorage`, com nome, WhatsApp e e-mail, continuava lá depois do envio.
+- **Correção:** depois do envio, o navegador guarda só que a pesquisa já foi respondida.
+
+#### 3. Corpo do POST lido antes de checar o tamanho — baixo
+- **Correção:** a rota recusa com 413 pelo `Content-Length`, antes de ler o corpo.
+
+#### 4. Validação fraca do id em “Remover contato” — baixo
+- **Correção:** `anonymizeSurveyContact` exige um uuid completo. Não era explorável, porque a ação já exige
+  admin e a consulta é parametrizada.
+
+### Pendente (decisão de negócio)
+
+- **Consentimento sem confirmação:** qualquer pessoa pode informar o número de outra e marcar a
+  autorização, porque o contato não é confirmado (não há double opt-in). Antes de usar a lista para
+  mandar mensagens, a primeira mensagem deve confirmar o interesse e oferecer a opção de sair.
+
+### Conferido
+
+- A chave pública não lê nem grava em `survey_responses` (RLS sem policies).
+- A rota do painel, a ação “Remover contato” e a exportação chamam `requireAdmin()`.
+- Os logs não têm dados pessoais.
+- Rate limit de 10 por minuto por IP no Firewall da Vercel.

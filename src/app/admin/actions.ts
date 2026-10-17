@@ -9,6 +9,7 @@ import { redirect } from 'next/navigation'
 import { CATALOG } from '@/data/catalog'
 import { isAdmin, requireAdmin } from '@/server/auth'
 import type { OrderStatus } from '@/server/orders'
+import { anonymizeSurveyContact } from '@/server/survey'
 import { authClient, db } from '@/server/supabase'
 import { ORDER_STATUSES } from './labels'
 
@@ -115,4 +116,11 @@ export async function savePrices(
   revalidatePath('/')
   revalidatePath('/admin/(painel)', 'layout')
   return { ok: true }
+}
+
+/** Pesquisa “Próximas peças”: apaga nome, WhatsApp e e-mail de uma resposta (pedido de exclusão). */
+export async function removeSurveyContact(form: FormData) {
+  await requireAdmin()
+  await anonymizeSurveyContact(String(form.get('id') ?? ''))
+  revalidatePath('/admin/proximas-pecas')
 }

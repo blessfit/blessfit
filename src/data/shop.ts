@@ -9,7 +9,7 @@ export const SHOP = {
   /** WhatsApp com DDI + DDD, só dígitos: (37) 99959-9655 */
   whatsapp: '5537999599655',
   /** @ do Instagram, sem o @ */
-  instagram: 'blessfit_ep',
+  instagram: 'blessfitstore_',
   hashtag: '#MovimentoBlessfit',
   tagline: 'Conforto · Performance · Estilo',
 
