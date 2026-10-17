@@ -33,6 +33,17 @@ const UFS = 'AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO R
 const text = (value: unknown, max: number) =>
   typeof value === 'string' && value.trim() ? value.trim().slice(0, max) : undefined
 
+/**
+ * URL do aviso de pagamento. Em Preview (HML) a Vercel protege o site com login: a chave de
+ * "Protection Bypass for Automation" deixa só o webhook da InfinitePay passar.
+ */
+function webhookUrl(site: string): string {
+  const url = new URL('/api/infinitepay-webhook', site)
+  const bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET
+  if (bypass && process.env.VERCEL_ENV !== 'production') url.searchParams.set('x-vercel-protection-bypass', bypass)
+  return url.toString()
+}
+
 function parseAddress(raw: Record<string, unknown> | undefined): ShippingAddress | string {
   const cep = typeof raw?.cep === 'string' ? normalizeCep(raw.cep) : null
   if (!cep) return 'CEP inválido'
@@ -159,8 +170,15 @@ export async function POST(request: Request): Promise<Response> {
           : []),
       ],
       redirect_url: `${site}/pedido/${order.id}`,
-      webhook_url: `${site}/api/infinitepay-webhook`,
+      webhook_url: webhookUrl(site),
       customer,
+      address: {
+        cep: address.cep,
+        street: address.street,
+        neighborhood: address.district,
+        number: address.number,
+        complement: address.complement,
+      },
     })
     await db().from('orders').update({ checkout_url: url }).eq('id', order.id)
     return json({ orderId: order.id, url })

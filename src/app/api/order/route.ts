@@ -33,6 +33,8 @@ export async function GET(request: Request): Promise<Response> {
       shipping: order.shipping_cents / 100,
       items: order.items.map(({ description, quantity }) => ({ description, quantity })),
       trackingCode: order.status === 'shipped' || order.status === 'delivered' ? order.tracking_code : null,
+      // para reabrir o pagamento se o cliente fechou a aba da InfinitePay
+      checkoutUrl: order.status === 'pending' ? order.checkout_url : null,
       receiptUrl: order.receipt_url,
     })
   } catch (err) {

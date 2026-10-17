@@ -13,6 +13,9 @@ export type CheckoutItem = { quantity: number; price: number; description: strin
 
 export type CheckoutCustomer = { name?: string; email?: string; phone_number?: string }
 
+/** Endereço que pré-preenche o checkout (a InfinitePay não tem cidade nem UF). */
+export type CheckoutAddress = { cep: string; street: string; neighborhood: string; number: string; complement?: string }
+
 export type PaymentCheck = {
   success: boolean
   paid: boolean
@@ -47,6 +50,7 @@ export async function createCheckoutLink(input: {
   redirect_url: string
   webhook_url: string
   customer?: CheckoutCustomer
+  address?: CheckoutAddress
 }): Promise<string> {
   const data = await post<{ url?: string }>('/links', input)
   if (!data.url) throw new Error(`InfinitePay /links sem url: ${JSON.stringify(data).slice(0, 300)}`)

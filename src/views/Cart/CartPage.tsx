@@ -236,6 +236,9 @@ export function CartPage() {
       return
     }
     setSubmitting(true)
+    // a aba do pagamento abre já no clique (depois do await o navegador bloquearia); esta aba acompanha o status
+    const tab = window.open('', '_blank')
+    tab?.document.write('<p style="font-family:sans-serif;padding:24px">Abrindo o pagamento seguro da InfinitePay…</p>')
     try {
       const r = await fetch('/api/checkout', {
         method: 'POST',
@@ -249,15 +252,22 @@ export function CartPage() {
           coupon: coupon?.code,
         }),
       })
-      const data = (await r.json()) as { url?: string; error?: string; code?: string; options?: ShippingOption[] }
+      const data = (await r.json()) as { orderId?: string; url?: string; error?: string; code?: string; options?: ShippingOption[] }
       if (r.status === 409 && data.options && quoteKey) {
         setQuote({ status: 'ok', options: data.options, key: quoteKey })
         setServiceId(data.options[0]?.id ?? null)
         throw new Error(data.error ?? 'O frete mudou. Confira as opções de novo.')
       }
-      if (!r.ok || !data.url) throw new Error(data.error ?? 'Não foi possível finalizar o pedido')
-      window.location.href = data.url
+      if (!r.ok || !data.url || !data.orderId) throw new Error(data.error ?? 'Não foi possível finalizar o pedido')
+      if (tab && !tab.closed) {
+        tab.location.href = data.url
+        window.location.href = `/pedido/${data.orderId}`
+      } else {
+        // pop-up bloqueado: paga nesta mesma aba e volta para /pedido no fim
+        window.location.href = data.url
+      }
     } catch (err) {
+      tab?.close()
       setSubmitError((err as Error).message)
       setSubmitting(false)
     }
@@ -493,8 +503,9 @@ export function CartPage() {
           </S.Grand>
 
           <Button as="button" variant="primary" block onClick={submit} disabled={submitting} aria-busy={submitting}>
-            {submitting ? 'Indo para o pagamento…' : 'Finalizar pedido'}
+            {submitting ? 'Abrindo o pagamento…' : 'Ir para o pagamento'}
           </Button>
+          <S.Alt>O pagamento abre numa nova aba, no ambiente seguro da InfinitePay. Esta página mostra quando ele for aprovado.</S.Alt>
           {submitError && <S.Error role="alert">{submitError}</S.Error>}
 
           <S.Trust>

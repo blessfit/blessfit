@@ -18,7 +18,12 @@ type OrderView = {
   shipping: number
   items: { description: string; quantity: number }[]
   trackingCode: string | null
+  checkoutUrl: string | null
 }
+
+/** Enquanto aguarda, consulta a cada 3 s por até 30 min (o webhook da InfinitePay grava o pagamento no banco). */
+const POLL_MS = 3000
+const POLL_MAX = 600
 
 const TITLE: Record<OrderView['status'], string> = {
   pending: 'Aguardando o pagamento',
@@ -30,7 +35,7 @@ const TITLE: Record<OrderView['status'], string> = {
 }
 
 const TEXT: Record<OrderView['status'], string> = {
-  pending: 'Assim que o pagamento for aprovado, esta página atualiza sozinha. No Pix leva poucos segundos.',
+  pending: 'Conclua o pagamento na aba da InfinitePay. Assim que ele for aprovado, esta página atualiza sozinha (no Pix leva poucos segundos).',
   paid: 'Recebemos o seu pagamento. Vamos separar e embalar as peças, e você recebe o código de rastreio quando o pedido for postado.',
   review: 'Recebemos o pagamento e estamos conferindo. Se precisar, falamos com você pelo WhatsApp.',
   shipped: 'Seu pedido já está a caminho.',
@@ -53,8 +58,7 @@ export function OrderPage({ id }: { id: string }) {
         const data = (await r.json()) as OrderView & { error?: string }
         if (!r.ok) throw new Error(data.error ?? 'Pedido não encontrado')
         setOrder(data)
-        // Pix pode demorar alguns segundos: consulta de novo por até ~2 minutos
-        if (data.status === 'pending' && attempt < 24) timer = setTimeout(() => load(attempt + 1), 5000)
+        if (data.status === 'pending' && attempt < POLL_MAX) timer = setTimeout(() => load(attempt + 1), POLL_MS)
       } catch (err) {
         setError((err as Error).message)
       }
@@ -86,7 +90,14 @@ export function OrderPage({ id }: { id: string }) {
               Pedido <strong>#{order.id.slice(0, 8).toUpperCase()}</strong> · {formatBRL(order.total)}
               {order.shipping > 0 ? ` (frete ${formatBRL(order.shipping)})` : ' · frete grátis'}
             </p>
-            <p>{TEXT[order.status]}</p>
+            <p role="status" aria-live="polite">
+              {TEXT[order.status]}
+            </p>
+            {order.status === 'pending' && order.checkoutUrl && (
+              <Button variant="outline" href={order.checkoutUrl} target="_blank" rel="noopener noreferrer">
+                Abrir o pagamento de novo
+              </Button>
+            )}
             <ul>
               {order.items.map((item) => (
                 <li key={item.description}>
