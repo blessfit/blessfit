@@ -12,6 +12,14 @@ export const SHOP = {
   instagram: 'blessfitstore_',
   hashtag: '#MovimentoBlessfit',
   tagline: 'Conforto · Performance · Estilo',
+  email: 'blessfit026@gmail.com',
+
+  /** Dados da empresa exibidos no rodapé (exigência do Decreto 7.962/2013). */
+  company: {
+    legalName: 'BLESSFIT STORE LTDA',
+    cnpj: '69.633.993/0001-35',
+    address: 'Rua Antônio Dias, 20, apto 402 – Bom Pastor, Divinópolis/MG – CEP 35500-163',
+  },
 
   /** Condições comerciais usadas nos cards, na sacola e na barra de benefícios. */
   freeShippingFrom: 299,

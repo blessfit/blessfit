@@ -80,6 +80,9 @@ export function SiteFooter() {
                   </button>
                 </li>
               ))}
+              <li>
+                <a href="/privacidade">Política de Privacidade</a>
+              </li>
             </ul>
           </S.Col>
 
