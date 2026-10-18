@@ -1,3 +1,5 @@
+import Link from 'next/link'
+import { signOut } from '@/app/conta/actions'
 import { Button, Dialog, IconButton, Instagram, Minus, Picture, Plus, SizePicker, User, WhatsApp } from '@/components/ui'
 import { CATEGORIES } from '@/data/content'
 import { NAV, SHOP } from '@/data/shop'
@@ -5,6 +7,7 @@ import { external, instagramUrl, whatsappUrl } from '@/lib/links'
 import { checkoutUrl } from '@/lib/orders'
 import { formatBRL } from '@/lib/price'
 import { ONLINE_CHECKOUT } from '@/lib/site'
+import { firstName, useMe } from '@/hooks/useMe'
 import { useStore } from '@/store/storeContext'
 import * as S from './Panels.styles'
 
@@ -25,6 +28,7 @@ function MobileMenu() {
   const { closePanel } = useStore()
   return (
     <S.Menu>
+      <MenuAccount />
       <nav aria-label="Menu principal">
         <S.MenuLinks>
           {NAV.map((item) => (
@@ -55,9 +59,6 @@ function MobileMenu() {
       </S.MenuGroup>
 
       <S.MenuFoot>
-        <Button variant="outline" block glyph={User} href="/conta">
-          Minha conta
-        </Button>
         <Button variant="primary" block glyph={WhatsApp} href={whatsappUrl()} {...external}>
           Atendimento no WhatsApp
         </Button>
@@ -69,6 +70,44 @@ function MobileMenu() {
         </p>
       </S.MenuFoot>
     </S.Menu>
+  )
+}
+
+/** Conta no menu do celular (no header ela só aparece do tablet para cima). */
+function MenuAccount() {
+  const me = useMe()
+  const { closePanel } = useStore()
+  if (me === undefined) return null
+  if (!me) {
+    return (
+      <Button variant="outline" block glyph={User} href="/entrar" onClick={closePanel}>
+        Entrar ou criar conta
+      </Button>
+    )
+  }
+  const first = firstName(me)
+  return (
+    <S.MenuUser>
+      <S.MenuHello>
+        <S.MenuAvatar aria-hidden="true">
+          {me.avatar ? <img src={me.avatar} alt="" referrerPolicy="no-referrer" /> : first.charAt(0).toUpperCase()}
+        </S.MenuAvatar>
+        <span>
+          Olá, <strong>{first}</strong>
+        </span>
+      </S.MenuHello>
+      <S.MenuUserLinks>
+        <Link href="/conta/pedidos" onClick={closePanel}>
+          Meus pedidos
+        </Link>
+        <Link href="/conta/dados" onClick={closePanel}>
+          Meus dados
+        </Link>
+        <form action={signOut}>
+          <button type="submit">Sair</button>
+        </form>
+      </S.MenuUserLinks>
+    </S.MenuUser>
   )
 }
 

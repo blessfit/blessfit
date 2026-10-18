@@ -59,10 +59,19 @@ export const MenuButton = styled(IconButton)`
   }
 `
 
-export const Account = styled(IconButton)``
+/** no celular a conta fica no menu lateral */
+export const Account = styled(IconButton)`
+  ${media.sm} {
+    display: none;
+  }
+`
 
 export const UserMenu = styled.div`
   position: relative;
+
+  ${media.sm} {
+    display: none;
+  }
 `
 
 export const UserButton = styled.button`
@@ -112,7 +121,6 @@ export const Avatar = styled.span`
   }
 `
 
-/** "Olá, Nome": no celular fica só a foto (não cabe ao lado da sacola). */
 export const Hello = styled.span`
   max-width: 140px;
   overflow: hidden;
@@ -120,10 +128,6 @@ export const Hello = styled.span`
 
   strong {
     font-weight: 700;
-  }
-
-  ${media.sm} {
-    display: none;
   }
 `
 

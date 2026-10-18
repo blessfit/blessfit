@@ -2,7 +2,10 @@
 
 /*
  * Moldura das telas da conta (/conta/pedidos e /conta/dados): saudação, menu entre as telas e sair.
+ * Fica no layout: ao trocar de tela só o conteúdo muda (navegação no cliente, com skeleton).
  */
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { Button } from '@/components/ui'
 import { signOut } from '@/app/conta/actions'
@@ -11,21 +14,10 @@ import * as S from './Account.styles'
 const PAGES = [
   { href: '/conta/pedidos', label: 'Meus pedidos' },
   { href: '/conta/dados', label: 'Meus dados' },
-] as const
+]
 
-export type AccountPage = (typeof PAGES)[number]['href']
-
-export function AccountShell({
-  active,
-  name,
-  email,
-  children,
-}: {
-  active: AccountPage
-  name: string
-  email: string
-  children: ReactNode
-}) {
+export function AccountShell({ name, email, children }: { name: string; email: string; children: ReactNode }) {
+  const pathname = usePathname()
   const firstName = name.trim().split(/\s+/)[0]
   return (
     <S.AccountLayout>
@@ -36,9 +28,9 @@ export function AccountShell({
         </div>
         <S.SideNav aria-label="Telas da conta">
           {PAGES.map((page) => (
-            <a key={page.href} href={page.href} aria-current={page.href === active ? 'page' : undefined}>
+            <Link key={page.href} href={page.href} aria-current={pathname === page.href ? 'page' : undefined}>
               {page.label}
-            </a>
+            </Link>
           ))}
         </S.SideNav>
         <form action={signOut}>

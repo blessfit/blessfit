@@ -1,27 +1,19 @@
-import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
+import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { signOut } from '@/app/conta/actions'
 import { ChevronDown, User } from '@/components/ui'
+import { firstName, useMe } from '@/hooks/useMe'
 import * as S from './Header.styles'
 
-type Me = { name: string; email: string; avatar: string }
-
 /**
- * Conta no header: ícone "Entrar" deslogado; "Olá, Nome" quando logado, com menu que abre ao passar o
- * mouse (no toque, ao tocar).
+ * Conta no header (só tablet/desktop; no celular fica no menu lateral): ícone "Entrar" deslogado;
+ * "Olá, Nome" quando logado, com menu que abre ao passar o mouse (no toque, ao tocar).
  */
 export function UserMenu() {
-  const [me, setMe] = useState<Me | null>(null)
+  const me = useMe()
   const [open, setOpen] = useState(false)
   const root = useRef<HTMLDivElement>(null)
   const closeTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
-
-  // as páginas são estáticas (não leem cookies): pergunta quem está logado depois de carregar
-  useEffect(() => {
-    fetch('/api/conta')
-      .then((r) => (r.ok ? (r.json() as Promise<Me>) : null))
-      .then(setMe)
-      .catch(() => setMe(null))
-  }, [])
 
   useEffect(() => {
     if (!open) return
@@ -45,15 +37,15 @@ export function UserMenu() {
     )
   }
 
-  // só mouse: o toque também dispara mouseenter, e aí o clique fecharia o menu que acabou de abrir
-  const hover = (e: React.PointerEvent, value: boolean) => {
+  // só mouse: o toque também dispara pointerenter, e aí o clique fecharia o menu que acabou de abrir
+  const hover = (e: PointerEvent, value: boolean) => {
     if (e.pointerType !== 'mouse') return
     clearTimeout(closeTimer.current)
     if (value) setOpen(true)
     else closeTimer.current = setTimeout(() => setOpen(false), 150)
   }
 
-  const first = me.name.trim().split(/\s+/)[0] || me.email.split('@')[0]
+  const first = firstName(me)
   return (
     <S.UserMenu ref={root} onPointerEnter={(e) => hover(e, true)} onPointerLeave={(e) => hover(e, false)}>
       <S.UserButton type="button" aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((o) => !o)}>
@@ -67,12 +59,12 @@ export function UserMenu() {
       </S.UserButton>
       {open && (
         <S.UserDropdown role="menu">
-          <a role="menuitem" href="/conta/pedidos">
+          <Link role="menuitem" href="/conta/pedidos" onClick={() => setOpen(false)}>
             Meus pedidos
-          </a>
-          <a role="menuitem" href="/conta/dados">
+          </Link>
+          <Link role="menuitem" href="/conta/dados" onClick={() => setOpen(false)}>
             Meus dados
-          </a>
+          </Link>
           <form action={signOut}>
             <button role="menuitem" type="submit">
               Sair

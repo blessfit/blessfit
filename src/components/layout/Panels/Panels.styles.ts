@@ -258,3 +258,65 @@ export const Alt = styled.p`
     text-decoration: underline;
   }
 `
+
+/* ——— Conta (menu do celular) ——— */
+
+export const MenuUser = styled.div`
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--surface);
+`
+
+export const MenuHello = styled.p`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--petrol);
+  font-size: 1.05rem;
+
+  strong {
+    font-weight: 750;
+  }
+`
+
+export const MenuAvatar = styled.span`
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--petrol);
+  color: var(--white);
+  font-weight: 700;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`
+
+export const MenuUserLinks = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+
+  a,
+  button {
+    display: grid;
+    place-items: center;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--white);
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 650;
+    white-space: nowrap;
+  }
+`
