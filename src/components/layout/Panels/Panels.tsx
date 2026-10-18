@@ -1,4 +1,4 @@
-import { Button, Dialog, IconButton, Instagram, Minus, Picture, Plus, WhatsApp } from '@/components/ui'
+import { Button, Dialog, IconButton, Instagram, Minus, Picture, Plus, SizePicker, WhatsApp } from '@/components/ui'
 import { CATEGORIES } from '@/data/content'
 import { NAV, SHOP } from '@/data/shop'
 import { external, instagramUrl, whatsappUrl } from '@/lib/links'
@@ -76,7 +76,9 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
     bagCount,
     checkoutLines,
     checkoutCount,
+    needSize,
     setQty,
+    setSize,
     setSelected,
     selectAll,
     removeFromBag,
@@ -110,6 +112,11 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
           <strong>{formatBRL(bagTotal)}</strong>
         </S.Total>
         <S.Pix>ou {formatBRL(bagPixTotal)} no Pix</S.Pix>
+        {needSize.length > 0 && (
+          <S.NeedSize role="status">
+            Escolha o tamanho de {needSize.length === 1 ? '1 peça' : `${needSize.length} peças`} para incluir no pedido.
+          </S.NeedSize>
+        )}
         {checkoutLines.length > 0 ? (
           <>
             <Button variant="primary" block href="/carrinho">
@@ -158,7 +165,7 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
                   type="checkbox"
                   checked={line.selected}
                   onChange={(e) => setSelected(line, e.target.checked)}
-                  aria-label={`Selecionar ${line.product.name} (${line.variant.color.name}, tam. ${line.size})`}
+                  aria-label={`Selecionar ${line.product.name} (${line.variant.color.name}${line.size ? `, tam. ${line.size}` : ''})`}
                 />
               </S.Check>
               <S.Thumb>
@@ -167,8 +174,21 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
               <div>
                 <S.LineName>{line.product.name}</S.LineName>
                 <S.LineMeta>
-                  {line.variant.color.name} · Tam. {line.size}
+                  {line.variant.color.name}
+                  {line.size && ` · Tam. ${line.size}`}
                 </S.LineMeta>
+                {!line.size && (
+                  <S.PickSize>
+                    <SizePicker
+                      label="Escolha o tamanho"
+                      sizes={line.product.sizes}
+                      soldOut={line.variant.soldOut ?? line.product.soldOut}
+                      value={null}
+                      onChange={(size) => setSize(line, size)}
+                      compact
+                    />
+                  </S.PickSize>
+                )}
                 <S.Qty>
                   <IconButton
                     $size={36}

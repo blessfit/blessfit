@@ -158,13 +158,31 @@ export const Payments = styled.div`
     gap: 8px;
   }
 
-  li {
-    padding: 6px 12px;
-    border: 1px solid var(--line-ink);
-    border-radius: 6px;
-    color: var(--white);
-    font-size: 12px;
-    font-weight: 700;
+  img {
+    display: block;
+    width: 46px;
+    height: auto;
+    border-radius: 4px;
+  }
+`
+
+export const Company = styled.address`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  padding-block: 20px;
+  border-top: 1px solid var(--line-ink);
+  color: var(--on-ink-muted);
+  font-size: 12px;
+  font-style: normal;
+
+  a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      color: var(--white);
+    }
   }
 `
 

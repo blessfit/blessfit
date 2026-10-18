@@ -3,10 +3,10 @@ import type { InfoPage } from '@/data/content'
 import { findVariant, type Product, type Size, type Variant } from '@/data/products'
 import { useCatalog } from './catalogContext'
 import type { BagLine } from '@/lib/orders'
-import { StoreContext, type BagItem, type Panel, type StoreState } from './storeContext'
+import { StoreContext, type BagItem, type BagKey, type Panel, type StoreState } from './storeContext'
 
-/** `selected` ausente = marcado (sacolas salvas antes da seleção existir). */
-type StoredLine = { id: string; color: string; size: Size; qty: number; selected?: boolean }
+/** `selected` ausente = marcado (sacolas salvas antes da seleção existir). `size` null = falta escolher. */
+type StoredLine = { id: string; color: string; size: Size | null; qty: number; selected?: boolean }
 
 const BAG_KEY = 'blessfit:sacola:v2'
 
@@ -27,8 +27,10 @@ function save(key: string, value: unknown) {
   }
 }
 
-const isLine = (l: StoredLine, line: BagLine) =>
+const isLine = (l: StoredLine, line: BagKey) =>
   l.id === line.product.id && l.color === line.variant.color.name && l.size === line.size
+
+const hasSize = (l: BagItem): l is BagItem & BagLine => l.size !== null
 
 /** Estado da loja: sacola (salva no navegador) e as janelas abertas. */
 export function StoreProvider({ children }: { children: ReactNode }) {
@@ -48,7 +50,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (loaded) save(BAG_KEY, stored)
   }, [loaded, stored])
 
-  const addToBag = useCallback((product: Product, variant: Variant, size: Size) => {
+  const addToBag = useCallback((product: Product, variant: Variant, size: Size | null = null) => {
     const color = variant.color.name
     setStored((lines) => {
       const found = lines.find((l) => l.id === product.id && l.color === color && l.size === size)
@@ -60,11 +62,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [])
 
   // quantidade 0 mantém o item na sacola; só o botão remover tira
-  const setQty = useCallback((line: BagLine, qty: number) => {
+  const setQty = useCallback((line: BagKey, qty: number) => {
     setStored((lines) => lines.map((l) => (isLine(l, line) ? { ...l, qty: Math.max(0, qty) } : l)))
   }, [])
 
-  const setSelected = useCallback((line: BagLine, selected: boolean) => {
+  // escolher um tamanho que já está na sacola (mesma peça e cor) junta os dois itens
+  const setSize = useCallback((line: BagKey, size: Size) => {
+    setStored((lines) => {
+      const current = lines.find((l) => isLine(l, line))
+      if (!current || current.size === size) return lines
+      const twin = lines.find((l) => l !== current && isLine(l, { ...line, size }))
+      if (!twin) return lines.map((l) => (l === current ? { ...l, size } : l))
+      return lines
+        .filter((l) => l !== current)
+        .map((l) => (l === twin ? { ...l, qty: l.qty + current.qty, selected: true } : l))
+    })
+  }, [])
+
+  const setSelected = useCallback((line: BagKey, selected: boolean) => {
     setStored((lines) => lines.map((l) => (isLine(l, line) ? { ...l, selected } : l)))
   }, [])
 
@@ -72,7 +87,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setStored((lines) => lines.map((l) => ({ ...l, selected })))
   }, [])
 
-  const removeFromBag = useCallback((line: BagLine) => {
+  const removeFromBag = useCallback((line: BagKey) => {
     setStored((lines) => lines.filter((l) => !isLine(l, line)))
   }, [])
 
@@ -84,17 +99,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         ? [{ product, variant: findVariant(product, l.color), size: l.size, qty: l.qty, selected: l.selected ?? true }]
         : []
     })
-    const checkoutLines = bag.filter((l) => l.selected && l.qty > 0)
+    const marked = bag.filter((l) => l.selected && l.qty > 0)
+    const checkoutLines: BagLine[] = marked
+      .filter(hasSize)
+      .map(({ product, variant, size, qty }) => ({ product, variant, size, qty }))
 
     return {
       bag,
       bagCount: bag.length,
       checkoutLines,
+      needSize: marked.filter((l) => !hasSize(l)),
       checkoutCount: checkoutLines.reduce((n, l) => n + l.qty, 0),
       bagTotal: checkoutLines.reduce((sum, l) => sum + l.product.price * l.qty, 0),
       bagPixTotal: checkoutLines.reduce((sum, l) => sum + l.product.pix * l.qty, 0),
       addToBag,
       setQty,
+      setSize,
       setSelected,
       selectAll,
       removeFromBag,
@@ -108,7 +128,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       openInfo: setInfo,
       closeInfo: () => setInfo(null),
     }
-  }, [findProduct, stored, panel, quickView, info, addToBag, setQty, setSelected, selectAll, removeFromBag])
+  }, [findProduct, stored, panel, quickView, info, addToBag, setQty, setSize, setSelected, selectAll, removeFromBag])
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
 }

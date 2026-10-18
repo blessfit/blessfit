@@ -139,6 +139,26 @@ export const LineMeta = styled.p`
   font-size: 13px;
 `
 
+/** Peça que entrou sem tamanho (“comprar o look”): a escolha fica em destaque, fora do esmaecido. */
+export const PickSize = styled.div`
+  margin-block: 10px 6px;
+
+  legend {
+    color: var(--petrol-deep);
+    font-weight: 700;
+  }
+`
+
+export const NeedSize = styled.p`
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--mint-soft);
+  color: var(--petrol-deep);
+  font-size: 13px;
+  font-weight: 600;
+`
+
 export const Qty = styled.div`
   display: inline-flex;
   align-items: center;

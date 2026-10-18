@@ -63,6 +63,9 @@ export function SiteFooter() {
                 </a>
               </li>
               <li>
+                <a href={`mailto:${SHOP.email}`}>{SHOP.email}</a>
+              </li>
+              <li>
                 <a href={whatsappUrl('Olá! Quero acompanhar meu pedido na Blessfit.')} {...external}>
                   Acompanhar pedido
                 </a>
@@ -80,6 +83,9 @@ export function SiteFooter() {
                   </button>
                 </li>
               ))}
+              <li>
+                <a href="/privacidade">Política de Privacidade</a>
+              </li>
             </ul>
           </S.Col>
 
@@ -98,11 +104,23 @@ export function SiteFooter() {
         <S.Payments>
           <h3>Formas de pagamento</h3>
           <ul>
-            {PAYMENT_METHODS.map((method) => (
-              <li key={method}>{method}</li>
+            {PAYMENT_METHODS.map(({ name, logo }) => (
+              <li key={name}>
+                <img src={logo.src} alt={name} title={name} width={46} height={30} loading="lazy" />
+              </li>
             ))}
           </ul>
         </S.Payments>
+
+        <S.Company>
+          <span>
+            {SHOP.company.legalName} · CNPJ {SHOP.company.cnpj}
+          </span>
+          <span>{SHOP.company.address}</span>
+          <span>
+            <a href={`mailto:${SHOP.email}`}>{SHOP.email}</a>
+          </span>
+        </S.Company>
 
         <S.Bottom>
           <span>

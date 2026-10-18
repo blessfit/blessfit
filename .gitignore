@@ -30,3 +30,6 @@ dist-ssr
 .next
 next-env.d.ts
 *.tsbuildinfo
+
+# credenciais baixadas (Google OAuth etc.): nunca versionar
+client_secret_*.json

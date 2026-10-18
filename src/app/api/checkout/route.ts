@@ -14,6 +14,7 @@
  */
 import { digits, isCpf, normalizeCep } from '@/lib/documents'
 import { checkFirstPurchase, discountOf, findCoupon, unitDiscount } from '@/server/coupons'
+import { currentUser, rememberCheckout } from '@/server/customers'
 import { createCheckoutLink, type CheckoutCustomer } from '@/server/infinitepay'
 import { json, priceCart, type Order, type OrderShipping, type PayMethod, type ShippingAddress } from '@/server/orders'
 import { publicOption, quoteShipping } from '@/server/shipping/quote'
@@ -132,9 +133,13 @@ export async function POST(request: Request): Promise<Response> {
   const itemsTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const discount = discountOf(items, coupon)
 
+  // conta opcional: o dono do pedido vem só da sessão, nunca do corpo da requisição
+  const user = await currentUser()
+
   const { data: order, error } = await db()
     .from('orders')
     .insert({
+      ...(user && { user_id: user.id }),
       method,
       items,
       items_total_cents: itemsTotal,
@@ -152,6 +157,9 @@ export async function POST(request: Request): Promise<Response> {
   if (error) {
     console.error('[checkout] erro ao salvar pedido', error)
     return json({ error: 'Não foi possível criar o pedido' }, 500)
+  }
+  if (user) {
+    await rememberCheckout(user.id, { name, cpf, phone, address }).catch((err) => console.error('[checkout] erro ao salvar o perfil', err))
   }
 
   const site = process.env.SITE_URL ?? new URL(request.url).origin

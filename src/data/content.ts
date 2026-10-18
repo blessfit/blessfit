@@ -2,6 +2,12 @@
  * Textos das seções da loja (categorias, benefícios, sobre, avaliações, FAQ e rodapé).
  * Edite aqui — os componentes só leem estes dados.
  */
+import type { StaticImageData } from 'next/image'
+import amex from '@/assets/img/pagamento/amex.svg'
+import elo from '@/assets/img/pagamento/elo.svg'
+import mastercard from '@/assets/img/pagamento/mastercard.svg'
+import pix from '@/assets/img/pagamento/pix.svg'
+import visa from '@/assets/img/pagamento/visa.svg'
 import { IMAGES, type Img } from './images'
 import { SHOP } from './shop'
 
@@ -80,17 +86,23 @@ export const ABOUT = {
 
 /*
  * Avaliações que as clientes mandaram no Instagram (direct, story ou comentário), com foto.
- * Para adicionar uma: coloque a foto em src/assets/img/avaliacoes/ (.webp, ~900px de largura, em pé,
- * de preferência 4:5), registre em IMAGES.reviews (data/images.ts) e cole em `url` o link do post ou
- * do destaque do story (no Instagram: ··· › Copiar link). Sem `url`, o card abre o perfil da loja.
+ * Para adicionar uma: salve o print em src/assets/img/avaliacoes/ (.webp em duas larguras, ex.:
+ * nome-600.webp e nome-1170.webp), registre em IMAGES.reviews (data/images.ts) e cole em `url` o link
+ * do post ou do destaque do story (no Instagram: ··· › Copiar link). Sem `url`, abre o perfil da loja.
+ * No card a foto aparece cortada (4:5) e o texto resumido; ao clicar, abre inteira com a mensagem toda.
  * Peça autorização da cliente antes de publicar.
  */
 export type Review = {
   name: string
   /** @ da cliente no Instagram, sem o @ */
-  handle: string
-  /** O que ela comprou (aparece no selo do card). */
-  product: string
+  handle?: string
+  /** Nota de 1 a 5 que ela deu às peças. */
+  rating: number
+  /**
+   * O que ela comprou: `id` do produto e nome da cor, como em data/catalog.ts. O selo “Comprou” do card
+   * coloca essas peças na sacola sem tamanho, e a pessoa escolhe o tamanho lá.
+   */
+  items: { id: string; color: string }[]
   /** A mensagem, do jeito que ela escreveu. */
   text: string
   photo: Img
@@ -98,35 +110,18 @@ export type Review = {
   url?: string
 }
 
-// TODO: troque pelas avaliações reais (foto, @ e link do post de cada cliente)
 export const REVIEWS: Review[] = [
   {
-    name: 'Camila R.',
-    handle: 'camila.treina',
-    product: 'Conjunto Maré',
-    text: 'O shorts não sobe nem enrola no agachamento, e o top segura de verdade. Já estou de olho na próxima cor!',
-    photo: IMAGES.reviews[0],
-  },
-  {
-    name: 'Rafael M.',
-    handle: 'rafa.move',
-    product: 'Conjunto Impulso',
-    text: 'Tecido leve e seca muito rápido. Comprei pelo WhatsApp, me ajudaram com o tamanho e chegou em 3 dias.',
-    photo: IMAGES.reviews[1],
-  },
-  {
-    name: 'Juliana S.',
-    handle: 'ju.fit',
-    product: 'Conjunto Aurora',
-    text: 'O top segura muito bem e a legging não fica transparente no agachamento. Lindo e confortável o dia todo.',
-    photo: IMAGES.reviews[2],
-  },
-  {
-    name: 'Lucas A.',
-    handle: 'lucas.treino',
-    product: 'Conjunto Fôlego',
-    text: 'A regata é super leve, perfeita para treinar no calor. Caimento ótimo e acabamento caprichado.',
-    photo: IMAGES.reviews[3],
+    // TODO: link do destaque, se o story estiver salvo (sem ele, o botão abre o perfil da loja)
+    name: 'Clara Almeida',
+    handle: 'claraamelo',
+    rating: 5,
+    items: [
+      { id: 'regata-brisa', color: 'Branco' },
+      { id: 'shorts-mare', color: 'Azul Petróleo' },
+    ],
+    text: 'Eu amei todas as peças que escolhi! Tenho dificuldade em achar short zero transparência e esse realmente é, além de não subir. Amei demais! 💚',
+    photo: IMAGES.reviews.sextou,
   },
 ]
 
@@ -221,4 +216,11 @@ export const INFO_PAGES: InfoPage[] = [
   },
 ]
 
-export const PAYMENT_METHODS = ['Pix', 'Visa', 'Mastercard', 'Elo', 'Amex']
+/** Bandeiras do rodapé; os logos ficam em src/assets/img/pagamento/. */
+export const PAYMENT_METHODS: { name: string; logo: StaticImageData }[] = [
+  { name: 'Pix', logo: pix },
+  { name: 'Visa', logo: visa },
+  { name: 'Mastercard', logo: mastercard },
+  { name: 'Elo', logo: elo },
+  { name: 'Amex', logo: amex },
+]

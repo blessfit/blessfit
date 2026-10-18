@@ -62,6 +62,11 @@ pedido (ex.: link com preço de Pix pago no cartão); `canceled` se o link não 
 
 Variáveis de ambiente (na Vercel e em `.env.local`; `npm run dev` já lê o `.env.local`):
 
+**Ambiente local (HML × produção):** o `APP_ENV` no topo do `.env.local` escolhe o banco do `npm run dev`:
+`hml` carrega o `.env.hml` (banco "blessfit-hml") e `production` carrega o `.env.local.producao` (banco real).
+Atalhos sem editar o arquivo: `npm run dev:hml` e `npm run dev:prod`. Uma etiqueta no topo da tela mostra o
+ambiente (vermelha em produção local). Só vale para o desenvolvimento: a Vercel usa as variáveis do painel.
+
 | Variável | Valor |
 | --- | --- |
 | `INFINITEPAY_HANDLE` | InfiniteTag da loja, sem o `$` |

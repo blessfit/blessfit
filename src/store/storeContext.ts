@@ -5,25 +5,35 @@ import type { BagLine } from '@/lib/orders'
 
 export type Panel = 'bag' | 'menu'
 
-/** Item da sacola. Quantidade 0 não remove: o item fica salvo (a sacola também serve de lista de desejos). */
-export type BagItem = BagLine & { selected: boolean }
+/**
+ * Item da sacola. Quantidade 0 não remove: o item fica salvo (a sacola também serve de lista de desejos).
+ * `size` null = entrou sem tamanho (ex.: “comprar o look” de uma avaliação); a pessoa escolhe na sacola.
+ */
+export type BagItem = Omit<BagLine, 'size'> & { size: Size | null; selected: boolean }
+
+/** O que identifica um item da sacola: produto, cor e tamanho. */
+export type BagKey = Pick<BagItem, 'product' | 'variant' | 'size'>
 
 export type StoreState = {
   bag: BagItem[]
   /** Quantos itens diferentes estão salvos na sacola. */
   bagCount: number
-  /** Itens marcados e com quantidade — os que vão para o pedido. */
+  /** Itens marcados, com quantidade e tamanho — os que vão para o pedido. */
   checkoutLines: BagLine[]
+  /** Itens marcados que ainda esperam a escolha do tamanho (ficam fora do pedido até lá). */
+  needSize: BagItem[]
   /** Peças (soma das quantidades) que vão para o pedido. */
   checkoutCount: number
   bagTotal: number
   /** Total pagando no Pix. */
   bagPixTotal: number
-  addToBag: (product: Product, variant: Variant, size: Size) => void
-  setQty: (line: BagLine, qty: number) => void
-  setSelected: (line: BagLine, selected: boolean) => void
+  /** Sem `size`, a peça entra sem tamanho e a pessoa escolhe na sacola. */
+  addToBag: (product: Product, variant: Variant, size?: Size | null) => void
+  setQty: (line: BagKey, qty: number) => void
+  setSize: (line: BagKey, size: Size) => void
+  setSelected: (line: BagKey, selected: boolean) => void
   selectAll: (selected: boolean) => void
-  removeFromBag: (line: BagLine) => void
+  removeFromBag: (line: BagKey) => void
 
   /** Gaveta aberta (sacola ou menu mobile). */
   panel: Panel | null
