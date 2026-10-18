@@ -48,7 +48,7 @@ const Card = styled.li`
     color: inherit;
     font: inherit;
     text-align: left;
-    cursor: zoom-in;
+    cursor: pointer;
   }
 
   > button:hover img {
