@@ -59,11 +59,7 @@ export const MenuButton = styled(IconButton)`
   }
 `
 
-export const Account = styled(IconButton)`
-  ${media.sm} {
-    display: none;
-  }
-`
+export const Account = styled(IconButton)``
 
 export const DesktopSearch = styled.div`
   width: min(100%, 320px);

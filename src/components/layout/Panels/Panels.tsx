@@ -1,4 +1,4 @@
-import { Button, Dialog, IconButton, Instagram, Minus, Picture, Plus, SizePicker, WhatsApp } from '@/components/ui'
+import { Button, Dialog, IconButton, Instagram, Minus, Picture, Plus, SizePicker, User, WhatsApp } from '@/components/ui'
 import { CATEGORIES } from '@/data/content'
 import { NAV, SHOP } from '@/data/shop'
 import { external, instagramUrl, whatsappUrl } from '@/lib/links'
@@ -55,6 +55,9 @@ function MobileMenu() {
       </S.MenuGroup>
 
       <S.MenuFoot>
+        <Button variant="outline" block glyph={User} href="/conta">
+          Minha conta
+        </Button>
         <Button variant="primary" block glyph={WhatsApp} href={whatsappUrl()} {...external}>
           Atendimento no WhatsApp
         </Button>
