@@ -12,7 +12,7 @@ function Mark({ data, title, ...rest }: LogoProps & { data: LogoPath }) {
     : { 'aria-hidden': true, focusable: 'false' as const }
   return (
     <svg viewBox={`0 0 ${data.width} ${data.height}`} {...a11y} {...rest}>
-      <path d={data.d} fill="currentColor" fillRule="evenodd" />
+      <path d={data.d} fill="currentColor" />
     </svg>
   )
 }
