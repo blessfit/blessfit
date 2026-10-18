@@ -51,6 +51,11 @@ export const GlobalStyle = createGlobalStyle`
     overflow-x: clip;
   }
 
+  /* celular: nada passa da largura da tela, então não dá para "tirar o zoom" e ver faixa branca */
+  html {
+    overflow-x: clip;
+  }
+
   img,
   svg,
   video {

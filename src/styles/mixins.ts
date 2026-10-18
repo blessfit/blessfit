@@ -2,6 +2,8 @@ import { css } from 'styled-components'
 
 /** Carrossel horizontal com scroll-snap e sem barra de rolagem. */
 export const snapScroller = css`
+  /* posicionado: os inputs escondidos (position: absolute) dos cards ficam dentro da rolagem, e não alargam a página */
+  position: relative;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
