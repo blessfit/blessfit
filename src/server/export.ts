@@ -21,7 +21,7 @@ const HEAD: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb:
 const TOTAL: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEEF1E3' } }
 const BRL = '"R$ "#,##0.00'
 
-const SIZES: Size[] = ['PP', 'P', 'M', 'G', 'GG']
+const SIZES: Size[] = ['P', 'M', 'G', 'GG']
 const GENDER = { Feminino: 'Fem', Masculino: 'Masc' } as const
 const STATUS: Record<string, string> = { paid: 'Pago', review: 'Conferir pagamento', shipped: 'Enviado', delivered: 'Entregue' }
 
@@ -165,7 +165,7 @@ export async function buildWorkbook(): Promise<Buffer> {
     )
     put(stockWs, r, 13, active ? 'À venda' : 'Oculto', { center: true })
     stockWs.getCell(r, 5).dataValidation = { type: 'list', allowBlank: true, formulae: ['"Fem,Masc,Unissex"'] }
-    stockWs.getCell(r, 6).dataValidation = { type: 'list', allowBlank: true, formulae: ['"PP,P,M,G,GG,XG,Único"'] }
+    stockWs.getCell(r, 6).dataValidation = { type: 'list', allowBlank: true, formulae: ['"P,M,G,GG,XG,Único"'] }
     r++
   }
   stockWs.autoFilter = `A4:M${r - 1}`
