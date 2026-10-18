@@ -4,6 +4,7 @@ import { NAV, SHOP } from '@/data/shop'
 import { external, instagramUrl, whatsappUrl } from '@/lib/links'
 import { checkoutUrl } from '@/lib/orders'
 import { formatBRL } from '@/lib/price'
+import { ONLINE_CHECKOUT } from '@/lib/site'
 import { useStore } from '@/store/storeContext'
 import * as S from './Panels.styles'
 
@@ -117,7 +118,11 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
             Escolha o tamanho de {needSize.length === 1 ? '1 peça' : `${needSize.length} peças`} para incluir no pedido.
           </S.NeedSize>
         )}
-        {checkoutLines.length > 0 ? (
+        {checkoutLines.length > 0 && !ONLINE_CHECKOUT ? (
+          <Button variant="primary" block glyph={WhatsApp} href={checkoutUrl(checkoutLines)} {...external}>
+            Finalizar pelo WhatsApp
+          </Button>
+        ) : checkoutLines.length > 0 ? (
           <>
             <Button variant="primary" block href="/carrinho">
               Finalizar compra

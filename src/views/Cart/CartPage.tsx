@@ -9,13 +9,14 @@
  * O rascunho do formulário (sem o CPF) fica salvo no navegador.
  */
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { Button, Check, ChevronLeft, Close, CreditCard, Minus, Picture, Plus, Repeat, SizePicker, Truck, Wordmark } from '@/components/ui'
+import { Button, Check, ChevronLeft, Close, CreditCard, Minus, Picture, Plus, Repeat, SizePicker, Truck, WhatsApp, Wordmark } from '@/components/ui'
 import { SHOP } from '@/data/shop'
 import { mask, UFS } from '@/lib/customer'
 import { digits, isCpf, normalizeCep } from '@/lib/documents'
 import { external, whatsappUrl } from '@/lib/links'
 import { checkoutUrl, type BagLine } from '@/lib/orders'
 import { formatBRL } from '@/lib/price'
+import { ONLINE_CHECKOUT } from '@/lib/site'
 import { useStore } from '@/store/storeContext'
 import * as S from './Cart.styles'
 
@@ -307,6 +308,24 @@ export function CartPage() {
           <Button variant="primary" href="/#conjuntos">
             Ver produtos
           </Button>
+        </S.Empty>
+      </CheckoutShell>
+    )
+  }
+
+  // pagamento pelo site desligado (lib/site.ts): o pedido segue montado para o WhatsApp
+  if (!ONLINE_CHECKOUT) {
+    return (
+      <CheckoutShell>
+        <S.Empty>
+          <h1>Finalize seu pedido pelo WhatsApp</h1>
+          <p>Seu pedido vai montado na mensagem: é só enviar que combinamos o pagamento e a entrega com você.</p>
+          {needSize.length > 0 && <S.Error role="alert">Escolha o tamanho de todas as peças na sacola antes de finalizar.</S.Error>}
+          {checkoutLines.length > 0 && (
+            <Button variant="primary" glyph={WhatsApp} href={checkoutUrl(checkoutLines)} {...external}>
+              Finalizar pelo WhatsApp
+            </Button>
+          )}
         </S.Empty>
       </CheckoutShell>
     )
