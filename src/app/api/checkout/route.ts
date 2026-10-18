@@ -13,6 +13,7 @@
  * O frete é cotado de novo aqui. Se a opção sumiu ou o preço mudou: 409 { code: 'shipping_changed', options }.
  */
 import { digits, isCpf, normalizeCep } from '@/lib/documents'
+import { ONLINE_CHECKOUT } from '@/lib/site'
 import { checkFirstPurchase, discountOf, findCoupon, unitDiscount } from '@/server/coupons'
 import { currentUser, rememberCheckout } from '@/server/customers'
 import { createCheckoutLink, type CheckoutCustomer } from '@/server/infinitepay'
@@ -63,6 +64,8 @@ function parseAddress(raw: Record<string, unknown> | undefined): ShippingAddress
 }
 
 export async function POST(request: Request): Promise<Response> {
+  if (!ONLINE_CHECKOUT) return json({ error: 'Pagamento pelo site indisponível no momento. Finalize pelo WhatsApp.' }, 403)
+
   let body: Body
   try {
     body = (await request.json()) as Body
