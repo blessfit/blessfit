@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 import '@fontsource-variable/montserrat/wght.css'
 import { SITE_URL } from '@/lib/site'
+import { EnvBadge } from './EnvBadge'
 import { StyledRegistry } from './providers/StyledRegistry'
 
 const title = 'Blessfit · Moda fitness'
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       {/* margin 0: sem a margem padrão do navegador (o painel não carrega o GlobalStyle da loja) */}
       <body style={{ margin: 0 }}>
+        <EnvBadge />
         <StyledRegistry>{children}</StyledRegistry>
       </body>
     </html>

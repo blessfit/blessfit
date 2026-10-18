@@ -7,7 +7,9 @@
     "*.css"
   ],
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/dev.mjs",
+    "dev:hml": "node scripts/dev.mjs hml",
+    "dev:prod": "node scripts/dev.mjs production",
     "build": "next build",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint",
