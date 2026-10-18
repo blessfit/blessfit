@@ -318,3 +318,60 @@ export const Row = styled.div`
   justify-content: space-between;
   gap: 12px;
 `
+
+/** /conta/*: menu da conta à esquerda e a tela (pedidos ou dados) à direita. */
+export const AccountLayout = styled.div`
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+
+  ${media.md} {
+    grid-template-columns: minmax(0, 1fr);
+  }
+`
+
+export const Side = styled.aside`
+  position: sticky;
+  top: 24px;
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--white);
+
+  ${media.md} {
+    position: static;
+  }
+`
+
+export const SideNav = styled.nav`
+  display: grid;
+  gap: 4px;
+
+  a {
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s;
+
+    &:hover {
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    &[aria-current='page'] {
+      background: var(--surface);
+      color: var(--text);
+    }
+  }
+
+  /* celular: as duas telas viram abas lado a lado */
+  ${media.md} {
+    grid-template-columns: 1fr 1fr;
+    text-align: center;
+  }
+`

@@ -153,7 +153,7 @@ export async function updatePassword(_: FormState, form: FormData): Promise<Form
     if (error.code === 'same_password') return { fields: { password: 'Use uma senha diferente da anterior' } }
     return { error: 'Não foi possível trocar a senha. Peça um novo link.' }
   }
-  redirect('/conta?senha=ok')
+  redirect('/conta/dados?senha=ok')
 }
 
 export async function saveProfile(_: FormState, form: FormData): Promise<FormState> {
