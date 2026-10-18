@@ -23,6 +23,9 @@ import modelTeal from '@/assets/img/model-teal.webp'
 import shortsMen from '@/assets/img/shorts-men.webp'
 import teeMen from '@/assets/img/tee-men.webp'
 import topTeal from '@/assets/img/top-teal.webp'
+// Avaliações das clientes no Instagram (prints dos stories, 9:16)
+import avaliacaoSextou600 from '@/assets/img/avaliacoes/sextou-600.webp'
+import avaliacaoSextou1170 from '@/assets/img/avaliacoes/sextou-1170.webp'
 // Conjunto Maré (azul petróleo) — fotos geradas no Google Flow a partir das peças reais
 import mareCostas900 from '@/assets/img/mare/costas-900.webp'
 import mareCostas1600 from '@/assets/img/mare/costas-1600.webp'
@@ -285,6 +288,9 @@ const FOLEGO = {
   conjuntoMarinhoCostas: folego('conjunto-marinho-costas', 'Modelo de costas com regata e shorts azul marinho Blessfit', '50% 30%'),
 }
 
+// Avaliações do Instagram — prints em 600 e 1170px (largura original do story)
+const avaliacao = folder({ 'sextou-600': avaliacaoSextou600, 'sextou-1170': avaliacaoSextou1170 }, 'avaliacoes')
+
 // Conjunto Aurora (preto: top nadador + legging) — fotos geradas no Google Flow a partir das peças reais
 const aurora = folder(
   {
@@ -465,14 +471,14 @@ export const IMAGES = {
     ),
   },
 
-  /** Fotos das avaliações do Instagram (REVIEWS em data/content.ts), na mesma ordem. */
-  // TODO: troque pelas fotos que as clientes mandaram (ex.: local(fotoCamila, 'Camila com o conjunto Maré'))
-  reviews: [
-    local(modelTeal, 'Cliente com o conjunto Maré Blessfit'),
-    local(modelMen, 'Cliente com o conjunto Impulso Blessfit'),
-    local(modelBlack, 'Cliente com o conjunto Aurora Blessfit'),
-    local(teeMen, 'Cliente com a camiseta Blessfit'),
-  ],
+  /** Fotos das avaliações do Instagram (REVIEWS em data/content.ts). */
+  reviews: {
+    sextou: avaliacao(
+      'sextou',
+      'Story da cliente: quatro selfies com a regata branca Brisa e o shorts azul petróleo Maré, com a legenda “Sextou de @blessfitstore_”',
+      '50% 0%',
+    ),
+  },
 
   community: [
     local(modelBlack, 'Cliente com regata e legging pretas Blessfit'),

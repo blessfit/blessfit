@@ -52,7 +52,9 @@ export async function getLiveCatalog(): Promise<LiveCatalog | null> {
     client.from('stock').select('product_id, color, size, quantity').returns<StockRow[]>(),
   ])
   if (products.error || stock.error) {
-    console.error('[catalog] erro ao ler preços/estoque', products.error ?? stock.error)
+    // o objeto de erro do Supabase aparece como {} no log do Next: registra a mensagem e o código
+    const { message, code } = (products.error ?? stock.error)!
+    console.error(`[catalog] erro ao ler preços/estoque: ${message} (${code})`)
     return null
   }
 
