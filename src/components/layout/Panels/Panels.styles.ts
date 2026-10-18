@@ -269,7 +269,7 @@ export const MenuUser = styled.div`
   background: var(--surface);
 `
 
-export const MenuHello = styled.p`
+export const MenuHello = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
@@ -278,6 +278,14 @@ export const MenuHello = styled.p`
 
   strong {
     font-weight: 750;
+  }
+
+  > span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 `
 
@@ -302,11 +310,10 @@ export const MenuAvatar = styled.span`
 
 export const MenuUserLinks = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 8px;
 
-  a,
-  button {
+  a {
     display: grid;
     place-items: center;
     min-height: 40px;
@@ -319,4 +326,12 @@ export const MenuUserLinks = styled.div`
     font-weight: 650;
     white-space: nowrap;
   }
+`
+
+export const SignOut = styled.button`
+  padding: 6px 4px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
 `
