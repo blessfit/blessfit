@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Bag, CountBadge, IconButton, Menu, User, Wordmark } from '@/components/ui'
+import { Bag, CountBadge, IconButton, Menu, Wordmark } from '@/components/ui'
 import { NAV } from '@/data/shop'
 import { useStore } from '@/store/storeContext'
 import * as S from './Header.styles'
 import { SearchBox } from './SearchBox'
+import { UserMenu } from './UserMenu'
 
 /** Header da loja: busca, logo central, conta/sacola e menu de categorias. */
 export function Header() {
@@ -34,9 +35,7 @@ export function Header() {
         </S.Logo>
 
         <S.Right>
-          <S.Account as="a" href="/conta" aria-label="Minha conta" title="Minha conta">
-            <User />
-          </S.Account>
+          <UserMenu />
           <IconButton type="button" aria-label={`Sacola (${bagCount} itens)`} onClick={() => openPanel('bag')}>
             <Bag />
             {bagCount > 0 && <CountBadge aria-hidden="true">{bagCount}</CountBadge>}

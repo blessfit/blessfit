@@ -61,6 +61,108 @@ export const MenuButton = styled(IconButton)`
 
 export const Account = styled(IconButton)``
 
+export const UserMenu = styled.div`
+  position: relative;
+`
+
+export const UserButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 6px 0 4px;
+  border-radius: 999px;
+  color: var(--petrol);
+  font-size: 14px;
+  white-space: nowrap;
+  transition: background 0.3s var(--ease);
+
+  &:hover {
+    background: var(--surface);
+  }
+
+  > svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s var(--ease);
+  }
+
+  &[aria-expanded='true'] > svg {
+    transform: rotate(180deg);
+  }
+`
+
+export const Avatar = styled.span`
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--petrol);
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 700;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`
+
+/** "Olá, Nome": no celular fica só a foto (não cabe ao lado da sacola). */
+export const Hello = styled.span`
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  strong {
+    font-weight: 700;
+  }
+
+  ${media.sm} {
+    display: none;
+  }
+`
+
+export const UserDropdown = styled.div`
+  position: absolute;
+  /* encostado no botão (sem vão), para o mouse não "cair" ao descer até o menu */
+  top: 100%;
+  right: 0;
+  z-index: 60;
+  display: grid;
+  min-width: 180px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: 0 12px 32px rgb(11 11 15 / 0.12);
+
+  a,
+  button {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: calc(var(--radius) - 4px);
+    color: var(--ink);
+    font-size: 14px;
+    text-align: left;
+
+    &:hover {
+      background: var(--surface);
+    }
+  }
+
+  form {
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px solid var(--line);
+  }
+`
+
 export const DesktopSearch = styled.div`
   width: min(100%, 320px);
 

@@ -1,4 +1,5 @@
-export { AccountView } from './AccountView'
 export { LoginView } from './LoginView'
 export { NewPasswordView } from './NewPasswordView'
+export { OrdersView } from './OrdersView'
+export { ProfileView } from './ProfileView'
 export { SignUpView } from './SignUpView'

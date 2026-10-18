@@ -172,6 +172,12 @@ export const ChevronRight: IconComponent = (p) => (
   </Svg>
 )
 
+export const ChevronDown: IconComponent = (p) => (
+  <Svg {...p} strokeWidth={1.8}>
+    <path d="m6 9 6 6 6-6" />
+  </Svg>
+)
+
 export const Menu: IconComponent = (p) => (
   <Svg {...p} strokeWidth={1.7}>
     <path d="M3.5 7h17" />
