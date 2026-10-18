@@ -279,14 +279,14 @@ export const MenuHello = styled.div`
   strong {
     font-weight: 750;
   }
+`
 
-  > span {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+export const MenuGreeting = styled.span`
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `
 
 export const MenuAvatar = styled.span`
@@ -295,6 +295,7 @@ export const MenuAvatar = styled.span`
   flex: none;
   width: 40px;
   height: 40px;
+  aspect-ratio: 1;
   overflow: hidden;
   border-radius: 50%;
   background: var(--petrol);
