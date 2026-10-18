@@ -205,7 +205,6 @@ export const INFO_PAGES: InfoPage[] = [
     table: {
       head: ['Tamanho', 'Busto / Tórax', 'Cintura', 'Quadril'],
       rows: [
-        ['PP', '78–82', '60–64', '86–90'],
         ['P', '83–88', '65–70', '91–96'],
         ['M', '89–94', '71–76', '97–102'],
         ['G', '95–102', '77–84', '103–110'],

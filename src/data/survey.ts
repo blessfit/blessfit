@@ -100,7 +100,7 @@ export const SURVEY_PATTERNS: { id: Pattern; label: string }[] = [
   { id: 'tanto', label: 'Tanto faz' },
 ]
 
-export const SURVEY_SIZES: Size[] = ['PP', 'P', 'M', 'G', 'GG']
+export const SURVEY_SIZES: Size[] = ['P', 'M', 'G', 'GG']
 
 // baseadas nos conjuntos do site (cartão): Maré 139,90 · Fôlego 147,90 · Impulso 154,90 · Brisa 159,90 · Aurora 164,90
 export const SURVEY_PRICES: Option[] = [

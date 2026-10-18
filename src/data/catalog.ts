@@ -18,7 +18,7 @@ import type { ProductImageKey } from './images'
 
 export type Gender = 'Feminino' | 'Masculino'
 export type Kind = 'Conjunto' | 'Blusa' | 'Shorts' | 'Legging'
-export type Size = 'PP' | 'P' | 'M' | 'G' | 'GG'
+export type Size = 'P' | 'M' | 'G' | 'GG'
 export type Color = { name: string; hex: string }
 /** Cor + a chave das fotos dela em IMAGES.products (e os tamanhos esgotados nessa cor, vindos do estoque). */
 export type CatalogVariant = { color: Color; images: ProductImageKey; soldOut?: Size[] }
@@ -74,7 +74,7 @@ export const CATALOG: CatalogProduct[] = [
     price: 139.9,
     pix: 129.9,
     compareAt: 154.8,
-    sizes: ['PP', 'P', 'M', 'G', 'GG'],
+    sizes: ['P', 'M', 'G', 'GG'],
   },
   {
     id: 'conjunto-aurora',
@@ -89,7 +89,7 @@ export const CATALOG: CatalogProduct[] = [
     price: 164.9,
     pix: 154.9,
     compareAt: 184.8,
-    sizes: ['PP', 'P', 'M', 'G', 'GG'],
+    sizes: ['P', 'M', 'G', 'GG'],
   },
   {
     id: 'conjunto-brisa',
@@ -109,7 +109,7 @@ export const CATALOG: CatalogProduct[] = [
     price: 159.9,
     pix: 149.9,
     compareAt: 179.8,
-    sizes: ['PP', 'P', 'M', 'G', 'GG'],
+    sizes: ['P', 'M', 'G', 'GG'],
   },
 
   // ——— Conjuntos masculinos ———
@@ -161,7 +161,7 @@ export const CATALOG: CatalogProduct[] = [
     description: 'Regata de cava aberta e caimento solto, com a estampa blessfit no peito.',
     price: 74.9,
     pix: 69.9,
-    sizes: ['PP', 'P', 'M', 'G', 'GG'],
+    sizes: ['P', 'M', 'G', 'GG'],
   },
   {
     id: 'legging-brisa',
@@ -175,7 +175,7 @@ export const CATALOG: CatalogProduct[] = [
     description: 'Legging de cós alto com logo b.f na lateral e blessfit nas costas, do agachamento ao cardio.',
     price: 104.9,
     pix: 99.9,
-    sizes: ['PP', 'P', 'M', 'G', 'GG'],
+    sizes: ['P', 'M', 'G', 'GG'],
   },
   {
     id: 'top-mare',
@@ -189,7 +189,7 @@ export const CATALOG: CatalogProduct[] = [
     description: 'Top de alças finas que se cruzam nas costas, com elástico largo na base e logo b.f no peito.',
     price: 79.9,
     pix: 74.9,
-    sizes: ['PP', 'P', 'M', 'G', 'GG'],
+    sizes: ['P', 'M', 'G', 'GG'],
   },
   {
     id: 'shorts-mare',
@@ -203,7 +203,7 @@ export const CATALOG: CatalogProduct[] = [
     description: 'Shorts de cós alto que não marca nem enrola, com logo b.f na frente e blessfit nas costas.',
     price: 74.9,
     pix: 69.9,
-    sizes: ['PP', 'P', 'M', 'G', 'GG'],
+    sizes: ['P', 'M', 'G', 'GG'],
   },
   {
     id: 'camiseta-impulso',
