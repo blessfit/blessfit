@@ -9,8 +9,9 @@
  * O rascunho do formulário (sem o CPF) fica salvo no navegador.
  */
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { Button, Check, ChevronLeft, Close, CreditCard, Minus, Picture, Plus, Repeat, Truck, Wordmark } from '@/components/ui'
+import { Button, Check, ChevronLeft, Close, CreditCard, Minus, Picture, Plus, Repeat, SizePicker, Truck, Wordmark } from '@/components/ui'
 import { SHOP } from '@/data/shop'
+import { mask, UFS } from '@/lib/customer'
 import { digits, isCpf, normalizeCep } from '@/lib/documents'
 import { external, whatsappUrl } from '@/lib/links'
 import { checkoutUrl, type BagLine } from '@/lib/orders'
@@ -53,26 +54,17 @@ type Quote =
 
 type Coupon = { code: string; percent: number }
 
-const UFS = 'AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'.split(' ')
+/** GET /api/conta (cliente logado). */
+type AccountData = {
+  email: string
+  name: string
+  cpf: string
+  phone: string
+  address: { cep: string; street: string; number: string; complement?: string; district: string; city: string; uf: string } | null
+}
+
 const DRAFT_KEY = 'blessfit:checkout:v1'
 const EMPTY: Form = { name: '', phone: '', cpf: '', email: '', cep: '', street: '', number: '', complement: '', district: '', city: '', uf: '' }
-
-const mask = {
-  cpf: (v: string) =>
-    digits(v)
-      .slice(0, 11)
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
-      .replace(/(\d{3})-?(\d{1,2})$/, '$1-$2'),
-  phone: (v: string) => {
-    const d = digits(v).slice(0, 11)
-    if (d.length <= 2) return d
-    if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`
-    const split = d.length === 11 ? 7 : 6
-    return `(${d.slice(0, 2)}) ${d.slice(2, split)}-${d.slice(split)}`
-  },
-  cep: (v: string) => digits(v).slice(0, 8).replace(/(\d{5})(\d)/, '$1-$2'),
-}
 
 const cents = (reais: number) => Math.round(reais * 100)
 const unitCents = (line: BagLine, method: Method) => cents(method === 'pix' ? line.product.pix : line.product.price)
@@ -95,7 +87,7 @@ function validate(form: Form): Partial<Record<keyof Form, string>> {
 }
 
 export function CartPage() {
-  const { checkoutLines, bagTotal, setQty, removeFromBag } = useStore()
+  const { checkoutLines, needSize, bagTotal, setQty, setSize, removeFromBag } = useStore()
   const [form, setForm] = useState<Form>(EMPTY)
   const [method, setMethod] = useState<Method>('pix')
   const [quote, setQuote] = useState<Quote>({ status: 'idle' })
@@ -127,6 +119,32 @@ export function CartPage() {
       // navegação privada: segue sem rascunho
     }
   }, [loaded, form])
+
+  // conta (opcional): logado, os campos ainda vazios vêm do perfil. undefined = conferindo; null = sem login
+  const [account, setAccount] = useState<string | null | undefined>(undefined)
+  useEffect(() => {
+    if (!loaded) return
+    fetch('/api/conta')
+      .then((r) => (r.ok ? (r.json() as Promise<AccountData>) : null))
+      .then((data) => {
+        setAccount(data?.email ?? null)
+        if (!data) return
+        const a = data.address
+        const fromAccount: Partial<Form> = {
+          name: data.name,
+          cpf: mask.cpf(data.cpf),
+          phone: mask.phone(data.phone),
+          email: data.email,
+          ...(a && { cep: mask.cep(a.cep), street: a.street, number: a.number, complement: a.complement ?? '', district: a.district, city: a.city, uf: a.uf }),
+        }
+        setForm((f) => {
+          const next = { ...f }
+          for (const [key, value] of Object.entries(fromAccount) as [keyof Form, string][]) if (value && !next[key].trim()) next[key] = value
+          return next
+        })
+      })
+      .catch(() => setAccount(null))
+  }, [loaded])
 
   const set = (key: keyof Form, value: string) => setForm((f) => ({ ...f, [key]: value }))
   const errors = validate(form)
@@ -229,6 +247,11 @@ export function CartPage() {
   const submit = async () => {
     setShowErrors(true)
     setSubmitError(null)
+    if (needSize.length > 0) {
+      setSubmitError('Escolha o tamanho de todas as peças da sacola.')
+      document.getElementById('escolha-tamanho')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      return
+    }
     if (Object.keys(errors).length > 0) {
       document.querySelector('[data-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       return
@@ -275,7 +298,7 @@ export function CartPage() {
     }
   }
 
-  if (checkoutLines.length === 0) {
+  if (checkoutLines.length === 0 && needSize.length === 0) {
     return (
       <CheckoutShell>
         <S.Empty>
@@ -295,6 +318,19 @@ export function CartPage() {
         <S.Steps>
           <S.Card aria-labelledby="passo-1">
             <StepHead n={1} id="passo-1" title="Seus dados" text="Para a nota fiscal e para avisarmos sobre o envio." />
+            {account !== undefined && (
+              <S.AccountLine>
+                {account ? (
+                  <>
+                    Comprando como <strong>{account}</strong> · <a href="/conta">Minha conta</a>
+                  </>
+                ) : (
+                  <>
+                    Já tem conta? <a href="/entrar?next=/carrinho">Entrar</a> para preencher seus dados.
+                  </>
+                )}
+              </S.AccountLine>
+            )}
             <S.Grid>
               <TextField label="Nome completo" span={6} value={form.name} onChange={(v) => set('name', v)} error={error('name')} autoComplete="name" placeholder="ex.: Maria Silva Santos" />
               <TextField label="Celular / WhatsApp" span={3} value={form.phone} onChange={(v) => set('phone', mask.phone(v))} error={error('phone')} autoComplete="tel-national" inputMode="tel" placeholder="(37) 99999-9999" />
@@ -415,6 +451,32 @@ export function CartPage() {
             Sua sacola <span>{pieces === 1 ? '1 peça' : `${pieces} peças`}</span>
           </S.BagTitle>
           <S.Lines>
+            {needSize.map((line, i) => (
+              <S.Line key={`${line.product.id}-${line.variant.color.name}-sem-tamanho`} id={i === 0 ? 'escolha-tamanho' : undefined}>
+                <S.Thumb>
+                  <Picture image={line.variant.images.main} decorative sizes="64px" />
+                </S.Thumb>
+                <div>
+                  <S.LineName>{line.product.name}</S.LineName>
+                  <S.LineMeta>{line.variant.color.name}</S.LineMeta>
+                  <S.PickSize>
+                    <SizePicker
+                      label="Escolha o tamanho"
+                      sizes={line.product.sizes}
+                      soldOut={line.variant.soldOut ?? line.product.soldOut}
+                      value={null}
+                      onChange={(size) => setSize(line, size)}
+                      compact
+                    />
+                  </S.PickSize>
+                </div>
+                <S.LineEnd>
+                  <button type="button" aria-label={`Remover ${line.product.name}`} onClick={() => removeFromBag(line)}>
+                    <Close />
+                  </button>
+                </S.LineEnd>
+              </S.Line>
+            ))}
             {checkoutLines.map((line) => (
               <S.Line key={`${line.product.id}-${line.variant.color.name}-${line.size}`}>
                 <S.Thumb>
@@ -542,7 +604,7 @@ export function CartPage() {
   )
 }
 
-export function CheckoutShell({ children }: { children: ReactNode }) {
+export function CheckoutShell({ children, crumb = 'Finalizar pedido' }: { children: ReactNode; crumb?: string }) {
   return (
     <S.Page>
       <S.Top>
@@ -561,7 +623,7 @@ export function CheckoutShell({ children }: { children: ReactNode }) {
             <ChevronLeft /> Continuar comprando
           </a>
           <span>/</span>
-          <span>Finalizar pedido</span>
+          <span>{crumb}</span>
         </S.Crumbs>
         {children}
       </S.Main>

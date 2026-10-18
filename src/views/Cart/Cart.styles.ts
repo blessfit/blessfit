@@ -129,6 +129,25 @@ export const StepNumber = styled.span`
   font-weight: 700;
 `
 
+export const AccountLine = styled.p`
+  margin: -8px 0 18px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 13px;
+  color: var(--text-muted);
+
+  strong,
+  a {
+    color: var(--text);
+    font-weight: 650;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+`
+
 export const Grid = styled.div`
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -392,6 +411,16 @@ export const LineName = styled.p`
 export const LineMeta = styled.p`
   font-size: 12px;
   color: var(--text-muted);
+`
+
+/** Peça que entrou sem tamanho (“comprar o look”): escolha antes de finalizar. */
+export const PickSize = styled.div`
+  margin-top: 8px;
+
+  legend {
+    color: var(--petrol-deep);
+    font-weight: 700;
+  }
 `
 
 export const Qty = styled.div`

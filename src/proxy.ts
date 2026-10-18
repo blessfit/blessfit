@@ -1,5 +1,5 @@
 /*
- * Renova a sessão do Supabase (cookies) a cada visita ao painel. Sem isto, o login expira em ~1h,
+ * Renova a sessão do Supabase (cookies) a cada visita ao painel e às páginas da conta do cliente. Sem isto, o login expira em ~1h,
  * porque as páginas (Server Components) não conseguem gravar cookies.
  */
 import { createServerClient } from '@supabase/ssr'
@@ -25,4 +25,4 @@ export async function proxy(request: NextRequest) {
   return response
 }
 
-export const config = { matcher: ['/admin/:path*'] }
+export const config = { matcher: ['/admin/:path*', '/entrar', '/criar-conta', '/conta/:path*', '/auth/:path*'] }
