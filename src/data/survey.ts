@@ -6,7 +6,6 @@
  * Para trocar as perguntas, crie uma campanha nova.
  */
 import { CATALOG, type Size } from './catalog'
-import { SHOP } from './shop'
 
 export const SURVEY = {
   campaign: 'proximas-pecas-2026',
@@ -14,8 +13,6 @@ export const SURVEY = {
   /** Depois disso a página mostra “Pesquisa encerrada” e a API recusa respostas. */
   closesAt: '2026-11-15T23:59:59-03:00',
   maxColors: 4,
-  /** Mesmo cupom do site, válido na próxima compra (aplicado no atendimento). */
-  coupon: SHOP.firstPurchaseCoupon,
   /** Versão do texto de consentimento gravada com cada contato. Mude junto com CONSENT_TEXT. */
   consentVersion: '2026-10-16',
 } as const

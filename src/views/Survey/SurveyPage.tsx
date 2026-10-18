@@ -1,7 +1,7 @@
 'use client'
 
 /*
- * Pesquisa “Próximas peças” (/proximas-pecas): abertura, 4 etapas e o cupom no fim.
+ * Pesquisa “Próximas peças” (/proximas-pecas): abertura, 4 etapas e o agradecimento no fim.
  * O rascunho fica no navegador: quem fecha o WhatsApp no meio continua de onde parou.
  */
 import { useEffect, useRef, useState, type ReactNode } from 'react'
@@ -82,12 +82,6 @@ const ClockIcon = () => (
   <Svg>
     <circle cx="12" cy="12" r="9" />
     <path d="M12 7v5l3 2" />
-  </Svg>
-)
-const GiftIcon = () => (
-  <Svg>
-    <path d="M20 12v8H4v-8M2 7h20v5H2zM12 20V7" />
-    <path d="M12 7c-2-4-6-3-6-1s3 1 6 1c3 0 6 1 6-1s-4-3-6 1" />
   </Svg>
 )
 const SendIcon = () => (
@@ -499,9 +493,6 @@ function Intro({ onStart }: { onStart: () => void }) {
             <ClockIcon /> Leva menos de 2 minutos
           </li>
           <li>
-            <GiftIcon /> Ganhe {SURVEY.coupon.percent}% OFF na próxima compra
-          </li>
-          <li>
             <SendIcon /> Seja avisada quando lançar
           </li>
         </S.Perks>
@@ -514,19 +505,8 @@ function Intro({ onStart }: { onStart: () => void }) {
 }
 
 function Thanks() {
-  const [copied, setCopied] = useState<'idle' | 'ok' | 'error'>('idle')
   const title = useRef<HTMLHeadingElement>(null)
   useEffect(() => title.current?.focus(), [])
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(SURVEY.coupon.code)
-      setCopied('ok')
-    } catch {
-      // navegador interno de app sem permissão: o código continua selecionável na tela
-      setCopied('error')
-    }
-  }
 
   return (
     <S.Done>
@@ -537,17 +517,8 @@ function Thanks() {
         <h1 ref={title} tabIndex={-1}>
           Obrigada!
         </h1>
-        <p>Suas respostas já fazem parte da próxima coleção. Aqui está o seu presente:</p>
+        <p>Suas respostas já fazem parte da próxima coleção.</p>
       </div>
-      <S.Coupon>
-        <span>{SURVEY.coupon.percent}% OFF na sua próxima compra</span>
-        <strong>{SURVEY.coupon.code}</strong>
-      </S.Coupon>
-      <S.Ghost type="button" onClick={copy}>
-        {copied === 'ok' ? 'Cupom copiado!' : 'Copiar cupom'}
-      </S.Ghost>
-      {copied === 'error' && <S.Small role="status">Não deu para copiar. Toque no código e segure para copiar.</S.Small>}
-      <S.Small>Informe o cupom no WhatsApp ao fazer o seu pedido.</S.Small>
       <S.LinkButton href={SITE_URL}>Ver a loja</S.LinkButton>
     </S.Done>
   )

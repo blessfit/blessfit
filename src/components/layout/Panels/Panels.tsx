@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Button, Dialog, IconButton, Instagram, Minus, Picture, Plus, SizePicker, Spinner, User, WhatsApp } from '@/components/ui'
+import type { Size } from '@/data/catalog'
 import { CATEGORIES } from '@/data/content'
 import { NAV, SHOP } from '@/data/shop'
 import { external, instagramUrl, whatsappUrl } from '@/lib/links'
@@ -8,7 +9,7 @@ import { formatBRL } from '@/lib/price'
 import { ONLINE_CHECKOUT } from '@/lib/site'
 import { firstName, useMe } from '@/hooks/useMe'
 import { useSignOut } from '@/hooks/useSignOut'
-import { useStore } from '@/store/storeContext'
+import { useStore, type BagItem } from '@/store/storeContext'
 import * as S from './Panels.styles'
 
 /** Gavetas laterais da loja: menu (celular) e sacola. */
@@ -118,6 +119,62 @@ function MenuAccount() {
   )
 }
 
+/** Peça na sacola: os tamanhos ficam sempre à mostra para escolher ou trocar. */
+function BagRow({ line }: { line: BagItem }) {
+  const { setQty, setSize, setSelected, removeFromBag } = useStore()
+
+  return (
+    <S.Line $muted={!line.selected || line.qty === 0}>
+      <S.Check>
+        <input
+          type="checkbox"
+          checked={line.selected}
+          onChange={(e) => setSelected(line, e.target.checked)}
+          aria-label={`Selecionar ${line.product.name} (${line.variant.color.name}${line.size ? `, tam. ${line.size}` : ''})`}
+        />
+      </S.Check>
+      <S.Thumb>
+        <Picture image={line.variant.images.main} decorative sizes="88px" />
+      </S.Thumb>
+      <div>
+        <S.LineName>{line.product.name}</S.LineName>
+        <S.LineMeta>{line.variant.color.name}</S.LineMeta>
+        <S.PickSize>
+          <SizePicker
+            label={line.size ? 'Tamanho' : 'Escolha o tamanho'}
+            sizes={line.product.sizes}
+            soldOut={line.variant.soldOut ?? line.product.soldOut}
+            value={line.size}
+            onChange={(size: Size) => setSize(line, size)}
+            compact
+          />
+        </S.PickSize>
+        <S.Qty>
+          <IconButton
+            $size={36}
+            type="button"
+            aria-label="Diminuir quantidade"
+            disabled={line.qty === 0}
+            onClick={() => setQty(line, line.qty - 1)}
+          >
+            <Minus />
+          </IconButton>
+          <span aria-live="polite">{line.qty}</span>
+          <IconButton $size={36} type="button" aria-label="Aumentar quantidade" onClick={() => setQty(line, line.qty + 1)}>
+            <Plus />
+          </IconButton>
+        </S.Qty>
+      </div>
+      <S.LineEnd>
+        <strong>{formatBRL(line.product.price * line.qty)}</strong>
+        <S.TextButton type="button" aria-label={`Remover ${line.product.name} da sacola`} onClick={() => removeFromBag(line)}>
+          Remover
+        </S.TextButton>
+      </S.LineEnd>
+    </S.Line>
+  )
+}
+
 function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   const {
     bag,
@@ -127,11 +184,7 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
     checkoutLines,
     checkoutCount,
     needSize,
-    setQty,
-    setSize,
-    setSelected,
     selectAll,
-    removeFromBag,
   } = useStore()
   // produto com frete grátis (painel → Preços) já garante o frete grátis do pedido
   const freeProduct = checkoutLines.some((l) => l.product.freeShipping)
@@ -210,71 +263,7 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
             Selecionar todos
           </S.SelectAll>
           {bag.map((line) => (
-            <S.Line
-              key={`${line.product.id}-${line.variant.color.name}-${line.size}`}
-              $muted={!line.selected || line.qty === 0}
-            >
-              <S.Check>
-                <input
-                  type="checkbox"
-                  checked={line.selected}
-                  onChange={(e) => setSelected(line, e.target.checked)}
-                  aria-label={`Selecionar ${line.product.name} (${line.variant.color.name}${line.size ? `, tam. ${line.size}` : ''})`}
-                />
-              </S.Check>
-              <S.Thumb>
-                <Picture image={line.variant.images.main} decorative sizes="88px" />
-              </S.Thumb>
-              <div>
-                <S.LineName>{line.product.name}</S.LineName>
-                <S.LineMeta>
-                  {line.variant.color.name}
-                  {line.size && ` · Tam. ${line.size}`}
-                </S.LineMeta>
-                {!line.size && (
-                  <S.PickSize>
-                    <SizePicker
-                      label="Escolha o tamanho"
-                      sizes={line.product.sizes}
-                      soldOut={line.variant.soldOut ?? line.product.soldOut}
-                      value={null}
-                      onChange={(size) => setSize(line, size)}
-                      compact
-                    />
-                  </S.PickSize>
-                )}
-                <S.Qty>
-                  <IconButton
-                    $size={36}
-                    type="button"
-                    aria-label="Diminuir quantidade"
-                    disabled={line.qty === 0}
-                    onClick={() => setQty(line, line.qty - 1)}
-                  >
-                    <Minus />
-                  </IconButton>
-                  <span aria-live="polite">{line.qty}</span>
-                  <IconButton
-                    $size={36}
-                    type="button"
-                    aria-label="Aumentar quantidade"
-                    onClick={() => setQty(line, line.qty + 1)}
-                  >
-                    <Plus />
-                  </IconButton>
-                </S.Qty>
-              </div>
-              <S.LineEnd>
-                <strong>{formatBRL(line.product.price * line.qty)}</strong>
-                <S.TextButton
-                  type="button"
-                  aria-label={`Remover ${line.product.name} da sacola`}
-                  onClick={() => removeFromBag(line)}
-                >
-                  Remover
-                </S.TextButton>
-              </S.LineEnd>
-            </S.Line>
+            <BagRow key={`${line.product.id}-${line.variant.color.name}-${line.size}`} line={line} />
           ))}
         </S.Lines>
       )}

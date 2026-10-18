@@ -1,16 +1,15 @@
 /*
- * Cupons do checkout. Hoje só o de primeira compra (SHOP.firstPurchaseCoupon), conferido pelo CPF:
- * vale se o CPF ainda não tem nenhum pedido pago.
+ * Cupons do checkout. Desligados por enquanto (lista vazia: todo código é recusado).
+ * Para voltar, cadastre aqui, ex.: { code: 'BLESS10', percent: 10 }; vale se o CPF ainda não tem pedido pago.
  */
 import 'server-only'
-import { SHOP } from '@/data/shop'
 import { SOLD } from './admin'
 import type { OrderItem } from './orders'
 import { db } from './supabase'
 
 export type Coupon = { code: string; percent: number }
 
-const COUPONS: Coupon[] = [SHOP.firstPurchaseCoupon]
+const COUPONS: Coupon[] = []
 
 /** Cupom pelo código digitado (sem diferenciar maiúsculas), ou null se não existir. */
 export const findCoupon = (code: string): Coupon | null =>

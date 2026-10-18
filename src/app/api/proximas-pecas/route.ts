@@ -1,8 +1,7 @@
 /*
- * POST /api/proximas-pecas — grava uma resposta da pesquisa “Próximas peças” e devolve o cupom.
+ * POST /api/proximas-pecas — grava uma resposta da pesquisa “Próximas peças”.
  * Validação em src/server/survey.ts. Limite de requisições: regra no Firewall da Vercel (docs/seguranca.md).
  */
-import { SURVEY } from '@/data/survey'
 import { json } from '@/server/orders'
 import { parseSurvey, saveSurvey } from '@/server/survey'
 
@@ -32,5 +31,5 @@ export async function POST(request: Request): Promise<Response> {
     return json({ error: 'Não foi possível enviar agora. Tente de novo em instantes.' }, 500)
   }
 
-  return json({ ok: true, coupon: SURVEY.coupon })
+  return json({ ok: true })
 }
