@@ -215,22 +215,6 @@ export const CepRow = styled.div`
   }
 `
 
-export const SmallButton = styled.button`
-  flex: none;
-  height: 48px;
-  padding: 0 18px;
-  border-radius: var(--radius-sm);
-  background: var(--ink);
-  color: var(--white);
-  font-size: 13px;
-  font-weight: 650;
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`
-
 export const Placeholder = styled.p`
   display: flex;
   align-items: center;
@@ -471,62 +455,6 @@ export const LineEnd = styled.div`
   }
 `
 
-export const CouponBox = styled.div`
-  display: grid;
-  gap: 8px;
-  padding: 14px;
-  border-radius: var(--radius-sm);
-  background: var(--paper);
-  font-size: 13px;
-  font-weight: 600;
-
-  input {
-    flex: 1;
-    min-width: 0;
-    height: 44px;
-    padding: 0 12px;
-    border: 1.5px solid var(--line-strong);
-    border-radius: 8px;
-    background: var(--white);
-    font-size: 16px;
-    font-weight: 450;
-    text-transform: uppercase;
-  }
-
-  input::placeholder {
-    text-transform: none;
-  }
-
-  input:focus {
-    border-color: var(--ink);
-    outline: none;
-  }
-`
-
-export const CouponRow = styled.div`
-  display: flex;
-  gap: 8px;
-
-  button {
-    height: 44px;
-  }
-`
-
-export const Applied = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  color: var(--success);
-
-  button {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-decoration: underline;
-  }
-`
-
 export const Error = styled.p`
   font-size: 12px;
   font-weight: 500;
@@ -553,10 +481,6 @@ export const Totals = styled.dl`
   dd {
     font-weight: 600;
   }
-`
-
-export const Discount = styled.dd`
-  color: var(--success);
 `
 
 export const Grand = styled.div`

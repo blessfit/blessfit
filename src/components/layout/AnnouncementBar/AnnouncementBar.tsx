@@ -30,7 +30,7 @@ const Message = styled.p<{ $active: boolean }>`
     transform 0.5s var(--ease);
 `
 
-/** Faixa de benefícios no topo (frete grátis, cupom, Pix). Troca de mensagem sozinha. */
+/** Faixa de benefícios no topo (frete grátis, parcelas, Pix). Troca de mensagem sozinha. */
 export function AnnouncementBar() {
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)

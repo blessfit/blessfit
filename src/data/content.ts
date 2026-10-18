@@ -195,7 +195,6 @@ export const INFO_PAGES: InfoPage[] = [
     paragraphs: [
       'Pix: preço com desconto em cada peça, com confirmação na hora.',
       `Cartão de crédito: em até ${SHOP.installments}x sem juros pelo link de pagamento seguro.`,
-      `Primeira compra? Use o cupom ${SHOP.firstPurchaseCoupon.code} e ganhe ${SHOP.firstPurchaseCoupon.percent}% OFF.`,
     ],
   },
   {

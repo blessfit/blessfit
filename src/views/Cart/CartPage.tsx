@@ -2,10 +2,10 @@
 
 /*
  * Carrinho e checkout (/carrinho): dados do cliente, endereço, frete e pagamento à esquerda;
- * sacola, cupom e totais à direita. "Finalizar pedido" cria o pedido em /api/checkout e leva
+ * sacola e totais à direita. "Finalizar pedido" cria o pedido em /api/checkout e leva
  * para o pagamento na InfinitePay.
  *
- * Os valores mostrados aqui são só uma prévia: o servidor recalcula itens, cupom e frete.
+ * Os valores mostrados aqui são só uma prévia: o servidor recalcula itens e frete.
  * O rascunho do formulário (sem o CPF) fica salvo no navegador.
  */
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
@@ -53,8 +53,6 @@ type Quote =
   | { status: 'ok'; options: ShippingOption[]; key: string }
   | { status: 'error'; message: string }
 
-type Coupon = { code: string; percent: number }
-
 /** GET /api/conta (cliente logado). */
 type AccountData = {
   email: string
@@ -93,10 +91,6 @@ export function CartPage() {
   const [method, setMethod] = useState<Method>('pix')
   const [quote, setQuote] = useState<Quote>({ status: 'idle' })
   const [serviceId, setServiceId] = useState<number | null>(null)
-  const [coupon, setCoupon] = useState<Coupon | null>(null)
-  const [couponInput, setCouponInput] = useState('')
-  const [couponError, setCouponError] = useState<string | null>(null)
-  const [couponPending, setCouponPending] = useState(false)
   const [showErrors, setShowErrors] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -210,40 +204,16 @@ export function CartPage() {
   const totals = useMemo(() => {
     const at = (m: Method) => {
       const items = checkoutLines.reduce((sum, l) => sum + unitCents(l, m) * l.qty, 0)
-      const discount = coupon
-        ? checkoutLines.reduce((sum, l) => sum + Math.round((unitCents(l, m) * coupon.percent) / 100) * l.qty, 0)
-        : 0
       const shipping = option ? cents(option.price) : 0
-      return { items, discount, shipping, total: items - discount + shipping }
+      return { items, shipping, total: items + shipping }
     }
     return { pix: at('pix'), card: at('card') }
-  }, [checkoutLines, coupon, option])
+  }, [checkoutLines, option])
   const current = totals[method]
   const pieces = checkoutLines.reduce((n, l) => n + l.qty, 0)
   // produto com frete grátis (painel → Preços) já garante o frete grátis do pedido
   const freeProduct = checkoutLines.some((l) => l.product.freeShipping)
   const missing = freeProduct ? 0 : Math.max(0, SHOP.freeShippingFrom - bagTotal)
-
-  const applyCoupon = async () => {
-    if (!couponInput.trim()) return
-    setCouponPending(true)
-    setCouponError(null)
-    try {
-      const r = await fetch('/api/coupon', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: couponInput, cpf: form.cpf }),
-      })
-      const data = (await r.json()) as Coupon & { error?: string }
-      if (!r.ok) throw new Error(data.error ?? 'Cupom inválido')
-      setCoupon({ code: data.code, percent: data.percent })
-      setCouponInput('')
-    } catch (err) {
-      setCouponError((err as Error).message)
-    } finally {
-      setCouponPending(false)
-    }
-  }
 
   const submit = async () => {
     setShowErrors(true)
@@ -275,7 +245,6 @@ export function CartPage() {
           customer: { name: form.name, cpf: form.cpf, phone: form.phone, email: form.email },
           address: { cep: form.cep, street: form.street, number: form.number, complement: form.complement, district: form.district, city: form.city, uf: form.uf },
           shipping: { serviceId: option.id, price: option.price },
-          coupon: coupon?.code,
         }),
       })
       const data = (await r.json()) as { orderId?: string; url?: string; error?: string; code?: string; options?: ShippingOption[] }
@@ -526,48 +495,11 @@ export function CartPage() {
             ))}
           </S.Lines>
 
-          <S.CouponBox>
-            {coupon ? (
-              <S.Applied>
-                <span>
-                  ✓ Cupom {coupon.code} aplicado ({coupon.percent}% OFF)
-                </span>
-                <button type="button" onClick={() => setCoupon(null)}>
-                  Remover
-                </button>
-              </S.Applied>
-            ) : (
-              <>
-                <label htmlFor="cupom">Tem cupom de desconto?</label>
-                <S.CouponRow>
-                  <input
-                    id="cupom"
-                    value={couponInput}
-                    onChange={(e) => setCouponInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && applyCoupon()}
-                    placeholder="Digite seu cupom"
-                    autoComplete="off"
-                  />
-                  <S.SmallButton type="button" onClick={applyCoupon} disabled={couponPending || !couponInput.trim()}>
-                    {couponPending ? '…' : 'Aplicar'}
-                  </S.SmallButton>
-                </S.CouponRow>
-                {couponError && <S.Error role="alert">{couponError}</S.Error>}
-              </>
-            )}
-          </S.CouponBox>
-
           <S.Totals>
             <div>
               <dt>Subtotal ({method === 'pix' ? 'Pix' : 'cartão'})</dt>
               <dd>{formatBRL(current.items / 100)}</dd>
             </div>
-            {coupon && (
-              <div>
-                <dt>Desconto ({coupon.code})</dt>
-                <S.Discount>− {formatBRL(current.discount / 100)}</S.Discount>
-              </div>
-            )}
             <div>
               <dt>Frete</dt>
               <dd>{option ? (option.free ? 'Grátis' : formatBRL(option.price)) : 'Informe o CEP'}</dd>

@@ -139,7 +139,7 @@ export const LineMeta = styled.p`
   font-size: 13px;
 `
 
-/** Peça que entrou sem tamanho (“comprar o look”): a escolha fica em destaque, fora do esmaecido. */
+/** Tamanhos da peça na sacola (sempre à mostra): a escolha fica em destaque, fora do esmaecido. */
 export const PickSize = styled.div`
   margin-block: 10px 6px;
 

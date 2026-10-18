@@ -537,33 +537,3 @@ export const DoneIcon = styled.span`
     height: 36px;
   }
 `
-
-export const Coupon = styled.div`
-  display: grid;
-  gap: 6px;
-  padding: 20px;
-  border: 2px dashed var(--ink);
-  border-radius: 16px;
-  background: var(--cream);
-
-  span {
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  strong {
-    color: var(--olive-deep);
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    user-select: all;
-  }
-`
-
-export const Small = styled.p`
-  color: var(--text-muted);
-  font-size: 13px;
-`

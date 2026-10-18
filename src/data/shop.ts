@@ -24,12 +24,10 @@ export const SHOP = {
   /** Condições comerciais usadas nos cards, na sacola e na barra de benefícios. */
   freeShippingFrom: 299,
   installments: 6,
-  firstPurchaseCoupon: { code: 'BLESS10', percent: 10 },
 } as const
 
 export const ANNOUNCEMENTS: string[] = [
   `Frete grátis nas compras acima de R$ ${SHOP.freeShippingFrom}`,
-  `${SHOP.firstPurchaseCoupon.percent}% OFF na primeira compra com o cupom ${SHOP.firstPurchaseCoupon.code}`,
   `${SHOP.installments}x sem juros no cartão · mais barato no Pix`,
 ]
 

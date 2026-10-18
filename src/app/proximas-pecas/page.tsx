@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { isSurveyOpen, SURVEY } from '@/data/survey'
 import { SurveyPage } from '@/views/Survey'
 
-const description = `Conte quais peças, cores e tamanhos você quer na próxima coleção e ganhe ${SURVEY.coupon.percent}% OFF na próxima compra.`
+const description = `Conte quais peças, cores e tamanhos você quer na próxima coleção.`
 
 export const metadata: Metadata = {
   title: `${SURVEY.title} · Blessfit`,
