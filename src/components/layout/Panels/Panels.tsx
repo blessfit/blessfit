@@ -92,9 +92,9 @@ function MenuAccount() {
         <S.MenuAvatar aria-hidden="true">
           {me.avatar ? <img src={me.avatar} alt="" referrerPolicy="no-referrer" /> : first.charAt(0).toUpperCase()}
         </S.MenuAvatar>
-        <span>
+        <S.MenuGreeting>
           Olá, <strong>{first}</strong>
-        </span>
+        </S.MenuGreeting>
         <form action={signOut}>
           <S.SignOut type="submit">Sair</S.SignOut>
         </form>
