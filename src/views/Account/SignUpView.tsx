@@ -21,7 +21,7 @@ export function SignUpView({ next }: { next: string }) {
   const [state, action, pending] = useActionState(signUp, initial)
   const errors = state.fields ?? {}
   const set = (key: keyof typeof profile) => (value: string) => setProfile((p) => ({ ...p, [key]: value }))
-  const loginHref = next === '/conta' ? '/entrar' : `/entrar?next=${encodeURIComponent(next)}`
+  const loginHref = next === '/' ? '/entrar' : `/entrar?next=${encodeURIComponent(next)}`
 
   if (state.sent) {
     return (

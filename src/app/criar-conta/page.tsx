@@ -8,7 +8,7 @@ import { AccountApp } from '../providers/AccountApp'
 export const metadata: Metadata = { title: 'Criar conta · Blessfit', robots: { index: false } }
 
 export default async function SignUpRoute({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
-  const target = safeNext((await searchParams).next)
+  const target = safeNext((await searchParams).next, '/')
   if (await currentUser()) redirect(target)
 
   return (

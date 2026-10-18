@@ -183,10 +183,10 @@ export async function saveProfile(_: FormState, form: FormData): Promise<FormSta
   return { ok: true }
 }
 
+/** Sem redirect: quem chama recarrega a página (useSignOut). */
 export async function signOut(): Promise<void> {
   const supabase = await authClient()
   await supabase.auth.signOut({ scope: 'local' })
-  redirect('/')
 }
 
 export async function deleteAccount(_: FormState, form: FormData): Promise<FormState> {

@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: 'Entrar · Blessfit', robots: { index
 
 export default async function LoginRoute({ searchParams }: { searchParams: Promise<{ next?: string; erro?: string }> }) {
   const { next, erro } = await searchParams
-  const target = safeNext(next)
+  const target = safeNext(next, '/')
   if (await currentUser()) redirect(target)
 
   return (
