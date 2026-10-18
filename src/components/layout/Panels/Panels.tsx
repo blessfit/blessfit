@@ -95,6 +95,9 @@ function MenuAccount() {
         <span>
           Olá, <strong>{first}</strong>
         </span>
+        <form action={signOut}>
+          <S.SignOut type="submit">Sair</S.SignOut>
+        </form>
       </S.MenuHello>
       <S.MenuUserLinks>
         <Link href="/conta/pedidos" onClick={closePanel}>
@@ -103,9 +106,6 @@ function MenuAccount() {
         <Link href="/conta/dados" onClick={closePanel}>
           Meus dados
         </Link>
-        <form action={signOut}>
-          <button type="submit">Sair</button>
-        </form>
       </S.MenuUserLinks>
     </S.MenuUser>
   )
