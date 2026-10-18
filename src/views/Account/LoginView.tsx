@@ -26,7 +26,7 @@ export function LoginView({ next, error }: { next: string; error?: string }) {
   const [passwordState, passwordAction, passwordPending] = useActionState(signInWithPassword, initial)
   const [linkState, linkAction, linkPending] = useActionState(sendMagicLink, initial)
   const [resetState, resetAction, resetPending] = useActionState(requestPasswordReset, initial)
-  const signUpHref = next === '/conta' ? '/criar-conta' : `/criar-conta?next=${encodeURIComponent(next)}`
+  const signUpHref = next === '/' ? '/criar-conta' : `/criar-conta?next=${encodeURIComponent(next)}`
 
   return (
     <S.Duo>

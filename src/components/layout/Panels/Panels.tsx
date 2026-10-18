@@ -1,6 +1,5 @@
 import Link from 'next/link'
-import { signOut } from '@/app/conta/actions'
-import { Button, Dialog, IconButton, Instagram, Minus, Picture, Plus, SizePicker, User, WhatsApp } from '@/components/ui'
+import { Button, Dialog, IconButton, Instagram, Minus, Picture, Plus, SizePicker, Spinner, User, WhatsApp } from '@/components/ui'
 import { CATEGORIES } from '@/data/content'
 import { NAV, SHOP } from '@/data/shop'
 import { external, instagramUrl, whatsappUrl } from '@/lib/links'
@@ -8,6 +7,7 @@ import { checkoutUrl } from '@/lib/orders'
 import { formatBRL } from '@/lib/price'
 import { ONLINE_CHECKOUT } from '@/lib/site'
 import { firstName, useMe } from '@/hooks/useMe'
+import { useSignOut } from '@/hooks/useSignOut'
 import { useStore } from '@/store/storeContext'
 import * as S from './Panels.styles'
 
@@ -77,6 +77,7 @@ function MobileMenu() {
 function MenuAccount() {
   const me = useMe()
   const { closePanel } = useStore()
+  const [signingOut, signOut] = useSignOut()
   if (me === undefined) return null
   if (!me) {
     return (
@@ -95,9 +96,15 @@ function MenuAccount() {
         <S.MenuGreeting>
           Olá, <strong>{first}</strong>
         </S.MenuGreeting>
-        <form action={signOut}>
-          <S.SignOut type="submit">Sair</S.SignOut>
-        </form>
+        <S.SignOut type="button" onClick={signOut} disabled={signingOut} aria-busy={signingOut}>
+          {signingOut ? (
+            <>
+              <Spinner /> Saindo…
+            </>
+          ) : (
+            'Sair'
+          )}
+        </S.SignOut>
       </S.MenuHello>
       <S.MenuUserLinks>
         <Link href="/conta/pedidos" onClick={closePanel}>

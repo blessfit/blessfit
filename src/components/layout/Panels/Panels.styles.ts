@@ -330,6 +330,10 @@ export const MenuUserLinks = styled.div`
 `
 
 export const SignOut = styled.button`
+  display: inline-flex;
+  flex: none;
+  gap: 6px;
+  align-items: center;
   padding: 6px 4px;
   color: var(--text-muted);
   font-size: 13px;

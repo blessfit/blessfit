@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
-import { signOut } from '@/app/conta/actions'
-import { ChevronDown, User } from '@/components/ui'
+import { ChevronDown, Spinner, User } from '@/components/ui'
 import { firstName, useMe } from '@/hooks/useMe'
+import { useSignOut } from '@/hooks/useSignOut'
 import * as S from './Header.styles'
 
 /**
@@ -11,6 +11,7 @@ import * as S from './Header.styles'
  */
 export function UserMenu() {
   const me = useMe()
+  const [signingOut, signOut] = useSignOut()
   const [open, setOpen] = useState(false)
   const root = useRef<HTMLDivElement>(null)
   const closeTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
@@ -31,7 +32,7 @@ export function UserMenu() {
 
   if (!me) {
     return (
-      <S.Account as="a" href="/conta" aria-label="Entrar ou criar conta" title="Entrar ou criar conta">
+      <S.Account as="a" href="/entrar" aria-label="Entrar ou criar conta" title="Entrar ou criar conta">
         <User />
       </S.Account>
     )
@@ -65,11 +66,17 @@ export function UserMenu() {
           <Link role="menuitem" href="/conta/dados" onClick={() => setOpen(false)}>
             Meus dados
           </Link>
-          <form action={signOut}>
-            <button role="menuitem" type="submit">
-              Sair
+          <S.SignOutItem>
+            <button role="menuitem" type="button" onClick={signOut} disabled={signingOut} aria-busy={signingOut}>
+              {signingOut ? (
+                <>
+                  <Spinner /> Saindo…
+                </>
+              ) : (
+                'Sair'
+              )}
             </button>
-          </form>
+          </S.SignOutItem>
         </S.UserDropdown>
       )}
     </S.UserMenu>

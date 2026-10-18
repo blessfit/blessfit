@@ -160,11 +160,22 @@ export const UserDropdown = styled.div`
     }
   }
 
-  form {
-    margin-top: 4px;
-    padding-top: 4px;
-    border-top: 1px solid var(--line);
+  button {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    &:disabled {
+      color: var(--text-muted);
+      cursor: progress;
+    }
   }
+`
+
+export const SignOutItem = styled.div`
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
 `
 
 export const DesktopSearch = styled.div`

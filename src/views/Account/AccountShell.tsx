@@ -7,8 +7,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
-import { Button } from '@/components/ui'
-import { signOut } from '@/app/conta/actions'
+import { Button, Spinner } from '@/components/ui'
+import { useSignOut } from '@/hooks/useSignOut'
 import * as S from './Account.styles'
 
 const PAGES = [
@@ -18,6 +18,7 @@ const PAGES = [
 
 export function AccountShell({ name, email, children }: { name: string; email: string; children: ReactNode }) {
   const pathname = usePathname()
+  const [signingOut, signOut] = useSignOut()
   const firstName = name.trim().split(/\s+/)[0]
   return (
     <S.AccountLayout>
@@ -33,11 +34,15 @@ export function AccountShell({ name, email, children }: { name: string; email: s
             </Link>
           ))}
         </S.SideNav>
-        <form action={signOut}>
-          <Button as="button" type="submit" variant="outline" size="sm" block>
-            Sair da conta
-          </Button>
-        </form>
+        <Button as="button" type="button" variant="outline" size="sm" block onClick={signOut} disabled={signingOut} aria-busy={signingOut}>
+          {signingOut ? (
+            <>
+              <Spinner /> Saindo…
+            </>
+          ) : (
+            'Sair da conta'
+          )}
+        </Button>
       </S.Side>
       <div style={{ display: 'grid', gap: 16, minWidth: 0 }}>{children}</div>
     </S.AccountLayout>
