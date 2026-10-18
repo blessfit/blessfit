@@ -5,9 +5,10 @@
  */
 import { useActionState, useState } from 'react'
 import { Button, Check } from '@/components/ui'
-import { requestPasswordReset, sendMagicLink, signInWithGoogle, signInWithPassword, type FormState } from '@/app/conta/actions'
+import { requestPasswordReset, sendMagicLink, signInWithPassword, type FormState } from '@/app/conta/actions'
 import * as S from './Account.styles'
-import { GoogleLogo, Input, PasswordInput } from './fields'
+import { GoogleForm } from './GoogleSignIn'
+import { Input, PasswordInput } from './fields'
 
 type Mode = 'password' | 'link' | 'reset'
 
@@ -157,14 +158,3 @@ export function LoginView({ next, error }: { next: string; error?: string }) {
   )
 }
 
-export function GoogleForm({ next }: { next: string }) {
-  return (
-    <form action={signInWithGoogle}>
-      <input type="hidden" name="next" value={next} />
-      <S.Divider>ou continue com</S.Divider>
-      <S.GoogleButton type="submit">
-        <GoogleLogo /> Continuar com o Google
-      </S.GoogleButton>
-    </form>
-  )
-}

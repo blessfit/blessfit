@@ -96,6 +96,21 @@ export async function signInWithGoogle(form: FormData): Promise<void> {
   redirect(data.url)
 }
 
+/**
+ * Login pelo popup do Google (Google Identity Services): o navegador recebe o ID token do Google e o
+ * Supabase confere a assinatura e o nonce. Devolve para onde ir, ou o erro.
+ */
+export async function signInWithGoogleToken(credential: string, nonce: string, next: string): Promise<{ next?: string; error?: string }> {
+  const supabase = await authClient()
+  const { data, error } = await supabase.auth.signInWithIdToken({ provider: 'google', token: credential, nonce })
+  if (error || !data.user) {
+    console.error('[conta] login pelo Google (popup)', error)
+    return { error: 'Não foi possível entrar com o Google. Tente de novo.' }
+  }
+  await finishLogin(data.user)
+  return { next: safeNext(next) }
+}
+
 export async function signUp(_: FormState, form: FormData): Promise<FormState> {
   const email = str(form, 'email').toLowerCase()
   const password = String(form.get('password') ?? '')

@@ -10,7 +10,7 @@ import { EMPTY_ADDRESS, mask } from '@/lib/customer'
 import * as C from '../Cart/Cart.styles'
 import * as S from './Account.styles'
 import { AddressFields, Input, PasswordInput } from './fields'
-import { GoogleForm } from './LoginView'
+import { GoogleForm } from './GoogleSignIn'
 
 const initial: FormState = {}
 

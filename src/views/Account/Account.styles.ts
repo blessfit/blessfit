@@ -395,3 +395,14 @@ export const Bone = styled.span<{ $w?: string; $h?: number }>`
     animation: none;
   }
 `
+
+/** Onde o Google desenha o botão dele (popup). */
+export const GoogleSlot = styled.div`
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+
+  &[hidden] {
+    display: none;
+  }
+`
