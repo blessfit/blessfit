@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 import { media } from '@/styles/media'
 
 /** /entrar: "Acesse sua conta" + "Criar uma nova conta", lado a lado no desktop. */
@@ -373,5 +373,25 @@ export const SideNav = styled.nav`
   ${media.md} {
     grid-template-columns: 1fr 1fr;
     text-align: center;
+  }
+`
+
+const shimmer = keyframes`
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+`
+
+/** Barra cinza animada do carregamento (loading.tsx das telas da conta). */
+export const Bone = styled.span<{ $w?: string; $h?: number }>`
+  display: block;
+  width: ${({ $w = '100%' }) => $w};
+  height: ${({ $h = 14 }) => $h}px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--surface) 25%, var(--line) 50%, var(--surface) 75%);
+  background-size: 200% 100%;
+  animation: ${shimmer} 1.4s ease-in-out infinite;
+
+  ${media.reducedMotion} {
+    animation: none;
   }
 `

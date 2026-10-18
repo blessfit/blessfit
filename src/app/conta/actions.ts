@@ -5,6 +5,7 @@
  * na conta conferem o login com currentUser() antes de tocar no banco.
  */
 import { headers } from 'next/headers'
+import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { addressErrors, isCpf, isEmail, isFullName, isPassword, isPhone, safeNext, type AddressForm } from '@/lib/customer'
 import { digits, normalizeCep } from '@/lib/documents'
@@ -163,6 +164,7 @@ export async function saveProfile(_: FormState, form: FormData): Promise<FormSta
   if (Object.keys(errors).length > 0) return { fields: errors }
   const fields: Partial<Customer> = { ...profile, address }
   await saveCustomer(user.id, fields)
+  revalidatePath('/conta', 'layout') // o "Olá, Nome" do menu da conta
   return { ok: true }
 }
 
