@@ -149,7 +149,7 @@ function BagRow({ line }: { line: BagItem }) {
             compact
           />
         </S.PickSize>
-        <S.Qty>
+        <S.Qty data-keep={line.qty === 0 || undefined}>
           <IconButton
             $size={36}
             type="button"
