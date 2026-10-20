@@ -99,7 +99,10 @@ export const SelectAll = styled.li`
   }
 `
 
-/** `$muted`: item desmarcado ou com quantidade 0 — fica salvo, mas fora do pedido. */
+/**
+ * `$muted`: item desmarcado ou com quantidade 0 — fica salvo, mas fora do pedido. O que tiver
+ * `data-keep` (o contador, com quantidade 0) não esmaece, para não parecer desabilitado.
+ */
 export const Line = styled.li<{ $muted?: boolean }>`
   display: grid;
   grid-template-columns: 20px 88px 1fr auto;
@@ -107,7 +110,7 @@ export const Line = styled.li<{ $muted?: boolean }>`
   padding: 16px 0;
   border-bottom: 1px solid var(--line);
 
-  > :not(:first-child) {
+  > :not(:first-child) > :not([data-keep]) {
     opacity: ${({ $muted }) => ($muted ? 0.55 : 1)};
     transition: opacity 0.2s var(--ease);
   }
