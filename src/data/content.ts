@@ -123,6 +123,14 @@ export const REVIEWS: Review[] = [
     text: 'Eu amei todas as peças que escolhi! Tenho dificuldade em achar short zero transparência e esse realmente é, além de não subir. Amei demais! 💚',
     photo: IMAGES.reviews.sextou,
   },
+  {
+    name: 'Diego Silva',
+    handle: 'silva39799',
+    rating: 5,
+    items: [{ id: 'camiseta-impulso', color: 'Azul Marinho' }],
+    text: 'Blessfit, obrigado por essa qualidade! Tecido geladinho, macio, com ótima elasticidade e conforto total pra treinar. Vale cada centavo!',
+    photo: IMAGES.reviews.diego,
+  },
 ]
 
 export const COMMUNITY = {

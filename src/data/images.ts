@@ -24,6 +24,7 @@ import shortsMen from '@/assets/img/shorts-men.webp'
 import teeMen from '@/assets/img/tee-men.webp'
 import topTeal from '@/assets/img/top-teal.webp'
 // Avaliações das clientes no Instagram (prints dos stories, 9:16)
+import avaliacaoDiego530 from '@/assets/img/avaliacoes/diego-530.webp'
 import avaliacaoSextou600 from '@/assets/img/avaliacoes/sextou-600.webp'
 import avaliacaoSextou1170 from '@/assets/img/avaliacoes/sextou-1170.webp'
 // Conjunto Maré (azul petróleo) — fotos geradas no Google Flow a partir das peças reais
@@ -289,7 +290,7 @@ const FOLEGO = {
 }
 
 // Avaliações do Instagram — prints em 600 e 1170px (largura original do story)
-const avaliacao = folder({ 'sextou-600': avaliacaoSextou600, 'sextou-1170': avaliacaoSextou1170 }, 'avaliacoes')
+const avaliacao = folder({ 'diego-530': avaliacaoDiego530, 'sextou-600': avaliacaoSextou600, 'sextou-1170': avaliacaoSextou1170 }, 'avaliacoes')
 
 // Conjunto Aurora (preto: top nadador + legging) — fotos geradas no Google Flow a partir das peças reais
 const aurora = folder(
@@ -478,6 +479,7 @@ export const IMAGES = {
       'Story da cliente: quatro selfies com a regata branca Brisa e o shorts azul petróleo Maré, com a legenda “Sextou de @blessfitstore_”',
       '50% 0%',
     ),
+    diego: avaliacao('diego', 'Selfie do cliente no espelho da academia com a camiseta raglan azul marinho Impulso', '50% 40%'),
   },
 
   community: [
