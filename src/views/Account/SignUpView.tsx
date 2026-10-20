@@ -9,7 +9,7 @@ import { signUp, type FormState } from '@/app/conta/actions'
 import { EMPTY_ADDRESS, mask } from '@/lib/customer'
 import * as C from '../Cart/Cart.styles'
 import * as S from './Account.styles'
-import { AddressFields, Input, PasswordInput } from './fields'
+import { AddressFields, Input, PasswordInput, useScrollToError } from './fields'
 import { GoogleForm } from './GoogleSignIn'
 
 const initial: FormState = {}
@@ -20,6 +20,7 @@ export function SignUpView({ next }: { next: string }) {
   const [address, setAddress] = useState(EMPTY_ADDRESS)
   const [state, action, pending] = useActionState(signUp, initial)
   const errors = state.fields ?? {}
+  useScrollToError(state.fields)
   const set = (key: keyof typeof profile) => (value: string) => setProfile((p) => ({ ...p, [key]: value }))
   const loginHref = next === '/' ? '/entrar' : `/entrar?next=${encodeURIComponent(next)}`
 
@@ -90,7 +91,7 @@ export function SignUpView({ next }: { next: string }) {
 
           <S.Section>
             <S.Check>
-              <input type="checkbox" name="terms" />
+              <input type="checkbox" name="terms" aria-invalid={Boolean(errors.terms)} />
               <span>
                 Li e aceito a{' '}
                 <a href="/privacidade" target="_blank" rel="noopener" style={{ color: 'var(--text)', textDecoration: 'underline' }}>

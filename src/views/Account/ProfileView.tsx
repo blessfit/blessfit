@@ -10,7 +10,7 @@ import { EMPTY_ADDRESS, mask, type AddressForm } from '@/lib/customer'
 import type { Customer } from '@/server/customers'
 import * as C from '../Cart/Cart.styles'
 import * as S from './Account.styles'
-import { AddressFields, Input } from './fields'
+import { AddressFields, Input, useScrollToError } from './fields'
 
 const initial: FormState = {}
 
@@ -29,6 +29,7 @@ export function ProfileView({ email, customer, notice }: { email: string; custom
   const [state, action, pending] = useActionState(saveProfile, initial)
   const [deleteState, deleteAction, deleting] = useActionState(deleteAccount, initial)
   const errors = state.fields ?? {}
+  useScrollToError(state.fields)
   const set = (key: keyof typeof profile) => (value: string) => setProfile((p) => ({ ...p, [key]: value }))
 
   return (

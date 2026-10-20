@@ -8,6 +8,14 @@ import { normalizeCep } from '@/lib/documents'
 import * as C from '../Cart/Cart.styles'
 import * as S from './Account.styles'
 
+/** Quando o envio volta com erro, rola até o primeiro campo marcado (aria-invalid), como no checkout. */
+export function useScrollToError(fields: Record<string, string> | undefined) {
+  useEffect(() => {
+    if (!fields || Object.keys(fields).length === 0) return
+    document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [fields])
+}
+
 type InputProps = {
   label: ReactNode
   name: string
@@ -129,7 +137,7 @@ export function AddressFields({
       <Input label="Cidade" name="city" span={3} spanSm={1} required={need} value={value.city} onChange={set('city')} error={errors.city} autoComplete="address-level2" />
       <C.Field $span={1} $spanSm={1} data-invalid={Boolean(errors.uf)}>
         <span>UF {need && <C.Required>*</C.Required>}</span>
-        <select name="uf" value={value.uf} onChange={(e) => set('uf')(e.target.value)} autoComplete="address-level1">
+        <select name="uf" value={value.uf} onChange={(e) => set('uf')(e.target.value)} autoComplete="address-level1" aria-invalid={Boolean(errors.uf)}>
           <option value="">—</option>
           {UFS.map((uf) => (
             <option key={uf}>{uf}</option>
