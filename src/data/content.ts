@@ -223,7 +223,7 @@ export const INFO_PAGES: InfoPage[] = [
       'O tecido tem elastano e estica. Se estiver entre dois tamanhos, prefira o maior.',
     ],
     tables: [
-      measures('Top Maré (alcinha)', ['Largura da base', 'Comprimento'], [['34', '37', '40', '43'], ['27', '28', '29,5', '31']]),
+      measures('Top Maré e Top Aurora (Conjunto Aurora)', ['Largura da base', 'Comprimento'], [['34', '37', '40', '43'], ['27', '28', '29,5', '31']]),
       measures('Shorts Maré', ['Cintura', 'Comprimento'], [['29', '31', '34', '37'], ['32', '35', '39', '43']]),
       measures('Legging Brisa (também no Conjunto Aurora)', ['Cintura', 'Comprimento'], [['29', '32', '35', '38'], ['91', '94', '98', '103']]),
       measures('Regata Brisa (feminina)', ['Largura', 'Comprimento'], [['45', '48', '51', '54'], ['45', '46,5', '48', '49,5']]),
