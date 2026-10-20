@@ -483,7 +483,7 @@ export const IMAGES = {
   },
 
   community: [
-    local(modelBlack, 'Cliente com regata e legging pretas Blessfit'),
+    local(modelBlack, 'Cliente com top e legging pretos Blessfit'),
     local(topTeal, 'Top azul petróleo Blessfit'),
     local(shortsMen, 'Bermuda preta masculina Blessfit'),
     stock('photo-1541534741688-6078c6bfb5c5', 'Atleta com top branco segurando a barra'),
