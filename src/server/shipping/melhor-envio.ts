@@ -80,7 +80,7 @@ type MeQuote = {
  * atendimento) ou sem preço ficam de fora.
  */
 export async function quote(input: { from: string; to: string; parcel: Parcel; services: number[]; timeoutMs?: number }): Promise<RawOption[]> {
-  const data = await request<MeQuote[]>(
+  const data = await request<MeQuote[] | MeQuote>(
     'POST',
     '/shipment/calculate',
     {
@@ -92,8 +92,10 @@ export async function quote(input: { from: string; to: string; parcel: Parcel; s
     },
     input.timeoutMs,
   )
+  // com um serviço só (recotação da etiqueta), o ME devolve o objeto em vez de uma lista
+  const list = Array.isArray(data) ? data : [data]
   // 🔎 custom_price/custom_delivery_range = valores com as regras da conta; usar o preço "com desconto" real
-  return data.flatMap((q) => {
+  return list.flatMap((q) => {
     const price = q.custom_price ?? q.price
     const range = q.custom_delivery_range ?? q.delivery_range
     if (q.error || !price || !range) return []
