@@ -47,10 +47,26 @@ export async function saveCustomer(id: string, fields: Partial<Customer> & { acc
   if (error) throw error
 }
 
-/** Depois de um pedido logado: guarda nome, celular e endereço usados. O CPF só entra se ainda não houver um. */
+/** O CPF já está em outra conta? (cada CPF é de uma conta só: índice único em customers.cpf) */
+export async function cpfTaken(cpf: string, exceptId?: string): Promise<boolean> {
+  let query = db().from('customers').select('id', { count: 'exact', head: true }).eq('cpf', cpf)
+  if (exceptId) query = query.neq('id', exceptId)
+  const { count, error } = await query
+  if (error) throw error
+  return (count ?? 0) > 0
+}
+
+/** Erro do Postgres de valor repetido num índice único (ex.: o CPF entrou em outra conta ao mesmo tempo). */
+export const isUniqueViolation = (err: unknown) => (err as { code?: string } | null)?.code === '23505'
+
+/**
+ * Depois de um pedido logado: guarda nome, celular e endereço usados. O CPF só entra se ainda não houver um
+ * e se não for de outra conta (o pedido segue normal; só não fica salvo no perfil).
+ */
 export async function rememberCheckout(id: string, data: { name: string; cpf: string; phone: string; address: ShippingAddress }) {
   const current = await getCustomer(id)
-  await saveCustomer(id, { name: data.name, phone: data.phone, address: data.address, ...(current?.cpf ? {} : { cpf: data.cpf }) })
+  const keepCpf = current?.cpf || (await cpfTaken(data.cpf, id))
+  await saveCustomer(id, { name: data.name, phone: data.phone, address: data.address, ...(keepCpf ? {} : { cpf: data.cpf }) })
 }
 
 export async function listCustomerOrders(userId: string): Promise<CustomerOrder[]> {
