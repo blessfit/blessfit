@@ -174,7 +174,17 @@ export type InfoPage = {
   id: 'trocas' | 'entrega' | 'pagamento' | 'tamanhos'
   title: string
   paragraphs: string[]
-  table?: { head: string[]; rows: string[][]; note?: string }
+  tables?: { title: string; head: string[]; rows: string[][] }[]
+  note?: string
+}
+
+/** Medidas da peça (em cm) da tabela do fornecedor, nos tamanhos vendidos no site: P, M, G e GG. */
+function measures(title: string, head: [string, string], values: [string[], string[]]) {
+  return {
+    title,
+    head: ['Tamanho', ...head],
+    rows: ['P', 'M', 'G', 'GG'].map((size, i) => [size, values[0][i], values[1][i]]),
+  }
 }
 
 // TODO: revise com as políticas e medidas reais da marca
@@ -208,17 +218,20 @@ export const INFO_PAGES: InfoPage[] = [
   {
     id: 'tamanhos',
     title: 'Guia de tamanhos',
-    paragraphs: ['Medidas do corpo em centímetros. Se estiver entre dois tamanhos, prefira o maior.'],
-    table: {
-      head: ['Tamanho', 'Busto / Tórax', 'Cintura', 'Quadril'],
-      rows: [
-        ['P', '83–88', '65–70', '91–96'],
-        ['M', '89–94', '71–76', '97–102'],
-        ['G', '95–102', '77–84', '103–110'],
-        ['GG', '103–110', '85–92', '111–118'],
-      ],
-      note: 'Ainda em dúvida? Envie suas medidas no WhatsApp que indicamos o tamanho ideal.',
-    },
+    paragraphs: [
+      'Medidas da peça em centímetros, com ela estendida sobre uma mesa, sem esticar. Largura e cintura vão de uma lateral à outra; compare com uma peça sua que veste bem.',
+      'O tecido tem elastano e estica. Se estiver entre dois tamanhos, prefira o maior.',
+    ],
+    tables: [
+      measures('Top Maré (alcinha)', ['Largura da base', 'Comprimento'], [['34', '37', '40', '43'], ['27', '28', '29,5', '31']]),
+      measures('Shorts Maré', ['Cintura', 'Comprimento'], [['29', '31', '34', '37'], ['32', '35', '39', '43']]),
+      measures('Legging Brisa (também no Conjunto Aurora)', ['Cintura', 'Comprimento'], [['29', '32', '35', '38'], ['91', '94', '98', '103']]),
+      measures('Regata Brisa (feminina)', ['Largura', 'Comprimento'], [['45', '48', '51', '54'], ['45', '46,5', '48', '49,5']]),
+      measures('Camiseta Impulso', ['Largura', 'Comprimento'], [['48,5', '51,5', '55,5', '59,5'], ['58,5', '60', '62,5', '65']]),
+      measures('Regata Fôlego (masculina)', ['Largura', 'Comprimento'], [['47', '50', '53', '56'], ['59,5', '61', '63', '65']]),
+      measures('Shorts Impulso', ['Cintura', 'Comprimento'], [['29', '31', '34', '37'], ['42', '44,5', '47', '49,5']]),
+    ],
+    note: 'Ainda em dúvida? Envie suas medidas no WhatsApp que indicamos o tamanho ideal.',
   },
 ]
 
