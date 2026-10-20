@@ -10,7 +10,7 @@ import { redirect } from 'next/navigation'
 import { addressErrors, isCpf, isEmail, isFullName, isPassword, isPhone, safeNext, type AddressForm } from '@/lib/customer'
 import { digits, normalizeCep } from '@/lib/documents'
 import { isAdmin } from '@/server/auth'
-import { currentUser, finishLogin, saveCustomer, type Customer } from '@/server/customers'
+import { cpfTaken, currentUser, finishLogin, isUniqueViolation, saveCustomer, type Customer } from '@/server/customers'
 import type { ShippingAddress } from '@/server/orders'
 import { authClient, db } from '@/server/supabase'
 
@@ -20,7 +20,14 @@ export type FormState = {
   /** E-mail para onde foi mandado o link (confirmação, acesso rápido ou nova senha). */
   sent?: string
   ok?: boolean
+  /** Cadastro barrado porque o e-mail ou o CPF já tem conta: a tela oferece entrar ou recuperar a senha. */
+  exists?: boolean
 }
+
+// Não diz de quem é a conta do CPF (dado de terceiro, LGPD).
+const EMAIL_TAKEN = 'Este e-mail já tem conta (inclusive pelo Google)'
+const CPF_TAKEN = 'Este CPF já está em outra conta'
+const CPF_IN_USE = 'Este CPF já está em outra conta. Fale com a gente no WhatsApp se ele for seu.'
 
 const str = (form: FormData, key: string) => String(form.get(key) ?? '').trim()
 
@@ -120,6 +127,9 @@ export async function signUp(_: FormState, form: FormData): Promise<FormState> {
   if (form.get('terms') !== 'on') errors.terms = 'Aceite a Política de Privacidade para criar a conta'
   if (Object.keys(errors).length > 0) return { fields: errors }
 
+  // antes de criar no Supabase, senão ele já manda o e-mail de confirmação
+  if (await cpfTaken(profile.cpf)) return { fields: { cpf: CPF_TAKEN }, exists: true }
+
   const next = safeNext(form.get('next'))
   const supabase = await authClient()
   const { data, error } = await supabase.auth.signUp({
@@ -130,13 +140,21 @@ export async function signUp(_: FormState, form: FormData): Promise<FormState> {
   if (error) {
     if (error.code === 'weak_password') return { fields: { password: 'Senha fraca: use 8+ caracteres, com letras e números' } }
     if (error.status === 429) return { error: 'Muitas tentativas. Espere alguns minutos e tente de novo.' }
+    // com a confirmação de e-mail desligada, o Supabase recusa o e-mail repetido com este erro
+    if (error.code === 'user_already_exists' || error.code === 'email_exists') return { fields: { email: EMAIL_TAKEN }, exists: true }
     console.error('[conta] erro no cadastro', error.code, error.message)
     return { error: 'Não foi possível criar a conta agora. Tente de novo em instantes.' }
   }
 
-  // e-mail já cadastrado: o Supabase devolve um usuário "fantasma" sem identidades (não salva nada)
-  if (data.user && data.user.identities?.length) {
+  // e-mail já cadastrado (e confirmado): o Supabase devolve um usuário "fantasma" sem identidades e não manda e-mail
+  if (!data.user?.identities?.length) return { fields: { email: EMAIL_TAKEN }, exists: true }
+
+  try {
     await saveCustomer(data.user.id, { ...profile, address, accepted_terms_at: new Date().toISOString() })
+  } catch (err) {
+    if (!isUniqueViolation(err)) throw err
+    // o CPF entrou em outra conta entre a conferência e agora
+    return { fields: { cpf: CPF_TAKEN }, exists: true }
   }
   // confirmação de e-mail desligada no Supabase: já entra direto
   if (data.session && data.user) {
@@ -178,7 +196,13 @@ export async function saveProfile(_: FormState, form: FormData): Promise<FormSta
   const { profile, address, errors } = readProfile(form)
   if (Object.keys(errors).length > 0) return { fields: errors }
   const fields: Partial<Customer> = { ...profile, address }
-  await saveCustomer(user.id, fields)
+  if (await cpfTaken(profile.cpf, user.id)) return { fields: { cpf: CPF_IN_USE } }
+  try {
+    await saveCustomer(user.id, fields)
+  } catch (err) {
+    if (!isUniqueViolation(err)) throw err
+    return { fields: { cpf: CPF_IN_USE } }
+  }
   revalidatePath('/conta', 'layout') // o "Olá, Nome" do menu da conta
   return { ok: true }
 }

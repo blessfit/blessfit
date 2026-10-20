@@ -32,11 +32,6 @@ export function SignUpView({ next }: { next: string }) {
             Enviamos um link de confirmação para <strong>{state.sent}</strong>. Abra o e-mail e toque no link para ativar sua conta.
             Não chegou? Confira o spam ou a aba Promoções.
           </S.Lead>
-          {/* e-mail já cadastrado: o Supabase não manda nada (e não conta, para não revelar quem é cliente) */}
-          <S.Lead>
-            Se este e-mail já tiver conta (inclusive pelo Google), nenhum link é enviado: <a href={loginHref}>entre aqui</a> ou use
-            “Esqueceu a senha?”.
-          </S.Lead>
           <div style={{ marginTop: 24 }}>
             <Button variant="outline" href="/">
               Voltar para a loja
@@ -110,7 +105,12 @@ export function SignUpView({ next }: { next: string }) {
                 {state.error}
               </S.Notice>
             )}
-            {Object.keys(errors).length > 0 && (
+            {state.exists ? (
+              <S.Notice $tone="error" role="alert">
+                Você já tem cadastro: <a href={loginHref}>entre aqui</a> ou use “Esqueceu a senha?” na tela de entrar.
+                {errors.cpf && ' Se esse CPF não for de uma conta sua, fale com a gente no WhatsApp.'}
+              </S.Notice>
+            ) : Object.keys(errors).length > 0 && (
               <S.Notice $tone="error" role="alert">
                 Confira os campos destacados.
               </S.Notice>
