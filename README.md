@@ -124,7 +124,7 @@ src/
 
 ## Antes de divulgar
 
-- [x] Número de WhatsApp em `SHOP.whatsapp`: (37) 99959-9655
+- [x] Número de WhatsApp em `SHOP.whatsapp`: (37) 99952-9650
 - [x] Instagram em `SHOP.instagram`: @blessfitstore_
 - [ ] Revisar preços, avaliações, FAQ, política de troca, entrega e guia de tamanhos com os dados reais
 - [x] Domínio oficial `www.blessfitstore.com.br` (DNS no Registro.br, `metadataBase` atualizado)
