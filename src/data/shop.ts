@@ -6,8 +6,8 @@ import { IMAGES, type Img } from './images'
 
 export const SHOP = {
   name: 'Blessfit',
-  /** WhatsApp com DDI + DDD, só dígitos: (37) 99959-9655 */
-  whatsapp: '5537999599655',
+  /** WhatsApp com DDI + DDD, só dígitos: (37) 99952-9650 */
+  whatsapp: '5537999529650',
   /** @ do Instagram, sem o @ */
   instagram: 'blessfitstore_',
   hashtag: '#MovimentoBlessfit',
