@@ -17,6 +17,13 @@ const Table = styled.table`
   font-size: 14px;
   text-align: center;
 
+  caption {
+    padding-bottom: 6px;
+    color: var(--ink);
+    font-weight: 700;
+    text-align: left;
+  }
+
   th,
   td {
     padding: 10px 8px;
@@ -47,31 +54,30 @@ export function InfoDialog() {
           {page.paragraphs.map((text) => (
             <p key={text}>{text}</p>
           ))}
-          {page.table && (
-            <>
-              <Table>
-                <thead>
-                  <tr>
-                    {page.table.head.map((h) => (
-                      <th key={h} scope="col">
-                        {h}
-                      </th>
+          {page.tables?.map((table) => (
+            <Table key={table.title}>
+              <caption>{table.title}</caption>
+              <thead>
+                <tr>
+                  {table.head.map((h) => (
+                    <th key={h} scope="col">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {table.rows.map((row) => (
+                  <tr key={row[0]}>
+                    {row.map((cell, i) => (
+                      <td key={i}>{cell}</td>
                     ))}
                   </tr>
-                </thead>
-                <tbody>
-                  {page.table.rows.map((row) => (
-                    <tr key={row[0]}>
-                      {row.map((cell, i) => (
-                        <td key={i}>{cell}</td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-              {page.table.note && <p>{page.table.note}</p>}
-            </>
-          )}
+                ))}
+              </tbody>
+            </Table>
+          ))}
+          {page.note && <p>{page.note}</p>}
           <Button
             variant="primary"
             glyph={WhatsApp}
