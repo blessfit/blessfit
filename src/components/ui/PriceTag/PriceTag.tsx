@@ -26,6 +26,11 @@ const Price = styled.span<{ $large?: boolean }>`
   letter-spacing: -0.02em;
 `
 
+const PixLabel = styled.span`
+  color: var(--petrol);
+  font-weight: 700;
+`
+
 const Was = styled.s`
   color: var(--text-faint);
 `
@@ -39,18 +44,13 @@ const Off = styled.span`
   font-weight: 750;
 `
 
-const Pix = styled.p`
-  color: var(--petrol);
-  font-weight: 650;
-`
-
 const Sr = styled.span`
   ${srOnly}
 `
 
 type PriceTagProps = { price: number; pix: number; compareAt?: number; large?: boolean }
 
-/** Preço, preço “de”, parcelamento e valor no Pix. */
+/** Preço no Pix em destaque (o menor), preço “de” e, embaixo, o preço no cartão com o parcelamento. */
 export function PriceTag({ price, pix, compareAt, large }: PriceTagProps) {
   const off = discountPercent(price, compareAt)
   return (
@@ -64,16 +64,14 @@ export function PriceTag({ price, pix, compareAt, large }: PriceTagProps) {
         )}
         <Price $large={large}>
           {off > 0 && <Sr>por </Sr>}
-          {formatBRL(price)}
+          {formatBRL(pix)}
         </Price>
+        <PixLabel>no Pix</PixLabel>
         {off > 0 && <Off>-{off}%</Off>}
       </Row>
       <p>
-        ou {SHOP.installments}x de {formatBRL(installment(price))} sem juros
+        ou {formatBRL(price)} em até {SHOP.installments}x de {formatBRL(installment(price))} sem juros
       </p>
-      <Pix>
-        {formatBRL(pix)} no Pix{price > pix && ` (economize ${formatBRL(price - pix)})`}
-      </Pix>
     </Root>
   )
 }
