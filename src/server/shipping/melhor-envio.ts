@@ -40,7 +40,7 @@ function errorMessage(text: string): string {
   }
 }
 
-async function request<T>(method: 'GET' | 'POST', path: string, body?: object, timeoutMs = 15_000): Promise<T> {
+async function request<T>(method: 'GET' | 'POST' | 'DELETE', path: string, body?: object, timeoutMs = 15_000): Promise<T> {
   const { base, token, userAgent } = config()
   const res = await fetch(`${base}/api/v2/me${path}`, {
     method,
@@ -57,7 +57,7 @@ async function request<T>(method: 'GET' | 'POST', path: string, body?: object, t
   const text = await res.text()
   if (res.status === 401) throw new MelhorEnvioError('Token do Melhor Envio inválido ou expirado: gere um novo no painel do ME', 401)
   if (!res.ok) throw new MelhorEnvioError(errorMessage(text), res.status)
-  return JSON.parse(text) as T
+  return (text ? JSON.parse(text) : undefined) as T
 }
 
 const reais = (cents: number) => Number((cents / 100).toFixed(2))
@@ -169,6 +169,9 @@ export async function addToCart(input: {
   return data.id
 }
 
+/** Tira do carrinho um envio ainda não pago. */
+export const removeFromCart = (id: string) => request<unknown>('DELETE', `/cart/${encodeURIComponent(id)}`)
+
 export type MeOrder = {
   id: string
   status: string
@@ -204,8 +207,14 @@ export async function getOrder(id: string): Promise<MeOrder> {
 /** Paga a etiqueta com o saldo da carteira do ME. */
 export const checkout = (id: string) => request<unknown>('POST', '/shipment/checkout', { orders: [id] })
 
-/** Gera a etiqueta (o código de rastreio pode demorar um pouco para aparecer). */
-export const generate = (id: string) => request<unknown>('POST', '/shipment/generate', { orders: [id] })
+/**
+ * Pede a geração da etiqueta. O ME gera em segundo plano: `generatedAt` e o rastreio aparecem um ou dois
+ * minutos depois. A recusa vem com HTTP 200 e `status: false` no envio.
+ */
+export async function generate(id: string): Promise<void> {
+  const data = await request<Record<string, { status?: boolean; message?: string }>>('POST', '/shipment/generate', { orders: [id] })
+  if (data[id]?.status === false) throw new MelhorEnvioError(data[id].message ?? 'O Melhor Envio não gerou a etiqueta')
+}
 
 /** URL do PDF da etiqueta (pode expirar: pedir de novo a cada impressão). */
 export async function printUrl(id: string): Promise<string> {
