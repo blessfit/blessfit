@@ -40,7 +40,7 @@ function errorMessage(text: string): string {
   }
 }
 
-async function request<T>(method: 'GET' | 'POST', path: string, body?: object, timeoutMs = 15_000): Promise<T> {
+async function request<T>(method: 'GET' | 'POST' | 'DELETE', path: string, body?: object, timeoutMs = 15_000): Promise<T> {
   const { base, token, userAgent } = config()
   const res = await fetch(`${base}/api/v2/me${path}`, {
     method,
@@ -57,7 +57,7 @@ async function request<T>(method: 'GET' | 'POST', path: string, body?: object, t
   const text = await res.text()
   if (res.status === 401) throw new MelhorEnvioError('Token do Melhor Envio inválido ou expirado: gere um novo no painel do ME', 401)
   if (!res.ok) throw new MelhorEnvioError(errorMessage(text), res.status)
-  return JSON.parse(text) as T
+  return (text ? JSON.parse(text) : undefined) as T
 }
 
 const reais = (cents: number) => Number((cents / 100).toFixed(2))
@@ -166,6 +166,9 @@ export async function addToCart(input: {
   })
   return data.id
 }
+
+/** Tira do carrinho um envio ainda não pago. */
+export const removeFromCart = (id: string) => request<unknown>('DELETE', `/cart/${encodeURIComponent(id)}`)
 
 export type MeOrder = {
   id: string

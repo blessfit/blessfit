@@ -2,8 +2,9 @@
  * Etiqueta do pedido no Melhor Envio, gerada pelo painel depois de emitir a NF-e:
  * carrinho → pagar com o saldo → gerar → imprimir.
  *
- * Cada passo grava o resultado antes do próximo. Se algo falhar, gerar de novo retoma de onde parou
- * (com `me_order_id` gravado, não cria outro carrinho nem paga duas vezes).
+ * Cada passo grava o resultado antes do próximo. Se algo falhar, gerar de novo com a mesma chave retoma
+ * de onde parou (com `me_order_id` gravado, não cria outro carrinho nem paga duas vezes). Com outra chave,
+ * o envio antigo sai do carrinho: a chave vai no envio, então reaproveitá-lo pagaria com a chave errada.
  */
 import 'server-only'
 import { LABEL_PRICE_TOLERANCE_CENTS } from '@/data/shipping'
@@ -46,6 +47,18 @@ async function update(id: string, patch: Partial<Order>) {
   if (error) throw error
 }
 
+/** Descarta o envio feito com outra chave. Se ele sumiu do ME, só limpa o vínculo; se já foi pago, recusa. */
+async function dropStaleCart(orderId: string, meId: string) {
+  try {
+    const me = await melhorEnvio.getOrder(meId)
+    if (me.paidAt) throw new Error('A etiqueta já foi paga com outra chave de NF-e: cancele o envio no painel do Melhor Envio antes de gerar outra')
+    await melhorEnvio.removeFromCart(meId)
+  } catch (err) {
+    if (!(err instanceof melhorEnvio.MelhorEnvioError && err.status === 404)) throw err
+  }
+  await update(orderId, { me_order_id: null })
+}
+
 export async function generateLabel(orderId: string, nfeKey: string, acceptCents?: number): Promise<LabelResult> {
   const order = await findOrder(orderId)
   if (!order) return { ok: false, error: 'Pedido não encontrado' }
@@ -59,7 +72,7 @@ export async function generateLabel(orderId: string, nfeKey: string, acceptCents
   // trava: dois cliques (ou duas abas) não compram duas etiquetas
   const { data: locked, error } = await db()
     .from('orders')
-    .update({ shipping_status: 'buying', nfe_key: key, shipping_error: null })
+    .update({ shipping_status: 'buying', shipping_error: null })
     .eq('id', order.id)
     .or('shipping_status.is.null,shipping_status.eq.failed')
     .select('id')
@@ -68,6 +81,12 @@ export async function generateLabel(orderId: string, nfeKey: string, acceptCents
 
   try {
     let meId = order.me_order_id
+    if (meId && order.nfe_key !== key) {
+      await dropStaleCart(order.id, meId)
+      meId = null
+    }
+    await update(order.id, { nfe_key: key })
+
     if (!meId) {
       const [current] = await melhorEnvio.quote({
         from: originCep(),
