@@ -207,8 +207,14 @@ export async function getOrder(id: string): Promise<MeOrder> {
 /** Paga a etiqueta com o saldo da carteira do ME. */
 export const checkout = (id: string) => request<unknown>('POST', '/shipment/checkout', { orders: [id] })
 
-/** Gera a etiqueta (o código de rastreio pode demorar um pouco para aparecer). */
-export const generate = (id: string) => request<unknown>('POST', '/shipment/generate', { orders: [id] })
+/**
+ * Pede a geração da etiqueta. O ME gera em segundo plano: `generatedAt` e o rastreio aparecem um ou dois
+ * minutos depois. A recusa vem com HTTP 200 e `status: false` no envio.
+ */
+export async function generate(id: string): Promise<void> {
+  const data = await request<Record<string, { status?: boolean; message?: string }>>('POST', '/shipment/generate', { orders: [id] })
+  if (data[id]?.status === false) throw new MelhorEnvioError(data[id].message ?? 'O Melhor Envio não gerou a etiqueta')
+}
 
 /** URL do PDF da etiqueta (pode expirar: pedir de novo a cada impressão). */
 export async function printUrl(id: string): Promise<string> {

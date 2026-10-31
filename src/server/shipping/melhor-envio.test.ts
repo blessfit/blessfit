@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { quote } from './melhor-envio'
+import { generate, quote, removeFromCart } from './melhor-envio'
 
 const parcel = { weightG: 300, lengthCm: 30, widthCm: 25, heightCm: 2, insuranceCents: 8990 }
 const pac = { id: 1, name: 'PAC', price: '20.50', delivery_range: { min: 3, max: 7 }, company: { name: 'Correios' } }
@@ -28,5 +28,20 @@ describe('quote', () => {
     const options = await quote({ from: '35500000', to: '30130010', parcel, services: [1] })
     expect(options).toHaveLength(1)
     expect(options[0].costCents).toBe(2050)
+  })
+
+  it('generate aceita a geração pedida', async () => {
+    respond({ envio: { status: true, message: 'Envio gerado com sucesso' } })
+    await expect(generate('envio')).resolves.toBeUndefined()
+  })
+
+  it('generate falha quando o ME recusa com HTTP 200 e status false', async () => {
+    respond({ envio: { status: false, message: 'Não foi possível gerar' } })
+    await expect(generate('envio')).rejects.toThrow('Não foi possível gerar')
+  })
+
+  it('removeFromCart aceita a resposta 204, sem corpo', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 204 })))
+    await expect(removeFromCart('envio')).resolves.toBeUndefined()
   })
 })

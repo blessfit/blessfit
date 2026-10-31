@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { findOrder, type Order } from '../orders'
-import { generateLabel } from './label'
+import { generateLabel, labelUrl } from './label'
 import * as melhorEnvio from './melhor-envio'
 
 const updates = vi.hoisted(() => [] as Record<string, unknown>[])
@@ -17,7 +17,7 @@ vi.mock('./melhor-envio', () => {
       super(message)
     }
   }
-  return { MelhorEnvioError, quote: vi.fn(), addToCart: vi.fn(), getOrder: vi.fn(), removeFromCart: vi.fn(), checkout: vi.fn(), generate: vi.fn() }
+  return { MelhorEnvioError, quote: vi.fn(), addToCart: vi.fn(), getOrder: vi.fn(), removeFromCart: vi.fn(), checkout: vi.fn(), generate: vi.fn(), printUrl: vi.fn() }
 })
 vi.mock('../supabase', () => ({
   db: () => ({
@@ -107,6 +107,34 @@ describe('generateLabel com envio já no carrinho', () => {
     expect(updates).not.toContainEqual({ me_order_id: null })
   })
 
+  it('com a mesma chave, cria outro envio se o antigo já não existe no Melhor Envio', async () => {
+    vi.mocked(findOrder).mockResolvedValue(order({}))
+    vi.mocked(melhorEnvio.getOrder).mockRejectedValueOnce(new melhorEnvio.MelhorEnvioError('Registro não encontrado', 404)).mockResolvedValue(meOrder({}))
+
+    expect(await generateLabel('pedido', OLD_KEY)).toEqual({ ok: true })
+    expect(updates).toContainEqual({ me_order_id: null })
+    expect(vi.mocked(melhorEnvio.addToCart).mock.calls[0][0].nfeKey).toBe(OLD_KEY)
+    expect(updates).toContainEqual({ me_order_id: 'envio-novo' })
+  })
+
+  it('não some com o envio se o Melhor Envio falhar por outro motivo', async () => {
+    vi.mocked(findOrder).mockResolvedValue(order({}))
+    vi.mocked(melhorEnvio.getOrder).mockRejectedValue(new melhorEnvio.MelhorEnvioError('Erro interno', 500))
+
+    expect((await generateLabel('pedido', OLD_KEY)).ok).toBe(false)
+    expect(melhorEnvio.addToCart).not.toHaveBeenCalled()
+    expect(updates).not.toContainEqual({ me_order_id: null })
+  })
+
+  it('fica pronta depois de pedir a geração, mesmo com o Melhor Envio ainda gerando', async () => {
+    vi.mocked(findOrder).mockResolvedValue(order({ me_order_id: null, nfe_key: null, shipping_status: null }))
+    vi.mocked(melhorEnvio.getOrder).mockResolvedValue(meOrder({ generatedAt: null, tracking: null }))
+
+    expect(await generateLabel('pedido', NEW_KEY)).toEqual({ ok: true })
+    expect(melhorEnvio.generate).toHaveBeenCalledWith('envio-novo')
+    expect(updates).toContainEqual({ shipping_status: 'ready', label_cost_cents: 1000, tracking_code: null })
+  })
+
   it('com outra chave, segue se o envio antigo já não existe no Melhor Envio', async () => {
     vi.mocked(findOrder).mockResolvedValue(order({}))
     vi.mocked(melhorEnvio.getOrder).mockRejectedValueOnce(new melhorEnvio.MelhorEnvioError('Registro não encontrado', 404)).mockResolvedValue(meOrder({}))
@@ -114,5 +142,28 @@ describe('generateLabel com envio já no carrinho', () => {
     expect(await generateLabel('pedido', NEW_KEY)).toEqual({ ok: true })
     expect(melhorEnvio.removeFromCart).not.toHaveBeenCalled()
     expect(vi.mocked(melhorEnvio.addToCart).mock.calls[0][0].nfeKey).toBe(NEW_KEY)
+  })
+})
+
+describe('labelUrl', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    updates.length = 0
+    vi.mocked(findOrder).mockResolvedValue(order({ shipping_status: 'ready', tracking_code: null }))
+  })
+
+  it('não imprime enquanto o Melhor Envio não terminou de gerar', async () => {
+    vi.mocked(melhorEnvio.getOrder).mockResolvedValue(meOrder({ generatedAt: null, tracking: null }))
+
+    expect((await labelUrl('pedido')).ok).toBe(false)
+    expect(melhorEnvio.printUrl).not.toHaveBeenCalled()
+  })
+
+  it('com a etiqueta gerada, grava o rastreio e devolve a URL', async () => {
+    vi.mocked(melhorEnvio.getOrder).mockResolvedValue(meOrder({}))
+    vi.mocked(melhorEnvio.printUrl).mockResolvedValue('https://etiqueta')
+
+    expect(await labelUrl('pedido')).toEqual({ ok: true, url: 'https://etiqueta' })
+    expect(updates).toContainEqual({ tracking_code: 'AA123' })
   })
 })

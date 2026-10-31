@@ -47,16 +47,14 @@ async function update(id: string, patch: Partial<Order>) {
   if (error) throw error
 }
 
-/** Descarta o envio feito com outra chave. Se ele sumiu do ME, só limpa o vínculo; se já foi pago, recusa. */
-async function dropStaleCart(orderId: string, meId: string) {
+/** Envio gravado no pedido, ou null se ele já não existe no ME (removido do carrinho, por exemplo). */
+async function findShipment(id: string) {
   try {
-    const me = await melhorEnvio.getOrder(meId)
-    if (me.paidAt) throw new Error('A etiqueta já foi paga com outra chave de NF-e: cancele o envio no painel do Melhor Envio antes de gerar outra')
-    await melhorEnvio.removeFromCart(meId)
+    return await melhorEnvio.getOrder(id)
   } catch (err) {
-    if (!(err instanceof melhorEnvio.MelhorEnvioError && err.status === 404)) throw err
+    if (err instanceof melhorEnvio.MelhorEnvioError && err.status === 404) return null
+    throw err
   }
-  await update(orderId, { me_order_id: null })
 }
 
 export async function generateLabel(orderId: string, nfeKey: string, acceptCents?: number): Promise<LabelResult> {
@@ -80,14 +78,16 @@ export async function generateLabel(orderId: string, nfeKey: string, acceptCents
   if (!locked?.length) return { ok: false, error: 'A etiqueta já está sendo gerada ou já está pronta' }
 
   try {
-    let meId = order.me_order_id
-    if (meId && order.nfe_key !== key) {
-      await dropStaleCart(order.id, meId)
-      meId = null
+    let me = order.me_order_id ? await findShipment(order.me_order_id) : null
+    if (me && order.nfe_key !== key) {
+      if (me.paidAt) throw new Error('A etiqueta já foi paga com outra chave de NF-e: cancele o envio no painel do Melhor Envio antes de gerar outra')
+      await melhorEnvio.removeFromCart(me.id)
+      me = null
     }
+    if (order.me_order_id && !me) await update(order.id, { me_order_id: null })
     await update(order.id, { nfe_key: key })
 
-    if (!meId) {
+    if (!me) {
       const [current] = await melhorEnvio.quote({
         from: originCep(),
         to: order.shipping_address.cep,
@@ -104,7 +104,7 @@ export async function generateLabel(orderId: string, nfeKey: string, acceptCents
         }
       }
 
-      meId = await melhorEnvio.addToCart({
+      const meId = await melhorEnvio.addToCart({
         serviceId: order.shipping.serviceId,
         from: sender(),
         to: recipient(order),
@@ -114,18 +114,19 @@ export async function generateLabel(orderId: string, nfeKey: string, acceptCents
         orderId: order.id,
       })
       await update(order.id, { me_order_id: meId })
+      me = await melhorEnvio.getOrder(meId)
     }
 
-    let me = await melhorEnvio.getOrder(meId)
     if (!me.paidAt) {
-      await melhorEnvio.checkout(meId)
-      me = await melhorEnvio.getOrder(meId)
+      await melhorEnvio.checkout(me.id)
+      me = await melhorEnvio.getOrder(me.id)
     }
     if (!me.generatedAt) {
-      await melhorEnvio.generate(meId)
-      me = await melhorEnvio.getOrder(meId)
+      await melhorEnvio.generate(me.id)
+      me = await melhorEnvio.getOrder(me.id)
     }
 
+    // `ready` = paga e com a geração pedida: o PDF e o rastreio só saem depois, e labelUrl confere
     await update(order.id, { shipping_status: 'ready', label_cost_cents: me.costCents, tracking_code: me.tracking })
     return { ok: true }
   } catch (err) {
@@ -135,15 +136,14 @@ export async function generateLabel(orderId: string, nfeKey: string, acceptCents
   }
 }
 
-/** URL do PDF da etiqueta. Aproveita para buscar o rastreio, que às vezes chega depois de gerar. */
+/** URL do PDF da etiqueta, quando o ME já terminou de gerar. Aproveita para buscar o rastreio, que chega junto. */
 export async function labelUrl(orderId: string): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
   const order = await findOrder(orderId)
   if (!order?.me_order_id || order.shipping_status !== 'ready') return { ok: false, error: 'Este pedido não tem etiqueta pronta' }
   try {
-    if (!order.tracking_code) {
-      const me = await melhorEnvio.getOrder(order.me_order_id)
-      if (me.tracking) await update(order.id, { tracking_code: me.tracking })
-    }
+    const me = await melhorEnvio.getOrder(order.me_order_id)
+    if (!me.generatedAt) return { ok: false, error: 'O Melhor Envio ainda está gerando a etiqueta: tente de novo em um ou dois minutos' }
+    if (me.tracking && !order.tracking_code) await update(order.id, { tracking_code: me.tracking })
     return { ok: true, url: await melhorEnvio.printUrl(order.me_order_id) }
   } catch (err) {
     return { ok: false, error: message(err) }
