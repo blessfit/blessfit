@@ -6,7 +6,7 @@ produção e é atualizada a cada passo. Nada aqui deve ser feito antes de a §1
 ## Dados do contador (loja)
 
 - [ ] NCM por tipo de peça. `6104.23.00` foi usado só em teste e é um palpite.
-- [ ] CFOP dentro e fora de MG.
+- [ ] CFOP dentro e fora de MG. Em teste a natureza escolheu 5102 em MG e 6108 para SP (não contribuinte): o contador confirma, e diz se é 6108 ou 6107.
 - [ ] CSOSN.
 - [ ] Origem da mercadoria (`itens[].origem`).
 - [ ] Gravar NCM e origem em `src/data/fiscal.ts` e virar `FISCAL.reviewed` para `true`. Enquanto estiver

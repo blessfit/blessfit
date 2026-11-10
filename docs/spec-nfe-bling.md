@@ -241,7 +241,7 @@ intermediador: nenhum desses campos precisa ir na API. O `xml` de `GET /nfe/{id}
   como a prazo, com duplicata. Vencendo no dia, sai à vista (`indPag=0`) e sem duplicata.
 - ⚠️ Na nota criada pela API, `indPres` saiu `9` (não presencial, outros), e não `2` (internet) como na nota feita
   na tela. A API não tem esse campo: precisa vir da natureza ou do Bling. Pendente para produção.
-- Conferidos no XML: cupom (nota nº 3, `vDesc` em reais) e frete pago (nota nº 4, `vFrete` 13,24 somado em `vNF`). Em aberto: venda para fora de MG.
+- Conferidos no XML: cupom (nota nº 3, `vDesc` em reais), frete pago (nota nº 4, `vFrete` 13,24 somado em `vNF`) e venda para SP (nota nº 5: `idDest` 2, CFOP **6108**, venda interestadual a não contribuinte, escolhido pela natureza do Bling). Duplo clique em **Emitir NF-e** (dois cliques no mesmo instante): uma nota só.
 
 **Regras de validação antes de chamar o Bling:**
 
