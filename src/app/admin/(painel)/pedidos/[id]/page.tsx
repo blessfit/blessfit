@@ -3,9 +3,13 @@ import { notFound } from 'next/navigation'
 import { SHOP } from '@/data/shop'
 import { getOrderWithEvents } from '@/server/admin'
 import { requireAdmin } from '@/server/auth'
+import { isConnected } from '@/server/nfe/auth'
+import { emissionEnv } from '@/server/nfe/bling'
+import { canRelease } from '@/server/nfe/issue'
 import { walletBalance } from '@/server/shipping/label'
 import { updateOrderStatus } from '../../../actions'
 import { AlertIcon, ArrowLeftIcon, WhatsAppIcon } from '../../../_components/Icons'
+import { NfeCard } from '../../../_components/NfeCard'
 import { SubmitButton } from '../../../_components/Pending'
 import { ShippingCard } from '../../../_components/ShippingCard'
 import { StatusBadge } from '../../../_components/StatusBadge'
@@ -13,11 +17,21 @@ import s from '../../../admin.module.css'
 import { cents, formatDate, METHOD_LABEL, NEXT_STEP, ORDER_STATUSES, shortId, STATUS_LABEL } from '../../../labels'
 import { productPhoto } from '../../../photos'
 
-export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function OrderPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ bling?: string }>
+}) {
   await requireAdmin()
   const found = await getOrderWithEvents((await params).id)
   if (!found) notFound()
   const { order, events } = found
+  const environment = emissionEnv()
+  const blingConnected = environment ? await isConnected() : false
+  const { bling: blingResult } = await searchParams
+  const releasable = canRelease(order)
 
   const phone = order.customer?.phone_number?.replace(/\D/g, '')
   const firstName = order.customer?.name?.split(' ')[0]
@@ -184,7 +198,12 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             </div>
           </section>
 
-          <ShippingCard order={order} balanceCents={balance} />
+          {environment && (
+            <NfeCard order={order} connected={blingConnected} environment={environment} result={blingResult} releasable={releasable} />
+          )}
+
+          {/* `key`: com a chave gravada pela emissão, o campo da etiqueta já vem preenchido */}
+          <ShippingCard key={order.nfe_key ?? ''} order={order} balanceCents={balance} />
 
           <section className={s.card}>
             <div className={s.cardHead}>

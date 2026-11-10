@@ -4,10 +4,15 @@
  * Ações do painel. Toda ação é um endpoint público: cada uma confere o login com requireAdmin()
  * antes de tocar no banco.
  */
+import { randomBytes } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { CATALOG } from '@/data/catalog'
 import { isAdmin, requireAdmin } from '@/server/auth'
+import { authorizeUrl, emissionEnv } from '@/server/nfe/bling'
+import { BLING_STATE_COOKIE, BLING_STATE_PATH } from '@/server/nfe/connection'
+import { issueInvoice, refreshInvoice, releaseInvoice } from '@/server/nfe/issue'
 import type { OrderStatus } from '@/server/orders'
 import { cancelLabel, generateLabel, labelUrl, type LabelResult } from '@/server/shipping/label'
 import { anonymizeSurveyContact } from '@/server/survey'
@@ -141,6 +146,47 @@ export async function printShippingLabel(orderId: string) {
 export async function cancelShippingLabel(orderId: string): Promise<ActionResult> {
   await requireAdmin()
   const result = await cancelLabel(orderId)
+  revalidatePath('/admin/(painel)', 'layout')
+  return result
+}
+
+/** Leva o admin para autorizar o aplicativo no Bling. O `state` fica em cookie para validar o retorno. */
+export async function connectBling(form: FormData) {
+  await requireAdmin()
+  if (!emissionEnv()) return
+  const orderId = String(form.get('orderId') ?? '')
+  const state = randomBytes(24).toString('hex')
+  const store = await cookies()
+  store.set(BLING_STATE_COOKIE, `${state}.${orderId}`, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: BLING_STATE_PATH,
+    maxAge: 10 * 60,
+  })
+  redirect(authorizeUrl(state))
+}
+
+/** NF-e pelo Bling: cria, envia à Sefaz e grava a chave (também é o "Tentar de novo" depois de rejeição). */
+export async function issueNfe(orderId: string): Promise<ActionResult> {
+  await requireAdmin()
+  const result = await issueInvoice(orderId)
+  revalidatePath('/admin/(painel)', 'layout')
+  return result.ok ? { ok: true } : result
+}
+
+/** Consulta a nota em andamento. Nunca cria nem envia outra. */
+export async function refreshNfe(orderId: string): Promise<ActionResult> {
+  await requireAdmin()
+  const result = await refreshInvoice(orderId)
+  revalidatePath('/admin/(painel)', 'layout')
+  return result.ok ? { ok: true } : result
+}
+
+/** Libera uma emissão que travou antes de o Bling devolver o id. O admin confere no Bling antes. */
+export async function releaseNfe(orderId: string): Promise<ActionResult> {
+  await requireAdmin()
+  const result = await releaseInvoice(orderId)
   revalidatePath('/admin/(painel)', 'layout')
   return result
 }
