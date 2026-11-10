@@ -222,7 +222,7 @@ Nomes de campo conforme o schema de `POST /nfe` 📘 (`*` = obrigatório no sche
 | NCM | `itens[].classificacaoFiscal` | `src/data/fiscal.ts` por `Kind` ⏳ | `6104.23.00` foi usado só em teste, nunca em produção |
 | CFOP e CSOSN | `itens[].cfop` omitido | Regra da natureza | No teste: 5102 e 102. ⏳ Testar também fora de MG |
 | Frete | `transporte.frete` | `shipping_cents` | 📘 Só existe o valor total, sem campo por item: o rateio fica com o Bling. Conferir o XML 🧪 |
-| Desconto | `desconto` | `discount_cents` | 🧪 O schema não diz se é valor ou percentual: conferir o XML. Conferir também se `item.price` já vem com desconto |
+| Desconto | `desconto` | `discount_cents` | ✅ Valor em reais (nota de teste nº 3: cupom de 10%, `vDesc` 0,40 rateado no item, `vNF` igual ao valor pago). `item.price` vai sem desconto |
 | Transporte | `transporte{fretePorConta = 0, transportador.nome*, volume{quantidade = 1, especie = 2, pesoBruto, pesoLiquido}}` | `shipping.carrier` e `shipping.parcel` | Peso em kg. Não usar `volumes[]`, que é da logística do Bling |
 | Pagamento | `parcelas[]{data*, valor*, formaPagamento.id*, caut}` | `method` e `paid_amount_cents` | `GET /formas-pagamentos` traz `tipoPagamento`: `17` Pix dinâmico, `20` Pix estático, `3` crédito. Gravar os ids em env |
 | E-mail | Query `enviarEmail=false` | Fixo na v1 | Sem o parâmetro, vale o padrão da conta: sempre enviar |
@@ -241,7 +241,7 @@ intermediador: nenhum desses campos precisa ir na API. O `xml` de `GET /nfe/{id}
   como a prazo, com duplicata. Vencendo no dia, sai à vista (`indPag=0`) e sem duplicata.
 - ⚠️ Na nota criada pela API, `indPres` saiu `9` (não presencial, outros), e não `2` (internet) como na nota feita
   na tela. A API não tem esse campo: precisa vir da natureza ou do Bling. Pendente para produção.
-- Em aberto: `desconto` (valor ou percentual) e venda para fora de MG.
+- Conferidos no XML: cupom (nota nº 3, `vDesc` em reais) e frete pago (nota nº 4, `vFrete` 13,24 somado em `vNF`). Em aberto: venda para fora de MG.
 
 **Regras de validação antes de chamar o Bling:**
 

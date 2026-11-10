@@ -196,7 +196,7 @@ export function nfeBody(draft: InvoiceDraft) {
       pesoBruto: item.weightKg,
       pesoLiquido: item.weightKg,
     })),
-    // 🧪 o schema não diz se é valor ou percentual: conferir no XML do primeiro teste com cupom
+    // valor em reais, não percentual: conferido no XML da nota de teste nº 3 (cupom de 10%, vDesc 0,40)
     ...(draft.discountCents > 0 && { desconto: reais(draft.discountCents) }),
     transporte: {
       fretePorConta: 0,
