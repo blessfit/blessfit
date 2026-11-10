@@ -290,12 +290,22 @@ export async function getInvoice(accessToken: string, id: string): Promise<Invoi
     state: invoiceState(data.situacao),
     number: data.numero || undefined,
     key: data.chaveAcesso || undefined,
-    danfeUrl: data.linkDanfe || undefined,
+    danfeUrl: blingUrl(data.linkDanfe),
     xmlUrl: data.xml || undefined,
   }
 }
 
 const BLING_HOST = 'www.bling.com.br'
+
+/** Link vindo da API (DANFE): só vai para o painel se for https no domínio do Bling. */
+function blingUrl(value: string | undefined): string | undefined {
+  try {
+    const url = new URL(value ?? '')
+    return url.protocol === 'https:' && (url.hostname === 'bling.com.br' || url.hostname.endsWith('.bling.com.br')) ? url.href : undefined
+  } catch {
+    return undefined
+  }
+}
 
 /**
  * Ambiente em que a Sefaz autorizou a nota, lido do `tpAmb` do XML (`1` produção, `2` homologação).

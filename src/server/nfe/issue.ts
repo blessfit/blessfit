@@ -133,7 +133,7 @@ export async function issueInvoice(orderId: string): Promise<NfeResult> {
     if (id) {
       const current = await getInvoice(token, id)
       if (!current) return giveUp(new BlingError('A nota deste pedido não foi encontrada no Bling: confira em Notas fiscais'))
-      if (current.state !== 'rejected' && current.state !== 'pending') return settle(order.id, current, env.env)
+      if (current.state !== 'rejected' && current.state !== 'pending') return await settle(order.id, current, env.env)
       if (!current.number) return giveUp(new BlingError('O Bling não informou o número da nota: corrija e envie por Bling > Notas fiscais'))
       try {
         await updateInvoice(token, id, current.number, built.draft)
@@ -216,6 +216,7 @@ export function canRelease(order: Pick<Order, 'nfe_status' | 'bling_nfe_id' | 'n
  * há nota deste pedido no Bling: o site não consegue saber sozinho (spec §9).
  */
 export async function releaseInvoice(orderId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId)) return { ok: false, error: 'Pedido não encontrado' }
   const staleBefore = new Date(Date.now() - STALE_ISSUING_MS).toISOString()
   const { data, error } = await db()
     .from('orders')

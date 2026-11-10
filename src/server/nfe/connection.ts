@@ -1,4 +1,5 @@
 /* Constantes do fluxo "Conectar Bling", compartilhadas pela action, pelo callback e pelo painel. */
+import 'server-only'
 
 /** Cookie HttpOnly com `{state}.{id do pedido}`, para validar o retorno e voltar ao pedido. */
 export const BLING_STATE_COOKIE = 'bling_oauth_state'

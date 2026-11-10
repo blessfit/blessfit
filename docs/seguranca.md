@@ -118,3 +118,49 @@ Não houve achado crítico nem alto.
 - A rota do painel, a ação “Remover contato” e a exportação chamam `requireAdmin()`.
 - Os logs não têm dados pessoais.
 - Rate limit de 10 por minuto por IP no Firewall da Vercel.
+
+## Revisão de 10/11/2026: NF-e pelo Bling
+
+Escopo: branch `feat/nfe-bling` (`src/server/nfe/`, `/api/bling/callback`, `/api/cron/bling-refresh`, ações e
+cartão da NF-e no painel, migration `20261031000000_nfe_bling.sql`). Feita pelo agente `security-reviewer`.
+Não houve achado crítico, alto nem médio.
+
+### Corrigido no código
+
+#### 1. Link do DANFE ia para o painel sem validação — baixo
+- **Problema:** o `linkDanfe` da resposta do Bling era gravado e virava `href` no painel sem checar esquema
+  nem domínio. Só seria explorável com a API do Bling comprometida (link de phishing com cara de DANFE).
+- **Correção:** `blingUrl` em `src/server/nfe/bling.ts` só aceita `https` em `bling.com.br` e subdomínios.
+
+#### 2. Chave da nota emitida pelo painel só era protegida na tela — baixo
+- **Problema:** o campo da chave fica só leitura com a nota autorizada, mas `createShippingLabel` aceitava
+  qualquer chave válida. Chamando a ação direto, um admin trocava a chave de uma nota emitida.
+- **Correção:** `generateLabel` recusa chave diferente da gravada quando `nfe_status = 'authorized'`.
+
+#### 3. `src/server/nfe/connection.ts` sem `server-only` — baixo
+- **Correção:** import adicionado. O arquivo só tinha constantes, sem segredo.
+
+#### 4. Ajustes informativos
+- `releaseInvoice` exige um uuid antes de consultar o banco.
+- `issueInvoice` aguarda o `settle` dentro do `try` (`return await`), para uma falha ao gravar cair no
+  tratamento de erro da emissão.
+
+### Pendente
+
+- Registrar o cron em `vercel.json` na entrega em produção (`docs/pendencias-prod-nfe.md`). Sem ele, o
+  refresh token vence depois de 30 dias sem emissão e é preciso reconectar: afeta disponibilidade, não
+  segurança.
+- Conferir com a chave pública, depois de aplicar a migration em produção, que `bling_auth` não é legível
+  (`permission denied` ou `[]`). A sonda não rodou nesta revisão.
+
+### Conferido
+
+- OAuth: `state` aleatório em cookie HttpOnly de uso único, comparado em tempo constante; callback e
+  "Conectar Bling" exigem admin; sem open redirect.
+- Tokens cifrados com AES-256-GCM, renovação com trava, nenhum token em log, resposta ou erro.
+- Cron: 401 sem `CRON_SECRET`, comparação em tempo constante.
+- Ações da NF-e com `requireAdmin()`; valores fiscais vêm só do banco, do catálogo e de `src/data/fiscal.ts`.
+- Leitura do XML só em `https://www.bling.com.br`, sem seguir redirecionamento e sem token.
+- Logs só com id do pedido e status HTTP. Erros do Bling aparecem como texto, sem HTML.
+- `bling_auth` com RLS sem policies e `revoke` de `anon`/`authenticated`; colunas novas de `orders` não saem
+  em `/api/order` nem na exportação.

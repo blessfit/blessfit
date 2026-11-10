@@ -204,11 +204,18 @@ describe('refreshInvoice', () => {
 })
 
 describe('releaseInvoice', () => {
+  const ID = '125bc5bb-94a5-4f27-86a2-6c4e2a7a0680'
+
   it('só libera emissão travada há mais de 2 minutos', async () => {
     db.lockRows = []
-    expect((await releaseInvoice('pedido')).ok).toBe(false)
-    db.lockRows = [{ id: 'pedido' }]
-    expect(await releaseInvoice('pedido')).toEqual({ ok: true })
+    expect((await releaseInvoice(ID)).ok).toBe(false)
+    db.lockRows = [{ id: ID }]
+    expect(await releaseInvoice(ID)).toEqual({ ok: true })
     expect(last()).toMatchObject({ nfe_status: null })
+  })
+
+  it('id que não é uuid: recusa sem consultar o banco', async () => {
+    expect((await releaseInvoice('pedido')).ok).toBe(false)
+    expect(db.updates).toEqual([])
   })
 })

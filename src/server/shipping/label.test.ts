@@ -83,6 +83,13 @@ describe('generateLabel com envio já no carrinho', () => {
     expect(melhorEnvio.addToCart).not.toHaveBeenCalled()
   })
 
+  it('com NF-e emitida pelo painel, recusa outra chave sem mexer no pedido', async () => {
+    vi.mocked(findOrder).mockResolvedValue(order({ nfe_status: 'authorized' }))
+
+    expect(await generateLabel('pedido', NEW_KEY)).toEqual({ ok: false, error: expect.stringMatching(/emitida pelo painel/) })
+    expect(updates).toEqual([])
+  })
+
   it('com outra chave, tira o envio antigo do carrinho e cria um com a chave nova', async () => {
     vi.mocked(findOrder).mockResolvedValue(order({}))
     vi.mocked(melhorEnvio.getOrder).mockResolvedValueOnce(meOrder({ id: 'envio-antigo', paidAt: null })).mockResolvedValue(meOrder({}))
