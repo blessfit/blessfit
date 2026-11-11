@@ -45,6 +45,15 @@ export const TagIcon = () => (
   </Icon>
 )
 
+export const TicketIcon = () => (
+  <Icon>
+    <path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z" />
+    <path d="m9.5 14.5 5-5" />
+    <circle cx="9.5" cy="9.5" r="0.6" />
+    <circle cx="14.5" cy="14.5" r="0.6" />
+  </Icon>
+)
+
 export const SurveyIcon = () => (
   <Icon>
     <path d="M9 4h6v3H9z" />

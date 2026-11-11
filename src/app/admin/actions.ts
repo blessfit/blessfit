@@ -10,6 +10,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { CATALOG } from '@/data/catalog'
 import { isAdmin, requireAdmin } from '@/server/auth'
+import { COUPON_CODE, normalizeCode, parseCouponForm, type CouponForm } from '@/server/coupons'
 import { authorizeUrl, emissionEnv } from '@/server/nfe/bling'
 import { BLING_STATE_COOKIE, BLING_STATE_PATH } from '@/server/nfe/connection'
 import { issueInvoice, refreshInvoice, releaseInvoice } from '@/server/nfe/issue'
@@ -125,6 +126,41 @@ export async function savePrices(
 
   revalidatePath('/')
   revalidatePath('/admin/(painel)', 'layout')
+  return { ok: true }
+}
+
+/** Cupons (docs/spec-cupons.md §4). O código não muda depois de criado e cupom não se apaga: só desliga. */
+export async function createCoupon(code: string, form: CouponForm): Promise<ActionResult> {
+  await requireAdmin()
+  const normalized = normalizeCode(String(code).slice(0, 40))
+  if (!COUPON_CODE.test(normalized)) return { ok: false, error: 'Código com 3 a 20 letras ou números, sem espaços nem acentos' }
+  const parsed = parseCouponForm(form)
+  if (!parsed.ok) return parsed
+
+  const { error } = await db().from('coupons').insert({ code: normalized, ...parsed.fields })
+  if (error) return { ok: false, error: error.code === '23505' ? `Já existe o cupom ${normalized}` : error.message }
+  revalidatePath('/admin/(painel)/cupons', 'page')
+  return { ok: true }
+}
+
+export async function updateCoupon(code: string, form: CouponForm): Promise<ActionResult> {
+  await requireAdmin()
+  const parsed = parseCouponForm(form)
+  if (!parsed.ok) return parsed
+
+  const { data, error } = await db().from('coupons').update(parsed.fields).eq('code', normalizeCode(String(code))).select('code')
+  if (error) return { ok: false, error: error.message }
+  if (!data?.length) return { ok: false, error: 'Cupom não encontrado' }
+  revalidatePath('/admin/(painel)/cupons', 'page')
+  return { ok: true }
+}
+
+export async function setCouponActive(code: string, active: boolean): Promise<ActionResult> {
+  await requireAdmin()
+  const { data, error } = await db().from('coupons').update({ active: active === true }).eq('code', normalizeCode(String(code))).select('code')
+  if (error) return { ok: false, error: error.message }
+  if (!data?.length) return { ok: false, error: 'Cupom não encontrado' }
+  revalidatePath('/admin/(painel)/cupons', 'page')
   return { ok: true }
 }
 
