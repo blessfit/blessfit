@@ -1,7 +1,7 @@
 # Spec de implementação — Cupons pelo painel
 
-> Status: **spec, não implementada** · 10/11/2026. Fazer numa branch separada (`feat/cupons`), depois dos testes
-> de NF-e.
+> Status: **implementada na branch `feat/cupons`, testada em HML** · 11/11/2026. Produção: aplicar a migration
+> antes do deploy do código.
 >
 > Hoje os cupons ficam fixos em `src/server/coupons.ts` (lista vazia = cupons desligados). Esta spec move os
 > cupons para o banco, com cadastro no painel e limite de usos.
@@ -53,18 +53,34 @@ O painel lista todos os cupons com os usos numa consulta só (`group by coupon_c
 
 - `Coupon` passa a ter os campos da tabela.
 - `findCoupon(code)` vira assíncrona: lê do banco por `code` (maiúsculas, sem espaços).
-- Nova `checkCoupon(coupon, cpf, now)` devolve o motivo da recusa ou `null`, nesta ordem:
+- Nova `checkCoupon(coupon, buyer, now)` devolve o motivo da recusa ou `null`, nesta ordem:
   1. `active = false` → "Cupom inválido" (não revelar que existiu).
-  2. Antes de `starts_at` ou depois de `ends_at` → "Este cupom não está valendo".
-  3. `max_uses` atingido → "Este cupom esgotou".
-  4. `first_purchase_only` e o CPF já tem pedido pago → mensagem atual.
+  2. Antes de `starts_at` → "Cupom inválido" (não revelar a campanha antes do lançamento). Depois de `ends_at`
+     → "Este cupom não está valendo".
+  3. `max_uses` atingido (pedidos pagos desde a criação do cupom) → "O cupom X esgotou".
+  4. `first_purchase_only` e já há pedido pago com o mesmo CPF, e-mail, telefone ou conta → mensagem atual.
+     Só o checkout confere: a prévia (`/api/coupon`) passa `buyer = null`, senão diria a qualquer um se um CPF
+     já comprou (docs/seguranca.md, revisão de 11/11/2026).
 - `unitDiscount` e `discountOf` não mudam.
 - `/api/coupon` e `/api/checkout` passam a usar `findCoupon` + `checkCoupon`. O checkout continua conferindo
   tudo de novo (o carrinho pode ter ficado aberto).
 - Pedido já criado com um cupom que depois foi desligado ou esgotou: **vale** (o cliente já viu o preço no
   link de pagamento).
 
-## 3. Painel `/admin/cupons`
+## 3. Campo de cupom no carrinho
+
+O campo saiu do site no commit `aa01a38` ("remove coupons from the site for now"). Volta em `CartPage.tsx` e
+`Cart.styles.ts`, a partir daquele commit (`git show aa01a38 -- src/views/Cart`), ajustado ao carrinho atual:
+
+- Campo "Cupom" com botão **Aplicar**, que consulta `/api/coupon` com o código e o CPF.
+- Mostra o desconto na linha do resumo e o total já com ele. O frete não tem desconto.
+- Mostra a mensagem da recusa (`checkCoupon`) embaixo do campo, e permite tirar o cupom aplicado.
+- O código aplicado vai junto para `/api/checkout`, que confere tudo de novo.
+
+Os textos de divulgação que saíram no mesmo commit (barra de anúncio, `content.ts`, `shop.ts`, pesquisa) **não**
+voltam: cada campanha decide onde divulgar o cupom.
+
+## 4. Painel `/admin/cupons`
 
 - Item **Cupons** no `AdminNav`.
 - Tabela: código, desconto, usos (`3 / 10`, ou `3` sem limite; em destaque se passar do limite), validade,
@@ -76,7 +92,7 @@ O painel lista todos os cupons com os usos numa consulta só (`group by coupon_c
 - Server actions em `src/app/admin/actions.ts`, com `requireAdmin()` e validação no servidor (as mesmas regras
   dos `check` da tabela, com mensagem em português).
 
-## 4. Testes
+## 5. Testes
 
 **Automatizados:** `checkCoupon` em cada recusa (desligado, antes do início, vencido, esgotado, primeira compra),
 cupom sem limite, código em minúsculas aceito, validação das actions.
@@ -90,9 +106,20 @@ cupom sem limite, código em minúsculas aceito, validação das actions.
 4. Cupom com fim no passado: recusa "não está valendo".
 5. Cupom sem "só primeira compra": o mesmo CPF usa duas vezes.
 
-## 5. Ordem
+Resultado em HML (11/11/2026), todos ✅:
 
-1. Migration (aplicar em HML; produção só na entrega).
-2. `coupons.ts` e as duas rotas, com testes. Remover o `TESTE10` fixo do código.
-3. Página e actions do painel.
-4. Testes manuais, `security-reviewer`, README.
+- 1 e 2: `LIMITE1` (limite 1) aplicado em minúsculas, pedido pendente mostra `0 / 1`; depois de pago, `1 / 1` e
+  "Esgotado", e o carrinho recusa "O cupom LIMITE1 esgotou".
+- 3: desligado recusa "Cupom inválido". Desligado com o carrinho aberto: o checkout recusa, o carrinho tira o
+  cupom, o total volta ao normal e nenhum pedido é criado.
+- 4: vencido recusa "Este cupom não está valendo".
+- 5: cupom sem "só primeira compra" passa para CPF que já comprou; com a opção, recusa.
+- Painel: criar e editar (desligar "só primeira compra") gravam no banco.
+
+## 6. Ordem
+
+1. Migration (aplicar em HML; produção só na entrega, **antes** do deploy do código).
+2. `coupons.ts` e as duas rotas, com testes. Tirar a lista fixa `COUPONS` (hoje vazia) do código.
+3. Campo de cupom no carrinho.
+4. Página e actions do painel.
+5. Testes manuais, `security-reviewer`, README.

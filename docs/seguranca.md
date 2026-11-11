@@ -164,3 +164,54 @@ Não houve achado crítico, alto nem médio.
 - Logs só com id do pedido e status HTTP. Erros do Bling aparecem como texto, sem HTML.
 - `bling_auth` com RLS sem policies e `revoke` de `anon`/`authenticated`; colunas novas de `orders` não saem
   em `/api/order` nem na exportação.
+
+## Revisão de 11/11/2026: cupons pelo painel
+
+Escopo: branch `feat/cupons` (`src/server/coupons.ts`, `/api/coupon`, cupom no `/api/checkout`, ações e página
+`/admin/cupons`, campo do carrinho, migration `20261111000000_coupons.sql`). Feita pelo agente
+`security-reviewer`. Não houve achado crítico nem alto.
+
+### Corrigido no código
+
+#### 1. `/api/coupon` dizia se um CPF já comprou na loja — médio
+- **Problema:** com um cupom "só na primeira compra" conhecido, `POST /api/coupon { code, cpf }` respondia
+  "vale só na primeira compra" para quem tinha pedido pago e 200 para quem não tinha. Sem login nem limite de
+  requisições, dava para testar uma lista de CPFs (dado pessoal: diz que a pessoa é cliente da loja).
+- **Correção:** a prévia do carrinho não confere mais a primeira compra e o carrinho não manda o CPF. Só o
+  checkout confere, com o formulário completo.
+
+#### 2. "Só na primeira compra" se contornava trocando o CPF — médio
+- **Problema:** a regra olhava só o CPF. O mesmo cliente repetia o cupom com o CPF de um parente ou de um
+  gerador (e a NF-e saía no CPF errado).
+- **Correção:** o checkout recusa se já há pedido pago com o mesmo CPF, e-mail (sem diferenciar maiúsculas,
+  sem curingas no `ilike`), telefone ou conta logada. Continua contornável com todos os dados novos: para
+  campanha grande, use também o limite de usos.
+
+#### 3. Mensagens deixavam descobrir cupons agendados — baixo
+- **Problema:** "não está valendo" para cupom agendado revelava a campanha antes do lançamento a um robô que
+  testasse códigos.
+- **Correção:** agendado responde "Cupom inválido", igual a desligado ou inexistente. O painel mostra a
+  situação real. O painel orienta usar códigos com 6 ou mais caracteres.
+
+#### 4. Usos contavam pedidos antigos com o mesmo código — informativo
+- **Correção:** os usos contam só pedidos feitos depois de o cupom ser criado, então um código recriado começa
+  do zero.
+
+### Risco aceito
+
+- **Sem limite de requisições** em `/api/coupon` e `/api/checkout`: dá para testar códigos (cerca de 47 mil
+  com 3 caracteres). Mitigado pelas mensagens iguais e pela orientação de códigos longos. Rever se aparecer
+  abuso nos logs.
+- **Corrida no último uso** (spec §0, opção A): pagamentos juntos no último uso passam todos, e o painel mostra
+  o excesso.
+- Ações do painel devolvem a mensagem do banco ao admin logado, no mesmo padrão das outras ações.
+
+### Conferido
+
+- `requireAdmin()` na página e nas três ações; o componente do painel não importa nada de `src/server`.
+- Entrada das ações validada no servidor sem confiar no formato; o `check` da tabela repete as regras.
+- Percentual e desconto vêm só do banco; o checkout recalcula tudo e grava o código vindo do banco.
+- `/api/coupon` devolve só `{ code, percent }`; desligado responde igual a inexistente.
+- Logs sem CPF nem detalhe do banco; erro ao consultar devolve 503 genérico.
+- Filtros do Supabase só com `.eq`/`.ilike`/`.in` parametrizados, sem `.or` montado com texto.
+- `coupons` com RLS sem policies e `revoke` de `anon`/`authenticated`.

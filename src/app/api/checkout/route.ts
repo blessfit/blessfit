@@ -14,7 +14,7 @@
  */
 import { digits, isCpf, normalizeCep } from '@/lib/documents'
 import { ONLINE_CHECKOUT } from '@/lib/site'
-import { checkFirstPurchase, discountOf, findCoupon, unitDiscount } from '@/server/coupons'
+import { checkCoupon, discountOf, findCoupon, unitDiscount, type Coupon } from '@/server/coupons'
 import { currentUser, rememberCheckout } from '@/server/customers'
 import { createCheckoutLink, type CheckoutCustomer } from '@/server/infinitepay'
 import { json, priceCart, type Order, type OrderShipping, type PayMethod, type ShippingAddress } from '@/server/orders'
@@ -84,12 +84,23 @@ export async function POST(request: Request): Promise<Response> {
   if (!phone || phone.length < 10) return json({ error: 'Informe um telefone com DDD' }, 400)
   const email = text(body.customer?.email, 160)
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: 'E-mail inválido' }, 400)
+  const phoneNumber = `+${phone.startsWith('55') ? phone : `55${phone}`}`
 
-  const coupon = typeof body.coupon === 'string' && body.coupon.trim() ? findCoupon(body.coupon) : null
-  if (typeof body.coupon === 'string' && body.coupon.trim() && !coupon) return json({ error: 'Cupom inválido' }, 400)
-  if (coupon) {
-    const error = await checkFirstPurchase(coupon, cpf)
-    if (error) return json({ error }, 400)
+  // confere tudo de novo: o carrinho pode ter ficado aberto enquanto o cupom esgotava ou vencia
+  const couponCode = typeof body.coupon === 'string' && body.coupon.trim() ? body.coupon : null
+  let coupon: Coupon | null = null
+  if (couponCode) {
+    try {
+      coupon = await findCoupon(couponCode)
+      // code 'coupon': o carrinho tira o cupom e mostra o motivo no campo dele
+      if (!coupon) return json({ error: 'Cupom inválido', code: 'coupon' }, 400)
+      const user = await currentUser()
+      const error = await checkCoupon(coupon, { cpf, email, phone: phoneNumber, userId: user?.id })
+      if (error) return json({ error, code: 'coupon' }, 400)
+    } catch (err) {
+      console.error('[checkout] erro ao conferir o cupom', err instanceof Error ? err.message : err)
+      return json({ error: 'Não deu para conferir o cupom agora. Tente de novo' }, 503)
+    }
   }
 
   const address = parseAddress(body.address)
@@ -121,7 +132,7 @@ export async function POST(request: Request): Promise<Response> {
   const customer: CheckoutCustomer = {
     name,
     email,
-    phone_number: `+${phone.startsWith('55') ? phone : `55${phone}`}`,
+    phone_number: phoneNumber,
   }
   const shipping: OrderShipping = {
     serviceId: option.serviceId,
