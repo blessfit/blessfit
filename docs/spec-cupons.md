@@ -64,7 +64,20 @@ O painel lista todos os cupons com os usos numa consulta só (`group by coupon_c
 - Pedido já criado com um cupom que depois foi desligado ou esgotou: **vale** (o cliente já viu o preço no
   link de pagamento).
 
-## 3. Painel `/admin/cupons`
+## 3. Campo de cupom no carrinho
+
+O campo saiu do site no commit `aa01a38` ("remove coupons from the site for now"). Volta em `CartPage.tsx` e
+`Cart.styles.ts`, a partir daquele commit (`git show aa01a38 -- src/views/Cart`), ajustado ao carrinho atual:
+
+- Campo "Cupom" com botão **Aplicar**, que consulta `/api/coupon` com o código e o CPF.
+- Mostra o desconto na linha do resumo e o total já com ele. O frete não tem desconto.
+- Mostra a mensagem da recusa (`checkCoupon`) embaixo do campo, e permite tirar o cupom aplicado.
+- O código aplicado vai junto para `/api/checkout`, que confere tudo de novo.
+
+Os textos de divulgação que saíram no mesmo commit (barra de anúncio, `content.ts`, `shop.ts`, pesquisa) **não**
+voltam: cada campanha decide onde divulgar o cupom.
+
+## 4. Painel `/admin/cupons`
 
 - Item **Cupons** no `AdminNav`.
 - Tabela: código, desconto, usos (`3 / 10`, ou `3` sem limite; em destaque se passar do limite), validade,
@@ -76,7 +89,7 @@ O painel lista todos os cupons com os usos numa consulta só (`group by coupon_c
 - Server actions em `src/app/admin/actions.ts`, com `requireAdmin()` e validação no servidor (as mesmas regras
   dos `check` da tabela, com mensagem em português).
 
-## 4. Testes
+## 5. Testes
 
 **Automatizados:** `checkCoupon` em cada recusa (desligado, antes do início, vencido, esgotado, primeira compra),
 cupom sem limite, código em minúsculas aceito, validação das actions.
@@ -90,9 +103,10 @@ cupom sem limite, código em minúsculas aceito, validação das actions.
 4. Cupom com fim no passado: recusa "não está valendo".
 5. Cupom sem "só primeira compra": o mesmo CPF usa duas vezes.
 
-## 5. Ordem
+## 6. Ordem
 
-1. Migration (aplicar em HML; produção só na entrega).
-2. `coupons.ts` e as duas rotas, com testes. Remover o `TESTE10` fixo do código.
-3. Página e actions do painel.
-4. Testes manuais, `security-reviewer`, README.
+1. Migration (aplicar em HML; produção só na entrega, **antes** do deploy do código).
+2. `coupons.ts` e as duas rotas, com testes. Tirar a lista fixa `COUPONS` (hoje vazia) do código.
+3. Campo de cupom no carrinho.
+4. Página e actions do painel.
+5. Testes manuais, `security-reviewer`, README.
