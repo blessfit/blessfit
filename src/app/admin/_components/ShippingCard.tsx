@@ -11,7 +11,7 @@ import { Spinner } from './Pending'
 type Props = {
   order: Pick<
     Order,
-    'id' | 'status' | 'shipping' | 'shipping_address' | 'nfe_key' | 'shipping_status' | 'shipping_error' | 'tracking_code' | 'label_cost_cents'
+    'id' | 'status' | 'shipping' | 'shipping_address' | 'nfe_key' | 'nfe_status' | 'shipping_status' | 'shipping_error' | 'tracking_code' | 'label_cost_cents'
   >
   /** Saldo da carteira do Melhor Envio (null = não deu para consultar). */
   balanceCents: number | null
@@ -127,6 +127,8 @@ export function ShippingCard({ order, balanceCents }: Props) {
                 inputMode="numeric"
                 value={nfeKey}
                 onChange={(e) => setNfeKey(e.target.value)}
+                // emitida pelo painel: a chave vem do Bling e não deve ser trocada aqui
+                readOnly={order.nfe_status === 'authorized'}
                 placeholder="Emita a nota e cole a chave aqui"
               />
             </label>

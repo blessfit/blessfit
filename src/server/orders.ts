@@ -15,6 +15,9 @@ export type PayMethod = 'card' | 'pix'
 /** 'review': pago, mas com valor ou forma de pagamento diferente do pedido — conferir à mão. */
 export type OrderStatus = 'pending' | 'paid' | 'review' | 'shipped' | 'delivered' | 'canceled'
 
+/** `blocked`: denegada, cancelada ou bloqueada no Bling, sem nova tentativa pelo site. */
+export type NfeStatus = 'issuing' | 'processing' | 'authorized' | 'rejected' | 'blocked'
+
 /** Linha da sacola como o site envia (mesmo formato salvo no navegador). */
 export type CartLine = { id: string; color: string; size: string; qty: number }
 
@@ -46,6 +49,13 @@ export type Order = {
   shipping_address: ShippingAddress | null
   customer_cpf: string | null
   nfe_key: string | null
+  /** NF-e emitida pelo painel (docs/spec-nfe-bling.md §9). `nfe_status` null = sem emissão pelo site. */
+  bling_nfe_id: string | null
+  nfe_status: NfeStatus | null
+  nfe_error: string | null
+  /** Traz `accessKey`, que dá acesso ao documento: só no painel, nunca em log. */
+  nfe_danfe_url: string | null
+  nfe_updated_at: string | null
   me_order_id: string | null
   label_cost_cents: number | null
   tracking_code: string | null

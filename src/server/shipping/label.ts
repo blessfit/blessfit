@@ -66,6 +66,10 @@ export async function generateLabel(orderId: string, nfeKey: string, acceptCents
   }
   const key = digits(nfeKey)
   if (!isNfeKey(key)) return { ok: false, error: 'Chave da NF-e inválida: confira os 44 dígitos' }
+  // nota emitida pelo painel: a chave é a dela (o campo é só leitura na tela, e o servidor garante)
+  if (order.nfe_status === 'authorized' && order.nfe_key && key !== order.nfe_key) {
+    return { ok: false, error: 'Este pedido tem NF-e emitida pelo painel: use a chave dela' }
+  }
 
   // trava: dois cliques (ou duas abas) não compram duas etiquetas
   const { data: locked, error } = await db()

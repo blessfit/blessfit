@@ -81,7 +81,36 @@ ambiente (vermelha em produção local). Só vale para o desenvolvimento: a Verc
 | `SHIPPING_ORIGIN_CEP` | CEP de onde saem os pacotes |
 | `SHIPPING_SENDER_*` | Remetente da etiqueta: `NAME`, `CNPJ`, `IE`, `PHONE`, `EMAIL`, `STREET`, `NUMBER`, `COMPLEMENT`, `DISTRICT`, `CITY`, `UF` |
 
-Frete (docs/spec-frete.md): peso e medidas das peças, embalagens e tabela de contingência em `src/data/shipping.ts`; etiqueta gerada no detalhe do pedido no painel, depois de colar a chave da NF-e. Testes: `npm test`.
+Frete (docs/spec-frete.md): peso e medidas das peças, embalagens e tabela de contingência em `src/data/shipping.ts`; etiqueta gerada no detalhe do pedido no painel, depois de emitir a NF-e (ou colar a chave). Testes: `npm test`.
+
+## NF-e pelo Bling
+
+Spec em `docs/spec-nfe-bling.md`; o que falta para produção em `docs/pendencias-prod-nfe.md`. Código em `src/server/nfe/`.
+
+- No detalhe do pedido pago, **Emitir NF-e** cria a nota no Bling, envia à Sefaz sem e-mail ao cliente e grava a
+  chave e o link do DANFE. A chave preenche a etiqueta do frete.
+- Uma trava no pedido impede notas duplicadas (duplo clique). Rejeitada pela Sefaz, **Tentar de novo** corrige e
+  reenvia a **mesma** nota. Sem resposta da Sefaz, **Atualizar** só consulta.
+- Proteção de ambiente: a emissão só roda se `BLING_EMISSION_ENV` e `MELHOR_ENVIO_ENV` concordam, se a nota de
+  referência (`BLING_ENV_PROBE_NFE_ID`) existe na conta, e a chave só é gravada se o `tpAmb` do XML bate.
+- Em produção o site recusa emitir enquanto `FISCAL.reviewed` for `false` em `src/data/fiscal.ts` (NCM e origem
+  conferidos pelo contador).
+- Conexão: o painel mostra **Conectar Bling** (OAuth). Os tokens ficam cifrados na tabela `bling_auth`.
+
+| Rota | O que faz |
+| --- | --- |
+| `GET /api/bling/callback` | Volta da autorização no Bling. Exige admin logado e o `state` do cookie |
+| `GET /api/cron/bling-refresh` | Renova os tokens (o refresh token vence em 30 dias sem uso). Exige `Authorization: Bearer CRON_SECRET` |
+
+| Variável | Valor |
+| --- | --- |
+| `BLING_EMISSION_ENV` | `test` ou `production`. Vazia desliga a emissão: o cartão da nota some e a chave volta a ser colada à mão |
+| `BLING_CLIENT_ID`, `BLING_CLIENT_SECRET` | Aplicativo do Bling (um por ambiente) |
+| `BLING_TOKEN_KEY` | Chave AES-256 dos tokens, em base64 (`openssl rand -base64 32`). Uma por ambiente |
+| `BLING_NATUREZA_ID` | Id da natureza de operação de venda no Bling |
+| `BLING_FORMA_PAGAMENTO_PIX_ID`, `BLING_FORMA_PAGAMENTO_CARTAO_ID` | Ids das formas de pagamento no Bling |
+| `BLING_ENV_PROBE_NFE_ID` | Id de uma nota que só existe na conta do ambiente certo |
+| `CRON_SECRET` | Segredo do cron de renovação (a Vercel envia no cabeçalho) |
 
 ## Painel /admin
 
@@ -89,7 +118,8 @@ Menu lateral no computador e barra de navegação embaixo no celular.
 
 - **Início**: vendas de hoje, 7 e 30 dias, ticket médio, pedidos para enviar e tamanhos para repor.
 - **Pedidos**: busca por cliente, produto ou nº do pedido e filtro por status. No detalhe: itens com foto,
-  pagamento, linha do tempo dos status (gravada pelo banco), botão do próximo passo e WhatsApp do cliente.
+  pagamento, linha do tempo dos status (gravada pelo banco), botão do próximo passo, WhatsApp do cliente,
+  nota fiscal (emitir pelo Bling) e etiqueta do frete.
 - **Estoque**: grade cor × tamanho com fotos e botões +/−, salva sem recarregar
   (em branco = sem controle; 0 = esgotado no site). Filtros por linha, tipo e “só para repor”.
 - **Preços**: cartão, Pix, preço “de” e produto à venda ou oculto.
@@ -108,7 +138,7 @@ em Authentication → Sign In / Providers) e coloque o e-mail em `ADMIN_EMAILS`.
 ```
 src/
 ├── app/                  # rotas do Next: loja, admin/ (painel) e api/ (checkout, webhook, pedidos)
-├── server/               # código só do servidor: InfinitePay, pedidos, Supabase e login do painel
+├── server/               # código só do servidor: InfinitePay, pedidos, frete, NF-e (nfe/), Supabase e login do painel
 ├── views/Store/          # composição das seções da loja
 ├── sections/             # banner, lançamentos, categorias, conjuntos, peças avulsas, sobre, avaliações, FAQ
 ├── components/
