@@ -1,26 +1,42 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { checkCoupon, couponState, findCoupon, normalizeCode, parseCouponForm, type Coupon, type CouponForm } from './coupons'
 
-/** Contagens que o banco devolve: usos do cupom (por coupon_code) e pedidos pagos do CPF (por customer_cpf). */
-const db = vi.hoisted(() => ({ uses: 0, paid: 0, row: null as unknown, queries: [] as string[] }))
+/**
+ * Banco de mentira: cada consulta guarda os filtros (`coluna=valor`) e a contagem sai do primeiro filtro.
+ * `paidBy` diz por quais colunas o comprador já tem pedido pago.
+ */
+const db = vi.hoisted(() => ({ uses: 0, paidBy: [] as string[], row: null as unknown, queries: [] as string[] }))
 
 vi.mock('server-only', () => ({}))
 vi.mock('./admin', () => ({ SOLD: ['paid', 'review', 'shipped', 'delivered'] }))
 vi.mock('./supabase', () => ({
   db: () => ({
     from: () => ({
-      select: () => ({
-        eq: (column: string, value: string) => {
+      select: () => {
+        const filters: string[] = []
+        const chain = {
+          eq: (column: string, value: string) => add(column, value),
+          ilike: (column: string, value: string) => add(column, value),
+          gte: (column: string, value: string) => add(column, value),
+          in: () => chain,
+          maybeSingle: async () => ({ data: db.row, error: null }),
+          then: (resolve: (value: { count: number; error: null }) => void) => {
+            const column = filters[0]?.split('=')[0] ?? ''
+            resolve({ count: column === 'coupon_code' ? db.uses : db.paidBy.includes(column) ? 1 : 0, error: null })
+          },
+        }
+        const add = (column: string, value: string) => {
+          filters.push(`${column}=${value}`)
           db.queries.push(`${column}=${value}`)
-          return {
-            in: async () => ({ count: column === 'coupon_code' ? db.uses : db.paid, error: null }),
-            maybeSingle: async () => ({ data: db.row, error: null }),
-          }
-        },
-      }),
+          return chain
+        }
+        return chain
+      },
     }),
   }),
 }))
+
+const BUYER = { cpf: '09926651674', email: 'cliente@example.com', phone: '+5537999999999', userId: 'conta-1' }
 
 const NOW = new Date('2026-11-11T12:00:00-03:00')
 const coupon = (patch: Partial<Coupon> = {}): Coupon => ({
@@ -37,7 +53,7 @@ const coupon = (patch: Partial<Coupon> = {}): Coupon => ({
 
 beforeEach(() => {
   db.uses = 0
-  db.paid = 0
+  db.paidBy = []
   db.row = null
   db.queries.length = 0
 })
@@ -66,15 +82,15 @@ describe('checkCoupon', () => {
     expect(await checkCoupon(coupon({ active: false }), null, NOW)).toBe('Cupom inválido')
   })
 
-  it('fora da validade', async () => {
+  it('fora da validade; agendado não revela a campanha antes do lançamento', async () => {
     expect(await checkCoupon(coupon({ ends_at: '2026-11-01T00:00:00Z' }), null, NOW)).toMatch(/não está valendo/)
-    expect(await checkCoupon(coupon({ starts_at: '2026-12-01T00:00:00Z' }), null, NOW)).toMatch(/não está valendo/)
+    expect(await checkCoupon(coupon({ starts_at: '2026-12-01T00:00:00Z' }), null, NOW)).toBe('Cupom inválido')
   })
 
-  it('esgotado: conta os pedidos pagos com o código', async () => {
+  it('esgotado: conta os pedidos pagos com o código desde a criação do cupom', async () => {
     db.uses = 1
     expect(await checkCoupon(coupon({ max_uses: 1 }), null, NOW)).toBe('O cupom BLESS10 esgotou')
-    expect(db.queries).toContain('coupon_code=BLESS10')
+    expect(db.queries).toEqual(expect.arrayContaining(['coupon_code=BLESS10', 'created_at=2026-11-01T00:00:00Z']))
   })
 
   it('sem limite: nem consulta os usos', async () => {
@@ -82,25 +98,40 @@ describe('checkCoupon', () => {
     expect(db.queries).not.toContain('coupon_code=BLESS10')
   })
 
-  it('primeira compra: recusa CPF com pedido pago', async () => {
-    db.paid = 1
-    expect(await checkCoupon(coupon(), '09926651674', NOW)).toMatch(/só na primeira compra/)
+  it.each([
+    ['CPF', 'customer_cpf'],
+    ['e-mail (trocou de CPF)', 'customer->>email'],
+    ['telefone (trocou de CPF e e-mail)', 'customer->>phone_number'],
+    ['conta logada', 'user_id'],
+  ])('primeira compra: recusa quem já tem pedido pago pelo mesmo %s', async (_, column) => {
+    db.paidBy = [column]
+    expect(await checkCoupon(coupon(), BUYER, NOW)).toMatch(/só na primeira compra/)
   })
 
-  it('sem "só primeira compra": o mesmo CPF usa de novo', async () => {
-    db.paid = 3
-    expect(await checkCoupon(coupon({ first_purchase_only: false }), '09926651674', NOW)).toBeNull()
+  it('primeira compra de verdade: passa', async () => {
+    expect(await checkCoupon(coupon(), BUYER, NOW)).toBeNull()
   })
 
-  it('sem CPF ainda: deixa a primeira compra para o checkout', async () => {
-    db.paid = 1
+  it('e-mail com % ou _ não vira curinga no ilike', async () => {
+    await checkCoupon(coupon(), { ...BUYER, email: 'a_b%c@example.com' }, NOW)
+    expect(db.queries).toContain('customer->>email=a\\_b\\%c@example.com')
+  })
+
+  it('sem "só primeira compra": quem já comprou usa de novo', async () => {
+    db.paidBy = ['customer_cpf', 'customer->>email']
+    expect(await checkCoupon(coupon({ first_purchase_only: false }), BUYER, NOW)).toBeNull()
+  })
+
+  it('sem comprador (prévia do carrinho): não responde se alguém já comprou', async () => {
+    db.paidBy = ['customer_cpf']
     expect(await checkCoupon(coupon(), null, NOW)).toBeNull()
+    expect(db.queries).toEqual([])
   })
 
   it('esgotado é recusado antes de conferir a primeira compra', async () => {
     db.uses = 2
-    db.paid = 1
-    expect(await checkCoupon(coupon({ max_uses: 2 }), '09926651674', NOW)).toMatch(/esgotou/)
+    db.paidBy = ['customer_cpf']
+    expect(await checkCoupon(coupon({ max_uses: 2 }), BUYER, NOW)).toMatch(/esgotou/)
   })
 })
 

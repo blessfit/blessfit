@@ -49,43 +49,61 @@ export async function findCoupon(code: string): Promise<Coupon | null> {
   return data
 }
 
-/** Pedidos pagos com o cupom. */
-export async function couponUses(code: string): Promise<number> {
+/**
+ * Pedidos pagos com o cupom desde que ele foi criado: um código antigo recriado no painel começa do zero.
+ */
+export async function couponUses(coupon: Pick<Coupon, 'code' | 'created_at'>): Promise<number> {
   const { count, error } = await db()
     .from('orders')
     .select('id', { count: 'exact', head: true })
-    .eq('coupon_code', code)
+    .eq('coupon_code', coupon.code)
+    .gte('created_at', coupon.created_at)
     .in('status', SOLD)
   if (error) throw error
   return count ?? 0
 }
 
-async function hasPaidOrder(cpf: string): Promise<boolean> {
-  const { count, error } = await db()
-    .from('orders')
-    .select('id', { count: 'exact', head: true })
-    .eq('customer_cpf', cpf)
-    .in('status', SOLD)
-  if (error) throw error
-  return !!count
+/** Quem está comprando, já validado pelo checkout. Telefone no formato gravado no pedido (`+55…`). */
+export type Buyer = { cpf: string; email: string; phone: string; userId?: string | null }
+
+/** `ilike` sem curingas: o e-mail é comparado sem diferenciar maiúsculas, e `%`/`_` valem como texto. */
+const literal = (value: string) => value.replace(/[\\%_]/g, (c) => `\\${c}`)
+
+/**
+ * Já tem pedido pago por este CPF, e-mail, telefone ou conta? Só o CPF não basta: trocar de CPF (de um parente,
+ * de um gerador) repetiria o cupom de primeira compra.
+ */
+async function hasPaidOrder(buyer: Buyer): Promise<boolean> {
+  const paid = () => db().from('orders').select('id', { count: 'exact', head: true }).in('status', SOLD)
+  const queries = [
+    paid().eq('customer_cpf', buyer.cpf),
+    paid().ilike('customer->>email', literal(buyer.email)),
+    paid().eq('customer->>phone_number', buyer.phone),
+    ...(buyer.userId ? [paid().eq('user_id', buyer.userId)] : []),
+  ]
+  const results = await Promise.all(queries)
+  for (const { error } of results) if (error) throw error
+  return results.some(({ count }) => !!count)
 }
 
 const REFUSALS: Record<Exclude<CouponState, 'active'>, (code: string) => string> = {
-  // não revela que o cupom existiu
+  // não revela que o cupom existiu, nem um agendado antes do lançamento (um robô testando códigos acharia a campanha)
   inactive: () => 'Cupom inválido',
-  scheduled: () => 'Este cupom não está valendo',
+  scheduled: () => 'Cupom inválido',
   expired: () => 'Este cupom não está valendo',
   exhausted: (code) => `O cupom ${code} esgotou`,
 }
 
 /**
  * Motivo da recusa, ou null se o cupom vale. Ordem: desligado, fora da validade, esgotado, primeira compra.
- * Sem CPF (o carrinho ainda não tem), a primeira compra fica para o checkout conferir.
+ *
+ * Sem `buyer` (prévia do carrinho em /api/coupon), a primeira compra não é conferida: responder ali diria a
+ * qualquer um se um CPF já comprou na loja. O checkout confere com os dados completos.
  */
-export async function checkCoupon(coupon: Coupon, cpf: string | null, now = new Date()): Promise<string | null> {
-  const state = couponState(coupon, coupon.max_uses === null ? 0 : await couponUses(coupon.code), now)
+export async function checkCoupon(coupon: Coupon, buyer: Buyer | null, now = new Date()): Promise<string | null> {
+  const state = couponState(coupon, coupon.max_uses === null ? 0 : await couponUses(coupon), now)
   if (state !== 'active') return REFUSALS[state](coupon.code)
-  if (coupon.first_purchase_only && cpf && (await hasPaidOrder(cpf))) return `O cupom ${coupon.code} vale só na primeira compra`
+  if (coupon.first_purchase_only && buyer && (await hasPaidOrder(buyer))) return `O cupom ${coupon.code} vale só na primeira compra`
   return null
 }
 
@@ -93,12 +111,22 @@ export async function checkCoupon(coupon: Coupon, cpf: string | null, now = new 
 export async function listCoupons(): Promise<{ coupon: Coupon; uses: number }[]> {
   const [coupons, orders] = await Promise.all([
     db().from('coupons').select('*').order('created_at', { ascending: false }).returns<Coupon[]>(),
-    db().from('orders').select('coupon_code').not('coupon_code', 'is', null).in('status', SOLD).returns<{ coupon_code: string }[]>(),
+    db()
+      .from('orders')
+      .select('coupon_code, created_at')
+      .not('coupon_code', 'is', null)
+      .in('status', SOLD)
+      .returns<{ coupon_code: string; created_at: string }[]>(),
   ])
   if (coupons.error) throw coupons.error
   if (orders.error) throw orders.error
+  // mesma regra de couponUses: só pedidos feitos depois de o cupom ser criado
+  const created = new Map(coupons.data.map((c) => [c.code, Date.parse(c.created_at)]))
   const uses = new Map<string, number>()
-  for (const { coupon_code } of orders.data) uses.set(coupon_code, (uses.get(coupon_code) ?? 0) + 1)
+  for (const { coupon_code, created_at } of orders.data) {
+    const since = created.get(coupon_code)
+    if (since !== undefined && Date.parse(created_at) >= since) uses.set(coupon_code, (uses.get(coupon_code) ?? 0) + 1)
+  }
   return coupons.data.map((coupon) => ({ coupon, uses: uses.get(coupon.code) ?? 0 }))
 }
 

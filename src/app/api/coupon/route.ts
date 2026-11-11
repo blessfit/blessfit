@@ -1,27 +1,25 @@
 /*
- * POST /api/coupon — confere um cupom no carrinho.
+ * POST /api/coupon — prévia do cupom no carrinho.
  *
- * Corpo: { code: 'BLESS10', cpf?: '000.000.000-00' }
- * Resposta: { code, percent } ou 400 { error }. Com CPF, já confere se é a primeira compra
- * (o checkout confere tudo de novo de qualquer jeito).
+ * Corpo: { code: 'BLESS10' }
+ * Resposta: { code, percent } ou 400 { error }. Não confere a primeira compra: com um CPF qualquer, a resposta
+ * diria se a pessoa já comprou na loja (docs/seguranca.md). O checkout confere tudo de novo.
  */
-import { digits, isCpf } from '@/lib/documents'
 import { checkCoupon, findCoupon } from '@/server/coupons'
 import { json } from '@/server/orders'
 
 export async function POST(request: Request): Promise<Response> {
-  let body: { code?: unknown; cpf?: unknown }
+  let body: { code?: unknown }
   try {
     body = (await request.json()) as typeof body
   } catch {
     return json({ error: 'JSON inválido' }, 400)
   }
 
-  const cpf = typeof body.cpf === 'string' ? digits(body.cpf) : ''
   try {
     const coupon = typeof body.code === 'string' ? await findCoupon(body.code) : null
     if (!coupon) return json({ error: 'Cupom inválido' }, 400)
-    const error = await checkCoupon(coupon, isCpf(cpf) ? cpf : null)
+    const error = await checkCoupon(coupon, null)
     if (error) return json({ error }, 400)
     // só o que o carrinho precisa: limite e validade ficam no servidor
     return json({ code: coupon.code, percent: coupon.percent })

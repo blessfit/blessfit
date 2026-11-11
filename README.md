@@ -26,8 +26,9 @@ npm run typecheck  # só a checagem de tipos (tsc)
 
 | O quê | Arquivo |
 | --- | --- |
-| WhatsApp, Instagram, frete grátis, parcelas, Pix, cupom, menu e slides do banner | `src/data/shop.ts` |
+| WhatsApp, Instagram, frete grátis, parcelas, Pix, menu e slides do banner | `src/data/shop.ts` |
 | Preços e estoque | Painel **/admin** → Estoque e preços (valores iniciais em `src/data/catalog.ts`) |
+| Cupons de desconto | Painel **/admin** → Cupons |
 | Produtos (conjuntos e peças avulsas): nomes, descrições, cores e tamanhos | `src/data/catalog.ts` |
 | Todas as fotos (produtos por cor, banner, categorias) | `src/data/images.ts` + `src/assets/img/` |
 | Categorias, benefícios, “Sobre”, avaliações, FAQ, políticas e guia de tamanhos | `src/data/content.ts` |
@@ -53,7 +54,8 @@ O total é sempre recalculado no servidor com os preços e o estoque do painel; 
 | Rota | O que faz |
 | --- | --- |
 | `POST /api/shipping/quote` | Recebe `{ cep, lines }` e devolve até 3 opções de frete do Melhor Envio (ou da tabela de contingência, se ele falhar) |
-| `POST /api/checkout` | Recebe `{ method, lines, customer: { name, cpf, phone, email? }, address, shipping: { serviceId, price } }`, cota o frete de novo, salva o pedido e devolve `{ orderId, url }` com o link de pagamento (itens + frete) |
+| `POST /api/coupon` | Recebe `{ code, cpf? }` e devolve `{ code, percent }` ou o motivo da recusa (prévia do carrinho) |
+| `POST /api/checkout` | Recebe `{ method, lines, customer: { name, cpf, phone, email? }, address, shipping: { serviceId, price }, coupon? }`, cota o frete e confere o cupom de novo, salva o pedido e devolve `{ orderId, url }` com o link de pagamento (itens com desconto + frete). Cupom recusado volta com `code: 'coupon'` e o carrinho o tira |
 | `POST /api/infinitepay-webhook` | Aviso de pagamento da InfinitePay. Confirma em `/payment_check` antes de marcar o pedido como pago |
 | `GET /api/order?id=…` | Situação do pedido. Na volta do checkout, repasse `transaction_nsu` e `slug` para confirmar na hora |
 
@@ -123,6 +125,10 @@ Menu lateral no computador e barra de navegação embaixo no celular.
 - **Estoque**: grade cor × tamanho com fotos e botões +/−, salva sem recarregar
   (em branco = sem controle; 0 = esgotado no site). Filtros por linha, tipo e “só para repor”.
 - **Preços**: cartão, Pix, preço “de” e produto à venda ou oculto.
+- **Cupons** (docs/spec-cupons.md): desconto percentual nos produtos (o frete não tem desconto), com limite de
+  usos, início e fim opcionais e a opção “só na primeira compra” (por CPF). Um uso conta quando o pedido é
+  pago, então carrinho abandonado não gasta o cupom. O limite é conferido no checkout, sem reserva: dois
+  pagamentos juntos no último uso passam os dois, e a lista mostra o excesso. Cupom não se apaga, só desliga.
 - **Exportar Excel** (Início, Estoque e Preços): planilha no formato da “Estoque BlessFit (com conjuntos)” com
   as abas Estoque, Conjuntos, Vendas (totais por período, forma de pagamento e produto), Pedidos e Como usar.
   Custo e nome do fornecedor de cada peça ficam em `src/server/pieces.ts` (só no servidor).

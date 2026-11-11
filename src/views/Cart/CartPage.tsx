@@ -232,7 +232,7 @@ export function CartPage() {
       const r = await fetch('/api/coupon', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: couponInput, cpf: form.cpf }),
+        body: JSON.stringify({ code: couponInput }),
       })
       const data = (await r.json()) as Coupon & { error?: string }
       if (!r.ok) throw new Error(data.error ?? 'Cupom inválido')

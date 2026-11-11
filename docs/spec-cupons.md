@@ -1,7 +1,7 @@
 # Spec de implementação — Cupons pelo painel
 
-> Status: **spec, não implementada** · 10/11/2026. Fazer numa branch separada (`feat/cupons`), depois dos testes
-> de NF-e.
+> Status: **implementada na branch `feat/cupons`, testada em HML** · 11/11/2026. Produção: aplicar a migration
+> antes do deploy do código.
 >
 > Hoje os cupons ficam fixos em `src/server/coupons.ts` (lista vazia = cupons desligados). Esta spec move os
 > cupons para o banco, com cadastro no painel e limite de usos.
@@ -53,11 +53,14 @@ O painel lista todos os cupons com os usos numa consulta só (`group by coupon_c
 
 - `Coupon` passa a ter os campos da tabela.
 - `findCoupon(code)` vira assíncrona: lê do banco por `code` (maiúsculas, sem espaços).
-- Nova `checkCoupon(coupon, cpf, now)` devolve o motivo da recusa ou `null`, nesta ordem:
+- Nova `checkCoupon(coupon, buyer, now)` devolve o motivo da recusa ou `null`, nesta ordem:
   1. `active = false` → "Cupom inválido" (não revelar que existiu).
-  2. Antes de `starts_at` ou depois de `ends_at` → "Este cupom não está valendo".
-  3. `max_uses` atingido → "Este cupom esgotou".
-  4. `first_purchase_only` e o CPF já tem pedido pago → mensagem atual.
+  2. Antes de `starts_at` → "Cupom inválido" (não revelar a campanha antes do lançamento). Depois de `ends_at`
+     → "Este cupom não está valendo".
+  3. `max_uses` atingido (pedidos pagos desde a criação do cupom) → "O cupom X esgotou".
+  4. `first_purchase_only` e já há pedido pago com o mesmo CPF, e-mail, telefone ou conta → mensagem atual.
+     Só o checkout confere: a prévia (`/api/coupon`) passa `buyer = null`, senão diria a qualquer um se um CPF
+     já comprou (docs/seguranca.md, revisão de 11/11/2026).
 - `unitDiscount` e `discountOf` não mudam.
 - `/api/coupon` e `/api/checkout` passam a usar `findCoupon` + `checkCoupon`. O checkout continua conferindo
   tudo de novo (o carrinho pode ter ficado aberto).
@@ -102,6 +105,16 @@ cupom sem limite, código em minúsculas aceito, validação das actions.
 3. Desligar o cupom: o carrinho recusa; um pedido já criado com ele continua pagável.
 4. Cupom com fim no passado: recusa "não está valendo".
 5. Cupom sem "só primeira compra": o mesmo CPF usa duas vezes.
+
+Resultado em HML (11/11/2026), todos ✅:
+
+- 1 e 2: `LIMITE1` (limite 1) aplicado em minúsculas, pedido pendente mostra `0 / 1`; depois de pago, `1 / 1` e
+  "Esgotado", e o carrinho recusa "O cupom LIMITE1 esgotou".
+- 3: desligado recusa "Cupom inválido". Desligado com o carrinho aberto: o checkout recusa, o carrinho tira o
+  cupom, o total volta ao normal e nenhum pedido é criado.
+- 4: vencido recusa "Este cupom não está valendo".
+- 5: cupom sem "só primeira compra" passa para CPF que já comprou; com a opção, recusa.
+- Painel: criar e editar (desligar "só primeira compra") gravam no banco.
 
 ## 6. Ordem
 
