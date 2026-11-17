@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { ANNOUNCEMENTS } from '@/data/shop'
+import { PROMO_SHORT, useTimeLeft } from '@/sections/BlackFriday'
+import { useCampaign } from '@/store/campaignContext'
 
 const Bar = styled.div`
   position: relative;
@@ -28,30 +30,56 @@ const Message = styled.p<{ $active: boolean }>`
   transition:
     opacity 0.5s var(--ease),
     transform 0.5s var(--ease);
+
+  strong {
+    font-weight: 800;
+    letter-spacing: 0.1em;
+  }
 `
 
-/** Faixa de benefícios no topo (frete grátis, parcelas, Pix). Troca de mensagem sozinha. */
+const pad = (n: number) => String(n).padStart(2, '0')
+
+/**
+ * Faixa de benefícios no topo (frete grátis, parcelas, Pix). Troca de mensagem sozinha.
+ * Na Black Friday, a primeira mensagem é a promoção e a segunda a contagem regressiva.
+ */
 export function AnnouncementBar() {
+  const { active: blackFriday, endsAt } = useCampaign()
+  const time = useTimeLeft(blackFriday ? endsAt : null)
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
 
+  const messages = blackFriday
+    ? [
+        <>
+          <strong>BLACK FRIDAY</strong> · {PROMO_SHORT}
+        </>,
+        ...(endsAt
+          ? [<>Termina em {time ? `${time.d}d ${pad(time.h)}h ${pad(time.m)}m ${pad(time.s)}s` : '…'}</>]
+          : []),
+        // sem a mensagem de frete grátis: na Black Friday não há frete grátis por valor
+        ...ANNOUNCEMENTS.filter((text) => !/frete grátis/i.test(text)),
+      ]
+    : ANNOUNCEMENTS
+  const count = messages.length
+
   useEffect(() => {
-    if (paused || ANNOUNCEMENTS.length < 2) return
-    const timer = window.setInterval(() => setIndex((i) => (i + 1) % ANNOUNCEMENTS.length), 4500)
+    if (paused || count < 2) return
+    const timer = window.setInterval(() => setIndex((i) => (i + 1) % count), 4500)
     return () => window.clearInterval(timer)
-  }, [paused])
+  }, [paused, count])
 
   return (
     <Bar
       role="region"
-      aria-label="Benefícios"
+      aria-label={blackFriday ? 'Black Friday' : 'Benefícios'}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      {ANNOUNCEMENTS.map((text, i) => (
-        <Message key={text} $active={i === index} aria-hidden={i !== index}>
+      {messages.map((text, i) => (
+        <Message key={i} $active={i === index % count} aria-hidden={i !== index % count}>
           {text}
         </Message>
       ))}

@@ -9,6 +9,7 @@ import { formatBRL } from '@/lib/price'
 import { ONLINE_CHECKOUT } from '@/lib/site'
 import { firstName, useMe } from '@/hooks/useMe'
 import { useSignOut } from '@/hooks/useSignOut'
+import { useFreeShippingFrom } from '@/store/campaignContext'
 import { useStore, type BagItem } from '@/store/storeContext'
 import * as S from './Panels.styles'
 
@@ -188,26 +189,30 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   } = useStore()
   // produto com frete grátis (painel → Preços) já garante o frete grátis do pedido
   const freeProduct = checkoutLines.some((l) => l.product.freeShipping)
-  const missing = freeProduct ? 0 : Math.max(0, SHOP.freeShippingFrom - bagTotal)
+  // null na Black Friday: sem frete grátis por valor, a barra de progresso some
+  const freeFrom = useFreeShippingFrom()
+  const missing = freeProduct ? 0 : freeFrom === null ? null : Math.max(0, freeFrom - bagTotal)
   const allSelected = bag.every((l) => l.selected)
 
   const footer =
     bag.length > 0 ? (
       <S.Summary>
-        <S.Shipping>
-          <p>
-            {missing > 0 ? (
-              <>
-                Faltam <strong>{formatBRL(missing)}</strong> para o frete grátis
-              </>
-            ) : (
-              <strong>Você ganhou frete grátis!</strong>
-            )}
-          </p>
-          <span>
-            <i style={{ width: `${missing === 0 ? 100 : Math.min(100, (bagTotal / SHOP.freeShippingFrom) * 100)}%` }} />
-          </span>
-        </S.Shipping>
+        {missing !== null && (
+          <S.Shipping>
+            <p>
+              {missing > 0 ? (
+                <>
+                  Faltam <strong>{formatBRL(missing)}</strong> para o frete grátis
+                </>
+              ) : (
+                <strong>Você ganhou frete grátis!</strong>
+              )}
+            </p>
+            <span>
+              <i style={{ width: `${missing === 0 || !freeFrom ? 100 : Math.min(100, (bagTotal / freeFrom) * 100)}%` }} />
+            </span>
+          </S.Shipping>
+        )}
         <S.Total>
           <span>
             Subtotal ({checkoutCount} {checkoutCount === 1 ? 'peça' : 'peças'})
@@ -221,7 +226,7 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
           </S.NeedSize>
         )}
         {checkoutLines.length > 0 && !ONLINE_CHECKOUT ? (
-          <Button variant="primary" block glyph={WhatsApp} href={checkoutUrl(checkoutLines)} {...external}>
+          <Button variant="primary" block glyph={WhatsApp} href={checkoutUrl(checkoutLines, freeFrom)} {...external}>
             Finalizar pelo WhatsApp
           </Button>
         ) : checkoutLines.length > 0 ? (
@@ -231,7 +236,7 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
             </Button>
             <S.Alt>
               ou{' '}
-              <a href={checkoutUrl(checkoutLines)} {...external}>
+              <a href={checkoutUrl(checkoutLines, freeFrom)} {...external}>
                 finalize pelo WhatsApp
               </a>
             </S.Alt>

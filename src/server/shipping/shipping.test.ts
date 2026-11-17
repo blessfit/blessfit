@@ -64,6 +64,11 @@ describe('applyRules', () => {
     expect(shown.filter((o) => o.free)).toHaveLength(1)
   })
 
+  it('Black Friday (sem valor mínimo): nada de frete grátis por valor, mas o produto marcado continua', () => {
+    expect(applyRules(raw, 50000, false, null).some((o) => o.free)).toBe(false)
+    expect(applyRules(raw, 50000, true, null)[0]).toMatchObject({ priceCents: 0, free: true })
+  })
+
   it('sem opções devolve lista vazia', () => {
     expect(applyRules([], 10000)).toEqual([])
   })

@@ -45,6 +45,13 @@ export const TagIcon = () => (
   </Icon>
 )
 
+export const MegaphoneIcon = () => (
+  <Icon>
+    <path d="M3 10v4a1 1 0 0 0 1 1h3l6 4V5L7 9H4a1 1 0 0 0-1 1z" />
+    <path d="M17 9a4 4 0 0 1 0 6" />
+  </Icon>
+)
+
 export const TicketIcon = () => (
   <Icon>
     <path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z" />

@@ -10,6 +10,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { CATALOG } from '@/data/catalog'
 import { isAdmin, requireAdmin } from '@/server/auth'
+import { saveCampaign } from '@/server/campaign'
 import { COUPON_CODE, normalizeCode, parseCouponForm, type CouponForm } from '@/server/coupons'
 import { authorizeUrl, emissionEnv } from '@/server/nfe/bling'
 import { BLING_STATE_COOKIE, BLING_STATE_PATH } from '@/server/nfe/connection'
@@ -126,6 +127,34 @@ export async function savePrices(
 
   revalidatePath('/')
   revalidatePath('/admin/(painel)', 'layout')
+  return { ok: true }
+}
+
+/**
+ * Liga ou desliga a Black Friday (tema, banner e desconto progressivo nas blusas).
+ * `endsAt` vem do `datetime-local` no horário de Brasília; vazio = só termina quando desligar.
+ */
+export async function setCampaign(input: { blackFriday: boolean; endsAt: string }): Promise<ActionResult> {
+  await requireAdmin()
+  const raw = typeof input?.endsAt === 'string' ? input.endsAt.trim().slice(0, 20) : ''
+  let endsAt: string | null = null
+  if (raw) {
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(raw)) return { ok: false, error: 'Data de fim inválida' }
+    const date = new Date(`${raw}:00-03:00`) // Brasília não tem horário de verão desde 2019
+    if (Number.isNaN(date.getTime())) return { ok: false, error: 'Data de fim inválida' }
+    if (input.blackFriday === true && date <= new Date()) return { ok: false, error: 'O fim já passou: escolha uma data futura ou deixe vazio' }
+    endsAt = date.toISOString()
+  }
+
+  try {
+    await saveCampaign({ blackFriday: input?.blackFriday === true, endsAt })
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Não foi possível salvar' }
+  }
+  // a loja e o carrinho são regerados com o tema novo na próxima visita
+  revalidatePath('/')
+  revalidatePath('/carrinho')
+  revalidatePath('/admin/(painel)/campanha', 'page')
   return { ok: true }
 }
 

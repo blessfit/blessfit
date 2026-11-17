@@ -2,6 +2,7 @@ import styled from 'styled-components'
 import { Accordion, Button, Container, Ruler, Section, SectionHeader, WhatsApp } from '@/components/ui'
 import { FAQ } from '@/data/content'
 import { external, whatsappUrl } from '@/lib/links'
+import { useCampaign } from '@/store/campaignContext'
 import { useStore } from '@/store/storeContext'
 import { media } from '@/styles/media'
 
@@ -30,6 +31,7 @@ const Aside = styled.div`
 /** Perguntas frequentes + atalhos para o WhatsApp e o guia de tamanhos. */
 export function HelpFaq() {
   const { openInfo } = useStore()
+  const { active: blackFriday } = useCampaign()
   return (
     <Section id="faq" $tone="paper" aria-labelledby="faq-title">
       <Container>
@@ -53,7 +55,7 @@ export function HelpFaq() {
               Guia de tamanhos
             </Button>
           </Aside>
-          <Accordion items={FAQ} />
+          <Accordion items={blackFriday ? FAQ.map((item) => ({ ...item, a: item.blackFriday ?? item.a })) : FAQ} />
         </Layout>
       </Container>
     </Section>

@@ -139,7 +139,8 @@ export const COMMUNITY = {
   images: IMAGES.community,
 }
 
-export type FaqItem = { q: string; a: string }
+/** `blackFriday`: resposta usada no lugar de `a` com a Black Friday ligada (ex.: sem frete grátis por valor). */
+export type FaqItem = { q: string; a: string; blackFriday?: string }
 
 // TODO: revise as respostas com a política real de trocas e entregas da marca
 export const FAQ: FaqItem[] = [
@@ -158,6 +159,8 @@ export const FAQ: FaqItem[] = [
   {
     q: 'Como funciona a entrega?',
     a: `Enviamos para todo o Brasil. O prazo e o frete são calculados pelo seu CEP, e o frete é grátis acima de R$ ${SHOP.freeShippingFrom}. Você recebe o código de rastreio assim que o pedido for postado.`,
+    blackFriday:
+      'Enviamos para todo o Brasil. O prazo e o frete são calculados pelo seu CEP; durante a Black Friday não há frete grátis por valor. Você recebe o código de rastreio assim que o pedido for postado.',
   },
   {
     q: 'Posso trocar se não servir?',
@@ -174,6 +177,8 @@ export type InfoPage = {
   id: 'trocas' | 'entrega' | 'pagamento' | 'tamanhos'
   title: string
   paragraphs: string[]
+  /** Usados no lugar de `paragraphs` com a Black Friday ligada. */
+  blackFridayParagraphs?: string[]
   tables?: { title: string; head: string[]; rows: string[][] }[]
   note?: string
 }
@@ -205,6 +210,11 @@ export const INFO_PAGES: InfoPage[] = [
       'Enviamos para todo o Brasil pelos Correios ou transportadora, com código de rastreio.',
       'Pedidos confirmados até 14h em dias úteis são postados no mesmo dia.',
       `Frete grátis nas compras acima de R$ ${SHOP.freeShippingFrom}. Abaixo disso, o valor é calculado pelo seu CEP no atendimento.`,
+    ],
+    blackFridayParagraphs: [
+      'Enviamos para todo o Brasil pelos Correios ou transportadora, com código de rastreio.',
+      'Pedidos confirmados até 14h em dias úteis são postados no mesmo dia.',
+      'Durante a Black Friday não há frete grátis por valor: o frete é calculado pelo seu CEP.',
     ],
   },
   {

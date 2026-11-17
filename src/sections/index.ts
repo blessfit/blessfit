@@ -1,5 +1,6 @@
 export * from './About'
 export * from './Benefits'
+export * from './BlackFriday'
 export * from './CampaignHero'
 export * from './Categories'
 export * from './ChooseSet'

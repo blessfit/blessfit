@@ -13,7 +13,7 @@ import {
   Truck,
 } from '@/components/ui'
 import type { Product, Variant } from '@/data/products'
-import { SHOP } from '@/data/shop'
+import { useFreeShippingFrom } from '@/store/campaignContext'
 import { useStore } from '@/store/storeContext'
 import { media } from '@/styles/media'
 import { usePurchase } from '../usePurchase'
@@ -148,6 +148,7 @@ const Perks = styled.ul`
 function QuickViewContent({ product, initialVariant }: { product: Product; initialVariant: Variant }) {
   const p = usePurchase(product, initialVariant)
   const { openInfo } = useStore()
+  const freeFrom = useFreeShippingFrom()
   const { images } = p.variant
   const photos = [images.main, images.hover, ...(images.gallery ?? [])]
   const [photo, setPhoto] = useState(0)
@@ -205,7 +206,7 @@ function QuickViewContent({ product, initialVariant }: { product: Product; initi
 
         <Perks>
           <li>
-            <Truck /> Frete grátis acima de R$ {SHOP.freeShippingFrom}
+            <Truck /> {freeFrom === null ? 'Frete calculado pelo CEP' : `Frete grátis acima de R$ ${freeFrom}`}
           </li>
           <li>
             <Repeat /> Primeira troca grátis em até 7 dias

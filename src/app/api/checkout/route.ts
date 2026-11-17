@@ -9,12 +9,17 @@
  *   shipping: { serviceId, price },  // a opção que o cliente viu em /api/shipping/quote
  *   coupon?: 'BLESS10'               // desconto só nos itens
  * }
+ * Na Black Friday (ligada em /admin/campanha) as blusas ganham o desconto progressivo de src/lib/campaign.ts.
+ * Cupom e promoção não somam: cada peça fica com o maior.
  * Resposta: { orderId, url } — o site manda o cliente para `url`.
  * O frete é cotado de novo aqui. Se a opção sumiu ou o preço mudou: 409 { code: 'shipping_changed', options }.
  */
+import { CATALOG } from '@/data/catalog'
+import { blouseCount, blouseTier, discountTotals, freeShippingFrom, isBlackFriday, isBlouse, lineDiscounts, type DiscountLine } from '@/lib/campaign'
 import { digits, isCpf, normalizeCep } from '@/lib/documents'
 import { ONLINE_CHECKOUT } from '@/lib/site'
-import { checkCoupon, discountOf, findCoupon, unitDiscount, type Coupon } from '@/server/coupons'
+import { getCampaign } from '@/server/campaign'
+import { checkCoupon, findCoupon, type Coupon } from '@/server/coupons'
 import { currentUser, rememberCheckout } from '@/server/customers'
 import { createCheckoutLink, type CheckoutCustomer } from '@/server/infinitepay'
 import { json, priceCart, type Order, type OrderShipping, type PayMethod, type ShippingAddress } from '@/server/orders'
@@ -114,9 +119,12 @@ export async function POST(request: Request): Promise<Response> {
   const atCardPrice = priceCart(body.lines, 'card', live)
   if ('error' in atCardPrice) return json({ error: atCardPrice.error }, 400)
 
+  // Black Friday lida do banco agora (o painel pode ter desligado): desconto nas blusas e sem frete grátis por valor
+  const blackFriday = isBlackFriday(await getCampaign())
+
   let quote
   try {
-    quote = await quoteShipping(address.cep, atCardPrice.items)
+    quote = await quoteShipping(address.cep, atCardPrice.items, freeShippingFrom(blackFriday))
   } catch (err) {
     console.error('[checkout] erro na cotação do frete', err)
     return json({ error: 'Não foi possível calcular o frete' }, 500)
@@ -145,7 +153,19 @@ export async function POST(request: Request): Promise<Response> {
     parcel: quote.parcel,
   }
   const itemsTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const discount = discountOf(items, coupon)
+
+  // Black Friday: desconto progressivo nas blusas
+  const discountLines: DiscountLine[] = items.map((item) => ({
+    unitCents: item.price,
+    qty: item.quantity,
+    blouse: isBlouse(CATALOG.find((p) => p.id === item.id)),
+  }))
+  const promoPercent = blackFriday ? blouseTier(blouseCount(discountLines)) : 0
+  const discounts = lineDiscounts(discountLines, { promoPercent, couponPercent: coupon?.percent ?? 0 })
+  const totals = discountTotals(discountLines, discounts)
+  const discount = totals.total
+  // cupom que a promoção cobriu em todas as peças não conta como uso
+  const usedCoupon = coupon && totals.coupon > 0 ? coupon : null
 
   // conta opcional: o dono do pedido vem só da sessão, nunca do corpo da requisição
   const user = await currentUser()
@@ -158,7 +178,8 @@ export async function POST(request: Request): Promise<Response> {
       items,
       items_total_cents: itemsTotal,
       shipping_cents: shipping.priceCents,
-      coupon_code: coupon?.code ?? null,
+      coupon_code: usedCoupon?.code ?? null,
+      promo: totals.promo > 0 ? `black-friday-blusas-${promoPercent}` : null,
       discount_cents: discount,
       total_cents: itemsTotal - discount + shipping.priceCents,
       customer,
@@ -181,12 +202,13 @@ export async function POST(request: Request): Promise<Response> {
     const url = await createCheckoutLink({
       order_nsu: order.id,
       items: [
-        // com cupom, o desconto já vai no preço de cada unidade (a InfinitePay não tem campo de desconto)
-        ...items.map(({ quantity, price, description }) =>
-          coupon
-            ? { quantity, price: price - unitDiscount(price, coupon), description: `${description} (${coupon.code} -${coupon.percent}%)` }
-            : { quantity, price, description },
-        ),
+        // com desconto, ele já vai no preço de cada unidade (a InfinitePay não tem campo de desconto)
+        ...items.map(({ quantity, price, description }, i) => {
+          const d = discounts[i]
+          if (!d.source) return { quantity, price, description }
+          const label = d.source === 'promo' ? 'Black Friday' : coupon!.code
+          return { quantity, price: price - d.unit, description: `${description} (${label} -${d.percent}%)` }
+        }),
         ...(shipping.priceCents > 0
           ? [{ quantity: 1, price: shipping.priceCents, description: `Frete — ${shipping.carrier} ${shipping.name}`.trim() }]
           : []),

@@ -1,6 +1,9 @@
 import {
   About,
   Benefits,
+  BlackFridayHero,
+  BlackFridaySteps,
+  BlackFridayTicker,
   CampaignHero,
   Categories,
   ChooseSet,
@@ -9,12 +12,26 @@ import {
   Pieces,
   Reviews,
 } from '@/sections'
+import { useCampaign } from '@/store/campaignContext'
 
-/** Página da loja: composição das seções, na ordem em que aparecem. */
+/**
+ * Página da loja: composição das seções, na ordem em que aparecem.
+ * Com a Black Friday ligada no painel, o carrossel dá lugar ao banner da campanha e entra a seção da promoção.
+ */
 export function StorePage() {
+  const { active: blackFriday } = useCampaign()
+
   return (
     <main id="conteudo" tabIndex={-1}>
-      <CampaignHero />
+      {blackFriday ? (
+        <>
+          <BlackFridayHero />
+          <BlackFridayTicker />
+          <BlackFridaySteps />
+        </>
+      ) : (
+        <CampaignHero />
+      )}
       {/* <Launches /> */}
       <Categories />
       <ChooseSet />

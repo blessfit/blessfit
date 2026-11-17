@@ -5,8 +5,11 @@ import { formatBRL } from './price'
 
 export type BagLine = { product: Product; variant: Variant; size: Size; qty: number }
 
-/** Link de WhatsApp com todos os itens da sacola (nome, cor, tamanho e quantidade de cada um). */
-export function checkoutUrl(lines: BagLine[]): string {
+/**
+ * Link de WhatsApp com todos os itens da sacola (nome, cor, tamanho e quantidade de cada um).
+ * `freeFrom`: valor do frete grátis em reais; null = sem frete grátis por valor (Black Friday).
+ */
+export function checkoutUrl(lines: BagLine[], freeFrom: number | null = SHOP.freeShippingFrom): string {
   const total = lines.reduce((sum, l) => sum + l.product.price * l.qty, 0)
   const pix = lines.reduce((sum, l) => sum + l.product.pix * l.qty, 0)
   const items = lines.flatMap((l, i) => [
@@ -22,7 +25,7 @@ export function checkoutUrl(lines: BagLine[]): string {
     '',
     ...items,
     `*Total: ${formatBRL(total)}* (ou ${formatBRL(pix)} no Pix)`,
-    ...(total >= SHOP.freeShippingFrom ? ['Frete grátis ✓'] : []),
+    ...(freeFrom !== null && total >= freeFrom ? ['Frete grátis ✓'] : []),
   ].join('\n')
   return whatsappUrl(message)
 }
