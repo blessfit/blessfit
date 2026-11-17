@@ -62,3 +62,34 @@ export const theme = {
 } as const
 
 export type Theme = typeof theme
+
+/**
+ * Tema da Black Friday (ligado em /admin/campanha): site branco, e o que era verde-oliva/petróleo
+ * (barra, botões, faixas, destaques) vira preto. Só sobrescreve as cores; desligado, vale o tema acima.
+ */
+export const blackFridayColors: Partial<Record<keyof Theme['colors'], string>> = {
+  ink: '#000000',
+  'ink-soft': '#1f1f1f',
+  'olive-deep': '#000000',
+  sage: '#e6e6e6',
+  'ink-raise': '#111111',
+  petrol: '#000000',
+  'petrol-deep': '#000000',
+  'petrol-dark': '#000000',
+  cream: '#ffffff',
+  'cream-soft': '#f3f3f3',
+  sand: '#ededed',
+  mint: '#e0e0e0',
+  'mint-soft': '#f0f0f0',
+  paper: '#fafafa',
+  surface: '#f3f3f3',
+  text: '#000000',
+  'text-muted': '#555555',
+  line: '#e5e5e5',
+  'line-strong': '#cfcfcf',
+  'on-ink-muted': 'rgb(255 255 255 / 0.7)',
+  'on-ink-faint': 'rgb(255 255 255 / 0.45)',
+  'line-ink': 'rgb(255 255 255 / 0.16)',
+  'on-cream-muted': 'rgb(0 0 0 / 0.64)',
+  'line-cream': 'rgb(0 0 0 / 0.14)',
+}

@@ -44,6 +44,8 @@ export type Order = {
   items_total_cents: number
   shipping_cents: number
   coupon_code: string | null
+  /** Promoção aplicada (ex.: 'black-friday-blusas-15'). O desconto dela está somado em `discount_cents`. */
+  promo: string | null
   discount_cents: number
   shipping: OrderShipping | null
   shipping_address: ShippingAddress | null

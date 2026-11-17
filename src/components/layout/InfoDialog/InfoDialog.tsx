@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 import { Button, Dialog, WhatsApp } from '@/components/ui'
 import { INFO_PAGES } from '@/data/content'
+import { useCampaign } from '@/store/campaignContext'
 import { external, whatsappUrl } from '@/lib/links'
 import { useStore } from '@/store/storeContext'
 
@@ -46,12 +47,14 @@ const Table = styled.table`
 export function InfoDialog() {
   const { info, closeInfo } = useStore()
   const page = INFO_PAGES.find((p) => p.id === info)
+  const { active: blackFriday } = useCampaign()
+  const paragraphs = (blackFriday && page?.blackFridayParagraphs) || page?.paragraphs || []
 
   return (
     <Dialog open={page !== undefined} onClose={closeInfo} title={page?.title ?? ''} width={620}>
       {page && (
         <Body>
-          {page.paragraphs.map((text) => (
+          {paragraphs.map((text) => (
             <p key={text}>{text}</p>
           ))}
           {page.tables?.map((table) => (

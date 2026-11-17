@@ -14,9 +14,11 @@ import { SHOP } from '@/data/shop'
 import { mask, UFS } from '@/lib/customer'
 import { digits, isCpf, normalizeCep } from '@/lib/documents'
 import { external, whatsappUrl } from '@/lib/links'
+import { blouseTier, discountTotals, freeShippingFrom, isBlouse, lineDiscounts, nextBlouseTier, type DiscountLine } from '@/lib/campaign'
 import { checkoutUrl, type BagLine } from '@/lib/orders'
 import { formatBRL } from '@/lib/price'
 import { ONLINE_CHECKOUT } from '@/lib/site'
+import { useCampaign } from '@/store/campaignContext'
 import { useStore } from '@/store/storeContext'
 import * as S from './Cart.styles'
 
@@ -207,22 +209,29 @@ export function CartPage() {
 
   const option = quote.status === 'ok' ? quote.options.find((o) => o.id === serviceId) ?? null : null
 
+  // Black Friday (painel → Campanha): desconto progressivo nas blusas. O checkout recalcula igual (src/lib/campaign.ts)
+  const { active: blackFriday } = useCampaign()
+  const blouses = checkoutLines.reduce((n, l) => n + (isBlouse(l.product) ? l.qty : 0), 0)
+  const promoPercent = blackFriday ? blouseTier(blouses) : 0
+  const nextTier = blackFriday ? nextBlouseTier(blouses) : null
+
   const totals = useMemo(() => {
     const at = (m: Method) => {
-      const items = checkoutLines.reduce((sum, l) => sum + unitCents(l, m) * l.qty, 0)
-      const discount = coupon
-        ? checkoutLines.reduce((sum, l) => sum + Math.round((unitCents(l, m) * coupon.percent) / 100) * l.qty, 0)
-        : 0
+      const lines: DiscountLine[] = checkoutLines.map((l) => ({ unitCents: unitCents(l, m), qty: l.qty, blouse: isBlouse(l.product) }))
+      const items = lines.reduce((sum, l) => sum + l.unitCents * l.qty, 0)
+      const split = discountTotals(lines, lineDiscounts(lines, { promoPercent, couponPercent: coupon?.percent ?? 0 }))
       const shipping = option ? cents(option.price) : 0
-      return { items, discount, shipping, total: items - discount + shipping }
+      return { items, discount: split.total, promo: split.promo, coupon: split.coupon, shipping, total: items - split.total + shipping }
     }
     return { pix: at('pix'), card: at('card') }
-  }, [checkoutLines, coupon, option])
+  }, [checkoutLines, coupon, option, promoPercent])
   const current = totals[method]
   const pieces = checkoutLines.reduce((n, l) => n + l.qty, 0)
   // produto com frete grátis (painel → Preços) já garante o frete grátis do pedido
   const freeProduct = checkoutLines.some((l) => l.product.freeShipping)
-  const missing = freeProduct ? 0 : Math.max(0, SHOP.freeShippingFrom - bagTotal)
+  // null na Black Friday: sem frete grátis por valor, a barra de progresso some
+  const freeFrom = freeShippingFrom(blackFriday)
+  const missing = freeProduct ? 0 : freeFrom === null ? null : Math.max(0, freeFrom - bagTotal)
 
   const applyCoupon = async () => {
     if (!couponInput.trim()) return
@@ -328,7 +337,7 @@ export function CartPage() {
           <p>Seu pedido vai montado na mensagem: é só enviar que combinamos o pagamento e a entrega com você.</p>
           {needSize.length > 0 && <S.Error role="alert">Escolha o tamanho de todas as peças na sacola antes de finalizar.</S.Error>}
           {checkoutLines.length > 0 && (
-            <Button variant="primary" glyph={WhatsApp} href={checkoutUrl(checkoutLines)} {...external}>
+            <Button variant="primary" glyph={WhatsApp} href={checkoutUrl(checkoutLines, freeFrom)} {...external}>
               Finalizar pelo WhatsApp
             </Button>
           )}
@@ -457,20 +466,22 @@ export function CartPage() {
         </S.Steps>
 
         <S.Aside aria-label="Resumo do pedido">
-          <S.FreeShipping>
-            <p>
-              {missing > 0 ? (
-                <>
-                  Faltam <strong>{formatBRL(missing)}</strong> para o frete grátis
-                </>
-              ) : (
-                <strong>Você ganhou frete grátis!</strong>
-              )}
-            </p>
-            <span>
-              <i style={{ width: `${missing === 0 ? 100 : Math.min(100, (bagTotal / SHOP.freeShippingFrom) * 100)}%` }} />
-            </span>
-          </S.FreeShipping>
+          {missing !== null && (
+            <S.FreeShipping>
+              <p>
+                {missing > 0 ? (
+                  <>
+                    Faltam <strong>{formatBRL(missing)}</strong> para o frete grátis
+                  </>
+                ) : (
+                  <strong>Você ganhou frete grátis!</strong>
+                )}
+              </p>
+              <span>
+                <i style={{ width: `${missing === 0 || !freeFrom ? 100 : Math.min(100, (bagTotal / freeFrom) * 100)}%` }} />
+              </span>
+            </S.FreeShipping>
+          )}
 
           <S.BagTitle>
             Sua sacola <span>{pieces === 1 ? '1 peça' : `${pieces} peças`}</span>
@@ -532,6 +543,22 @@ export function CartPage() {
             ))}
           </S.Lines>
 
+          {blackFriday && (
+            <S.Alt role="status">
+              {nextTier ? (
+                <>
+                  <strong>Black Friday:</strong> adicione mais {nextTier.missing} {nextTier.missing === 1 ? 'blusa' : 'blusas'} e
+                  ganhe {nextTier.percent}% nas blusas.
+                </>
+              ) : (
+                <>
+                  <strong>Black Friday:</strong> você ganhou o desconto máximo de {promoPercent}% nas blusas.
+                </>
+              )}{' '}
+              Cupom e promoção não somam: cada peça fica com o maior desconto.
+            </S.Alt>
+          )}
+
           <S.CouponBox>
             {coupon ? (
               <S.Applied>
@@ -568,10 +595,18 @@ export function CartPage() {
               <dt>Subtotal ({method === 'pix' ? 'Pix' : 'cartão'})</dt>
               <dd>{formatBRL(current.items / 100)}</dd>
             </div>
+            {current.promo > 0 && (
+              <div>
+                <dt>
+                  Black Friday ({blouses} blusas, {promoPercent}%)
+                </dt>
+                <S.Discount>− {formatBRL(current.promo / 100)}</S.Discount>
+              </div>
+            )}
             {coupon && (
               <div>
                 <dt>Desconto ({coupon.code})</dt>
-                <S.Discount>− {formatBRL(current.discount / 100)}</S.Discount>
+                <S.Discount>− {formatBRL(current.coupon / 100)}</S.Discount>
               </div>
             )}
             <div>
@@ -619,7 +654,7 @@ export function CartPage() {
 
           <S.Alt>
             Prefere?{' '}
-            <a href={checkoutUrl(checkoutLines)} {...external}>
+            <a href={checkoutUrl(checkoutLines, freeFrom)} {...external}>
               Finalize pelo WhatsApp
             </a>
           </S.Alt>

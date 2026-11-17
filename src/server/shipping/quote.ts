@@ -4,6 +4,7 @@
 import 'server-only'
 import { CATALOG } from '@/data/catalog'
 import { FALLBACK, FALLBACK_SERVICE, SERVICES } from '@/data/shipping'
+import { SHOP } from '@/data/shop'
 import { regionOf } from '@/lib/documents'
 import type { OrderItem } from '../orders'
 import * as melhorEnvio from './melhor-envio'
@@ -52,8 +53,9 @@ function fallback(cep: string): RawOption[] {
 /**
  * `items`: itens com o preço do cartão (valor declarado e frete grátis não mudam com a forma de pagamento).
  * `cep` já normalizado (8 dígitos).
+ * `freeFrom`: valor mínimo do frete grátis em reais; null = sem frete grátis por valor (Black Friday).
  */
-export async function quoteShipping(cep: string, items: OrderItem[]): Promise<Quote> {
+export async function quoteShipping(cep: string, items: OrderItem[], freeFrom: number | null = SHOP.freeShippingFrom): Promise<Quote> {
   const parcel = parcelOf(items)
   const itemsCents = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
@@ -73,6 +75,6 @@ export async function quoteShipping(cep: string, items: OrderItem[]): Promise<Qu
   }
 
   const freeProduct = items.some((item) => item.freeShipping)
-  if (raw.length > 0) return { options: applyRules(raw, itemsCents, freeProduct), source: 'live', parcel }
-  return { options: applyRules(fallback(cep), itemsCents, freeProduct), source: 'fallback', parcel }
+  if (raw.length > 0) return { options: applyRules(raw, itemsCents, freeProduct, freeFrom), source: 'live', parcel }
+  return { options: applyRules(fallback(cep), itemsCents, freeProduct, freeFrom), source: 'fallback', parcel }
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { getCampaign } from '@/server/campaign'
 import { getLiveCatalog } from '@/server/supabase'
 import CartApp from './CartApp'
 
@@ -11,5 +12,6 @@ export const metadata: Metadata = {
 export const revalidate = 60
 
 export default async function CartRoute() {
-  return <CartApp live={await getLiveCatalog()} />
+  const [live, campaign] = await Promise.all([getLiveCatalog(), getCampaign()])
+  return <CartApp live={live} campaign={campaign} />
 }
