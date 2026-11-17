@@ -41,11 +41,31 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [quickView, setQuickView] = useState<StoreState['quickView']>(null)
   const [info, setInfo] = useState<InfoPage['id'] | null>(null)
 
+  /**
+   * Cor salva que não existe mais no produto (renomeada no catálogo, ex.: "Petróleo" → "Azul Petróleo") passa
+   * para a cor que a sacola mostra. Sem isso o item aparecia, mas trocar tamanho, quantidade ou remover não
+   * achava a linha. Se virar repetido, junta as quantidades.
+   */
+  const normalize = useCallback(
+    (lines: StoredLine[]) => {
+      const out: StoredLine[] = []
+      for (const line of lines) {
+        const product = findProduct(line.id)
+        const color = product ? findVariant(product, line.color).color.name : line.color
+        const twin = out.find((o) => o.id === line.id && o.color === color && o.size === line.size)
+        if (twin) twin.qty += line.qty
+        else out.push({ ...line, color })
+      }
+      return out
+    },
+    [findProduct],
+  )
+
   // o servidor não tem o localStorage: a sacola salva entra depois da primeira renderização
   useEffect(() => {
-    setStored(load(BAG_KEY, []))
+    setStored(normalize(load(BAG_KEY, [])))
     setLoaded(true)
-  }, [])
+  }, [normalize])
   useEffect(() => {
     if (loaded) save(BAG_KEY, stored)
   }, [loaded, stored])
