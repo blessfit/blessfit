@@ -1,6 +1,6 @@
 /*
  * Dados internos das peças, vindos da planilha “Estoque BlessFit (com conjuntos)”: nome do fornecedor,
- * preço de custo e de quais peças cada conjunto é montado.
+ * preço de custo. De quais peças cada conjunto é montado fica em src/data/catalog.ts (`parts`).
  * Fica em src/server/ de propósito: o custo nunca vai para o código do site (navegador).
  */
 import 'server-only'
@@ -16,15 +16,6 @@ export const PIECES: Record<string, { supplier: string; cost: number; name?: str
   'BF-M01-C': { supplier: 'Camisa UV', cost: 42.9 },
   'BF-M01-S': { supplier: 'Bermuda Poliamida', cost: 42.9 },
   'BF-M02-R': { supplier: 'Regata UV', cost: 42.9 },
-}
-
-/** Por referência do conjunto: as duas peças que o compõem. */
-export const SET_PARTS: Record<string, [string, string]> = {
-  'BF-F01': ['BF-F01-T', 'BF-F01-S'], // Maré: top + shorts
-  'BF-F02': ['BF-F02-T', 'BF-F03-L'], // Aurora: top nadador + legging
-  'BF-F03': ['BF-F03-R', 'BF-F03-L'], // Brisa: regata + legging
-  'BF-M01': ['BF-M01-C', 'BF-M01-S'], // Impulso: camiseta + bermuda
-  'BF-M02': ['BF-M02-R', 'BF-M01-S'], // Fôlego: regata + bermuda
 }
 
 /** Sigla da cor no código (ex.: BF-M02-R-PRE-G). */

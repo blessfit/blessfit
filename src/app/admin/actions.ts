@@ -8,7 +8,7 @@ import { randomBytes } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { CATALOG } from '@/data/catalog'
+import { CATALOG, STOCK_PIECES } from '@/data/catalog'
 import { isAdmin, requireAdmin } from '@/server/auth'
 import { authorizeUrl, emissionEnv } from '@/server/nfe/bling'
 import { BLING_STATE_COOKIE, BLING_STATE_PATH } from '@/server/nfe/connection'
@@ -60,14 +60,14 @@ function money(value: string): number | null {
   return Number.isFinite(number) && number > 0 ? Math.round(number * 100) / 100 : Number.NaN
 }
 
-/** Estoque de um produto: quantidade por cor × tamanho (null = sem controle). */
+/** Estoque de uma peça: quantidade por cor × tamanho (null = sem controle). Conjunto não tem estoque próprio. */
 export async function saveStock(
   productId: string,
   rows: { color: string; size: string; quantity: number | null }[],
 ): Promise<ActionResult> {
   await requireAdmin()
-  const product = CATALOG.find((p) => p.id === productId)
-  if (!product) return { ok: false, error: 'Produto não encontrado' }
+  const product = STOCK_PIECES.find((p) => p.id === productId)
+  if (!product) return { ok: false, error: 'Produto não encontrado (conjunto usa o estoque das peças)' }
 
   for (const row of rows) {
     if (!product.variants.some((v) => v.color.name === row.color) || !product.sizes.some((s) => s === row.size)) {

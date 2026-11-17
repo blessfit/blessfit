@@ -3,8 +3,8 @@
  * guarda no Supabase, confirma o pagamento com a InfinitePay e dá baixa no estoque.
  */
 import 'server-only'
-import { CATALOG } from '@/data/catalog'
-import { applyLive, stockOf, type LiveCatalog } from '@/data/live'
+import { CATALOG, STOCK_PIECES, stockPiecesOf, type StockPiece } from '@/data/catalog'
+import { applyLive, pieceStock, stockOf, type LiveCatalog } from '@/data/live'
 import { checkPayment, type CheckoutItem } from './infinitepay'
 import type { Parcel } from './shipping/package'
 import { db } from './supabase'
@@ -21,8 +21,18 @@ export type NfeStatus = 'issuing' | 'processing' | 'authorized' | 'rejected' | '
 /** Linha da sacola como o site envia (mesmo formato salvo no navegador). */
 export type CartLine = { id: string; color: string; size: string; qty: number }
 
-/** `freeShipping`: produto marcado com frete grátis no painel na hora do pedido. */
-export type OrderItem = CheckoutItem & { id: string; ref: string; color: string; size: string; freeShipping?: true }
+/**
+ * `freeShipping`: produto marcado com frete grátis no painel na hora do pedido.
+ * `pieces`: num conjunto, as duas peças que saem do estoque quando o pedido é pago.
+ */
+export type OrderItem = CheckoutItem & {
+  id: string
+  ref: string
+  color: string
+  size: string
+  freeShipping?: true
+  pieces?: StockPiece[]
+}
 
 export type Order = {
   id: string
@@ -127,7 +137,27 @@ export function priceCart(
       price: Math.round((method === 'pix' ? product.pix : product.price) * 100),
       description: `${product.name} · ${line.color} · ${size}`,
       ...(product.freeShipping ? { freeShipping: true as const } : {}),
+      ...(product.parts ? { pieces: stockPiecesOf(product.id, line.color!, size) } : {}),
     })
+  }
+
+  // a mesma peça pode vir avulsa e dentro de um conjunto (ou em dois conjuntos): soma tudo antes de conferir
+  const demand = new Map<string, { piece: StockPiece; quantity: number }>()
+  for (const item of items) {
+    for (const piece of item.pieces ?? [{ id: item.id, color: item.color, size: item.size }]) {
+      const key = `${piece.id}|${piece.color}|${piece.size}`
+      const entry = demand.get(key) ?? { piece, quantity: 0 }
+      entry.quantity += item.quantity
+      demand.set(key, entry)
+    }
+  }
+  for (const { piece, quantity } of demand.values()) {
+    const left = pieceStock(live, piece)
+    if (left !== null && quantity > left) {
+      const name = STOCK_PIECES.find((p) => p.id === piece.id)?.name ?? piece.id
+      const rest = left === 1 ? 'resta 1 unidade' : `restam ${left} unidades`
+      return { error: `Só ${rest} de ${name} ${piece.color} ${piece.size}, somando os conjuntos e as peças da sacola` }
+    }
   }
   return { items }
 }

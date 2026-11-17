@@ -15,12 +15,14 @@ type Props = {
   /** Quantidade por `${cor}|${tamanho}`; null = sem controle. */
   initial: Record<string, number | null>
   lowStock: number
+  /** Só mostra as quantidades (conjunto: calculado pelas peças, não se edita aqui). */
+  readOnly?: boolean
 }
 
 const key = (color: string, size: string) => `${color}|${size}`
 
 /** Grade de estoque de um produto (cor × tamanho) com +/− e salvamento sem recarregar a página. */
-export function StockEditor({ productId, sizes, colors, initial, lowStock }: Props) {
+export function StockEditor({ productId, sizes, colors, initial, lowStock, readOnly }: Props) {
   const [values, setValues] = useState(initial)
   const [saved, setSaved] = useState(initial)
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null)
@@ -84,31 +86,37 @@ export function StockEditor({ productId, sizes, colors, initial, lowStock }: Pro
                   const level = quantity === null ? undefined : quantity === 0 ? 'out' : quantity <= lowStock ? 'low' : undefined
                   return (
                     <td key={size}>
-                      <span className={s.stepper} data-level={level}>
-                        <button
-                          type="button"
-                          onClick={() => bump(k, -1)}
-                          aria-label={`Diminuir ${color.name} ${size}`}
-                        >
-                          −
-                        </button>
-                        <input
-                          type="number"
-                          min={0}
-                          inputMode="numeric"
-                          placeholder="—"
-                          value={quantity ?? ''}
-                          onChange={(e) => set(k, e.target.value === '' ? null : Math.floor(Number(e.target.value)))}
-                          aria-label={`Estoque ${color.name} ${size}`}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => bump(k, 1)}
-                          aria-label={`Aumentar ${color.name} ${size}`}
-                        >
-                          +
-                        </button>
-                      </span>
+                      {readOnly ? (
+                        <span className={s.qty} data-level={level}>
+                          {quantity ?? '—'}
+                        </span>
+                      ) : (
+                        <span className={s.stepper} data-level={level}>
+                          <button
+                            type="button"
+                            onClick={() => bump(k, -1)}
+                            aria-label={`Diminuir ${color.name} ${size}`}
+                          >
+                            −
+                          </button>
+                          <input
+                            type="number"
+                            min={0}
+                            inputMode="numeric"
+                            placeholder="—"
+                            value={quantity ?? ''}
+                            onChange={(e) => set(k, e.target.value === '' ? null : Math.floor(Number(e.target.value)))}
+                            aria-label={`Estoque ${color.name} ${size}`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => bump(k, 1)}
+                            aria-label={`Aumentar ${color.name} ${size}`}
+                          >
+                            +
+                          </button>
+                        </span>
+                      )}
                     </td>
                   )
                 })}
@@ -118,19 +126,21 @@ export function StockEditor({ productId, sizes, colors, initial, lowStock }: Pro
         </table>
       </div>
 
-      <div className={s.saveBar}>
-        {result ? (
-          <span className={s.status} data-tone={result.ok ? 'ok' : 'error'} role="status">
-            {result.ok ? <CheckIcon /> : <AlertIcon />} {result.message}
-          </span>
-        ) : (
-          dirty && <span className={s.status}>Alterações não salvas</span>
-        )}
-        <button className={s.button} type="button" onClick={save} disabled={!dirty || pending}>
-          {pending && <Spinner />}
-          {pending ? 'Salvando…' : 'Salvar estoque'}
-        </button>
-      </div>
+      {!readOnly && (
+        <div className={s.saveBar}>
+          {result ? (
+            <span className={s.status} data-tone={result.ok ? 'ok' : 'error'} role="status">
+              {result.ok ? <CheckIcon /> : <AlertIcon />} {result.message}
+            </span>
+          ) : (
+            dirty && <span className={s.status}>Alterações não salvas</span>
+          )}
+          <button className={s.button} type="button" onClick={save} disabled={!dirty || pending}>
+            {pending && <Spinner />}
+            {pending ? 'Salvando…' : 'Salvar estoque'}
+          </button>
+        </div>
+      )}
     </>
   )
 }
