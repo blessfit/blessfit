@@ -1682,3 +1682,11 @@ a.orderRow:hover {
     display: none;
   }
 }
+
+/* texto de ajuda embaixo de um campo (Campanha) */
+.couponHint {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.35;
+}

@@ -6,7 +6,9 @@
  * `price` em reais; `id` e `price` voltam em POST /api/checkout (shipping).
  * Peso e preço são calculados aqui, nunca vêm do navegador.
  */
+import { freeShippingFrom, isBlackFriday } from '@/lib/campaign'
 import { normalizeCep } from '@/lib/documents'
+import { getCampaign } from '@/server/campaign'
 import { json, priceCart } from '@/server/orders'
 import { publicOption, quoteShipping } from '@/server/shipping/quote'
 import { getLiveCatalog } from '@/server/supabase'
@@ -26,7 +28,9 @@ export async function POST(request: Request): Promise<Response> {
   if ('error' in priced) return json({ error: priced.error }, 400)
 
   try {
-    const { options, source } = await quoteShipping(cep, priced.items)
+    // Black Friday ligada: sem frete grátis por valor
+    const freeFrom = freeShippingFrom(isBlackFriday(await getCampaign()))
+    const { options, source } = await quoteShipping(cep, priced.items, freeFrom)
     return json({ options: options.map(publicOption), source })
   } catch (err) {
     console.error('[frete] erro na cotação', err)

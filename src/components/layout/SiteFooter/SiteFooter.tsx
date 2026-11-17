@@ -2,6 +2,7 @@ import { Container, CreditCard, Instagram, Repeat, Truck, WhatsApp, Wordmark, ty
 import { INFO_PAGES, PAYMENT_METHODS } from '@/data/content'
 import { NAV, SHOP } from '@/data/shop'
 import { external, instagramUrl, whatsappUrl } from '@/lib/links'
+import { useFreeShippingFrom } from '@/store/campaignContext'
 import { useStore } from '@/store/storeContext'
 import * as S from './SiteFooter.styles'
 
@@ -12,8 +13,13 @@ const PERKS: { icon: IconComponent; title: string; text: string }[] = [
   { icon: Repeat, title: 'Troca fácil', text: 'Primeira troca grátis' },
 ]
 
+/** Na Black Friday não há frete grátis por valor: o primeiro item vira "Frete pelo CEP". */
+const BLACK_FRIDAY_SHIPPING_PERK = { icon: Truck, title: 'Entrega para todo o Brasil', text: 'Frete calculado pelo CEP' }
+
 export function SiteFooter() {
   const { openInfo } = useStore()
+  const freeFrom = useFreeShippingFrom()
+  const perks = freeFrom === null ? [BLACK_FRIDAY_SHIPPING_PERK, ...PERKS.slice(1)] : PERKS
   const year = new Date().getFullYear()
 
   return (
@@ -21,7 +27,7 @@ export function SiteFooter() {
       <S.Perks>
         <Container>
           <ul>
-            {PERKS.map(({ icon: Icon, title, text }) => (
+            {perks.map(({ icon: Icon, title, text }) => (
               <li key={title}>
                 <Icon />
                 <span>

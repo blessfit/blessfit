@@ -568,3 +568,7 @@ export const Empty = styled.div`
     color: var(--text-muted);
   }
 `
+
+export const Discount = styled.dd`
+  color: var(--success);
+`

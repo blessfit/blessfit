@@ -1,17 +1,19 @@
 import { createGlobalStyle } from 'styled-components'
-import { theme } from './theme'
+import { blackFridayColors, theme } from './theme'
 
 const toVars = (prefix: string, tokens: Record<string, string>) =>
   Object.entries(tokens)
     .map(([key, value]) => `--${prefix}${key}: ${value};`)
     .join('\n')
 
-export const GlobalStyle = createGlobalStyle`
+/** `$blackFriday`: troca as cores da marca pelo preto e branco da campanha (só as variáveis mudam). */
+export const GlobalStyle = createGlobalStyle<{ $blackFriday?: boolean }>`
   :root {
     ${toVars('', theme.colors)}
     ${toVars('font-', theme.fonts)}
     ${toVars('', theme.easings)}
     ${toVars('', theme.layout)}
+    ${({ $blackFriday }) => ($blackFriday ? toVars('', blackFridayColors as Record<string, string>) : '')}
 
     /* cor de destaque e texto secundário do contexto (sobrescritos nas seções escuras) */
     --accent: var(--petrol);
