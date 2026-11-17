@@ -46,7 +46,18 @@ export type CatalogProduct = {
   badge?: 'Lançamento' | 'Mais vendido' | 'Últimas peças'
   /** Pedido com este produto tem a opção de frete mais barata grátis (o painel → Preços também liga e desliga). */
   freeShipping?: boolean
+  /**
+   * Conjunto: as duas peças de que é montado. O conjunto não tem estoque próprio: fica disponível enquanto
+   * as duas peças tiverem estoque, e a venda dá baixa nas duas.
+   */
+  parts?: [SetPart, SetPart]
 }
+
+/**
+ * Peça de um conjunto. Sem `color`, a peça tem a mesma cor do conjunto; com `color`, troca a cor da peça
+ * em alguma cor do conjunto (ex.: o Conjunto Brisa Branco vem com a legging Preto).
+ */
+export type SetPart = { id: string; color?: Record<string, string> }
 
 const C = {
   preto: { name: 'Preto', hex: '#111114' },
@@ -75,6 +86,7 @@ export const CATALOG: CatalogProduct[] = [
     pix: 129.9,
     compareAt: 154.8,
     sizes: ['P', 'M', 'G', 'GG'],
+    parts: [{ id: 'top-mare' }, { id: 'shorts-mare' }],
   },
   {
     id: 'conjunto-aurora',
@@ -90,6 +102,7 @@ export const CATALOG: CatalogProduct[] = [
     pix: 154.9,
     compareAt: 184.8,
     sizes: ['P', 'M', 'G', 'GG'],
+    parts: [{ id: 'top-aurora' }, { id: 'legging-brisa' }],
   },
   {
     id: 'conjunto-brisa',
@@ -110,6 +123,7 @@ export const CATALOG: CatalogProduct[] = [
     pix: 149.9,
     compareAt: 179.8,
     sizes: ['P', 'M', 'G', 'GG'],
+    parts: [{ id: 'regata-brisa' }, { id: 'legging-brisa', color: { Branco: 'Preto' } }],
   },
 
   // ——— Conjuntos masculinos ———
@@ -127,6 +141,7 @@ export const CATALOG: CatalogProduct[] = [
     pix: 144.9,
     compareAt: 174.8,
     sizes: ['P', 'M', 'G', 'GG'],
+    parts: [{ id: 'camiseta-impulso' }, { id: 'shorts-impulso' }],
   },
   {
     id: 'conjunto-folego',
@@ -142,6 +157,7 @@ export const CATALOG: CatalogProduct[] = [
     pix: 137.9,
     compareAt: 164.8,
     sizes: ['P', 'M', 'G', 'GG'],
+    parts: [{ id: 'regata-folego' }, { id: 'shorts-impulso' }],
   },
 
   // ——— Peças avulsas ———
@@ -248,3 +264,36 @@ export const CATALOG: CatalogProduct[] = [
     sizes: ['P', 'M', 'G', 'GG'],
   },
 ]
+
+/**
+ * Peças que não são vendidas sozinhas no site, só dentro de um conjunto, mas têm estoque próprio
+ * (editado no painel → Estoque). Não aparecem na loja; preço 0 porque não são vendidas avulsas.
+ */
+export const STOCK_ONLY: CatalogProduct[] = [
+  {
+    id: 'top-aurora',
+    ref: 'BF-F02-T',
+    name: 'Top Aurora',
+    gender: 'Feminino',
+    kind: 'Blusa',
+    category: 'Top feminino (só no Conjunto Aurora)',
+    variants: [v(C.preto, 'conjunto-aurora-preto')],
+    pieces: ['Top nadador'],
+    description: 'Top nadador do Conjunto Aurora.',
+    price: 0,
+    pix: 0,
+    sizes: ['P', 'M', 'G', 'GG'],
+  },
+]
+
+/** Tudo o que tem estoque próprio: as peças avulsas da loja e as que só vêm dentro de um conjunto. */
+export const STOCK_PIECES: CatalogProduct[] = [...CATALOG.filter((p) => !p.parts), ...STOCK_ONLY]
+
+export type StockPiece = { id: string; color: string; size: string }
+
+/** De onde sai o estoque de um item: do próprio produto ou, num conjunto, das suas duas peças. */
+export function stockPiecesOf(productId: string, color: string, size: string): StockPiece[] {
+  const parts = CATALOG.find((p) => p.id === productId)?.parts
+  if (!parts) return [{ id: productId, color, size }]
+  return parts.map((part) => ({ id: part.id, color: part.color?.[color] ?? color, size }))
+}

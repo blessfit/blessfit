@@ -2,7 +2,7 @@
  * Consultas do painel /admin (sempre com a chave secreta; as páginas chamam requireAdmin() antes).
  */
 import 'server-only'
-import { CATALOG, type CatalogProduct } from '@/data/catalog'
+import { STOCK_PIECES, type CatalogProduct } from '@/data/catalog'
 import { stockOf, type LiveCatalog } from '@/data/live'
 import type { Order, OrderStatus } from './orders'
 import { db } from './supabase'
@@ -17,9 +17,9 @@ export type OrderEvent = { status: OrderStatus; created_at: string }
 
 export type RestockItem = { product: CatalogProduct; color: string; size: string; quantity: number }
 
-/** Tamanhos esgotados ou com estoque baixo (só os que têm controle de estoque). */
+/** Peças esgotadas ou com estoque baixo (só as que têm controle de estoque; conjunto segue as peças). */
 export function restockList(live: LiveCatalog | null): RestockItem[] {
-  return CATALOG.flatMap((product) =>
+  return STOCK_PIECES.flatMap((product) =>
     product.variants.flatMap(({ color }) =>
       product.sizes.flatMap((size) => {
         const quantity = stockOf(live, product.id, color.name, size)

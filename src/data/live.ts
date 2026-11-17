@@ -2,7 +2,7 @@
  * Preços e estoque “ao vivo”, vindos do Supabase (editados no painel /admin), aplicados sobre o catálogo.
  * Sem banco configurado (ou fora do ar) o site usa os valores de src/data/catalog.ts.
  */
-import type { CatalogProduct, Size } from './catalog'
+import { stockPiecesOf, type CatalogProduct, type Size, type StockPiece } from './catalog'
 
 export type LiveProduct = { price: number; pix: number; compareAt: number | null; active: boolean; freeShipping: boolean }
 
@@ -14,9 +14,20 @@ export type LiveCatalog = {
 
 export const stockKey = (productId: string, color: string, size: string) => `${productId}|${color}|${size}`
 
-/** Quantidade em estoque, ou null quando o tamanho não tem controle de estoque. */
-export const stockOf = (live: LiveCatalog | null, productId: string, color: string, size: string) =>
-  live?.stock[stockKey(productId, color, size)] ?? null
+/** Quantidade gravada no banco para uma peça, ou null quando o tamanho não tem controle de estoque. */
+export const pieceStock = (live: LiveCatalog | null, piece: StockPiece) =>
+  live?.stock[stockKey(piece.id, piece.color, piece.size)] ?? null
+
+/**
+ * Quantidade em estoque, ou null quando o tamanho não tem controle de estoque.
+ * Conjunto: quantos dá para montar, ou seja, a menor quantidade entre as duas peças (peça sem controle não limita).
+ */
+export function stockOf(live: LiveCatalog | null, productId: string, color: string, size: string): number | null {
+  const counts = stockPiecesOf(productId, color, size)
+    .map((piece) => pieceStock(live, piece))
+    .filter((quantity) => quantity !== null)
+  return counts.length ? Math.min(...counts) : null
+}
 
 type Shape = Pick<CatalogProduct, 'id' | 'price' | 'pix' | 'compareAt' | 'sizes' | 'soldOut' | 'freeShipping'> & {
   variants: { color: { name: string }; soldOut?: Size[] }[]
