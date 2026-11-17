@@ -1686,7 +1686,7 @@ a.orderRow:hover {
 /* ——— Cupons ——— */
 .couponRow {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 80px 110px minmax(0, 1.3fr) 110px 150px;
+  grid-template-columns: minmax(0, 1fr) 80px 110px minmax(0, 1.3fr) 110px 200px;
   align-items: center;
   gap: 14px;
   padding: 12px 20px;
@@ -1702,19 +1702,43 @@ a.orderRow:hover {
   letter-spacing: 0.04em;
 }
 
+/* dois botões da mesma largura: "Desligar" e "Religar" não mudam a coluna de lugar */
 .couponActions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  display: grid;
+  grid-template-columns: repeat(2, 92px);
+  justify-content: end;
   gap: 8px;
+}
+
+.couponActions .button {
+  justify-content: center;
+  width: 100%;
+  padding-inline: 0;
 }
 
 .couponForm {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  align-items: end;
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  align-items: start;
+  gap: 16px 14px;
   padding: 18px 20px;
+}
+
+/* a chave fica numa linha só, alinhada à esquerda, sem espremer o trilho */
+.couponForm .switch {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+.couponForm .switch i {
+  flex-shrink: 0;
+}
+
+.couponHint {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.35;
 }
 
 .couponForm[data-inline='true'] {
@@ -1728,6 +1752,8 @@ a.orderRow:hover {
   align-items: center;
   gap: 10px;
   grid-column: 1 / -1;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
 }
 
 @media (max-width: 1000px) {

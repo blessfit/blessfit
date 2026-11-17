@@ -127,7 +127,7 @@ export function NewCoupon() {
           autoComplete="off"
           required
         />
-        <span className={s.cellSub}>Use 6 ou mais caracteres: código curto é fácil de adivinhar</span>
+        <span className={s.couponHint}>6 ou mais caracteres: código curto é fácil de adivinhar</span>
       </label>
       <Fields form={form} set={set} />
       <div className={s.couponFormFoot}>
