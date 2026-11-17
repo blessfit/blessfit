@@ -5,11 +5,11 @@
  */
 import 'server-only'
 import ExcelJS from 'exceljs'
-import { CATALOG, type CatalogProduct, type Size } from '@/data/catalog'
+import { CATALOG, STOCK_PIECES, stockPiecesOf, type CatalogProduct, type Size } from '@/data/catalog'
 import { stockOf } from '@/data/live'
 import { SOLD } from './admin'
 import type { Order } from './orders'
-import { colorCode, PIECES, SET_PARTS } from './pieces'
+import { colorCode, PIECES } from './pieces'
 import { db, getLiveCatalog } from './supabase'
 
 // ——— Estilo da planilha original ———
@@ -105,6 +105,18 @@ export async function buildWorkbook(): Promise<Buffer> {
   }
   const soldQty = (id: string, color: string, size: string) => sold.get(`${id}|${color}|${size}`)?.qty ?? 0
 
+  // saídas de estoque por peça: o conjunto vendido sai das duas peças (pedido antigo, sem `pieces`, saía do próprio conjunto)
+  const shipped = new Map<string, number>()
+  for (const order of orders) {
+    for (const item of order.items) {
+      for (const piece of item.pieces ?? [{ id: item.id, color: item.color, size: item.size }]) {
+        const key = `${piece.id}|${piece.color}|${piece.size}`
+        shipped.set(key, (shipped.get(key) ?? 0) + item.quantity)
+      }
+    }
+  }
+  const outQty = (id: string, color: string, size: string) => shipped.get(`${id}|${color}|${size}`) ?? 0
+
   const prices = (p: CatalogProduct) => {
     const row = live?.products[p.id]
     return {
@@ -129,7 +141,7 @@ export async function buildWorkbook(): Promise<Buffer> {
     ['Código', 'Produto', 'Nome no site', 'Cor', 'Gênero', 'Tamanho', 'Preço de custo', 'Preço no Pix', 'Preço em até 6x sem juros', 'Entradas', 'Saídas', 'Saldo', 'No site'],
     [20, 24, 34, 16, 10, 10, 15, 14, 16, 11, 10, 10, 11],
   )
-  const pieces = CATALOG.filter((p) => p.kind !== 'Conjunto').flatMap((p) =>
+  const pieces = STOCK_PIECES.flatMap((p) =>
     p.variants.flatMap(({ color }) => p.sizes.map((size) => ({ p, color: color.name, size }))),
   )
   pieces.sort(
@@ -144,7 +156,7 @@ export async function buildWorkbook(): Promise<Buffer> {
     const info = PIECES[p.ref]
     const { price, pix, active } = prices(p)
     const balance = stockOf(live, p.id, color, size)
-    const out = soldQty(p.id, color, size)
+    const out = outQty(p.id, color, size)
     put(stockWs, r, 1, `${p.ref}-${colorCode(color)}-${size}`, { input: true })
     put(stockWs, r, 2, info?.supplier ?? p.category, { input: true })
     put(stockWs, r, 3, p.name, { input: true })
@@ -152,8 +164,9 @@ export async function buildWorkbook(): Promise<Buffer> {
     put(stockWs, r, 5, GENDER[p.gender], { input: true })
     put(stockWs, r, 6, size, { input: true })
     put(stockWs, r, 7, info?.cost ?? null, { input: true, money: true })
-    put(stockWs, r, 8, pix, { input: true, money: true })
-    put(stockWs, r, 9, price, { input: true, money: true })
+    // peça que só vem em conjunto não tem preço avulso
+    put(stockWs, r, 8, pix || null, { input: true, money: true })
+    put(stockWs, r, 9, price || null, { input: true, money: true })
     put(stockWs, r, 10, balance === null ? null : balance + out, { input: true, center: true })
     put(stockWs, r, 11, out, { input: true, center: true })
     put(
@@ -176,15 +189,15 @@ export async function buildWorkbook(): Promise<Buffer> {
   setupSheet(
     setWs,
     'CONJUNTOS BLESSFIT',
-    `Exportado do painel em ${generatedAt}. Cada conjunto é montado com 2 peças; no site o conjunto tem estoque próprio (coluna Disponível).`,
+    `Exportado do painel em ${generatedAt}. Cada conjunto é montado com 2 peças; no site o conjunto sai do estoque das peças (coluna Disponível = quantos dá para montar).`,
     ['Código', 'Conjunto (nome no site)', 'Peça 1', 'Peça 2', 'Cor', 'Gênero', 'Tamanho', 'Preço de custo', 'Preço no Pix', 'Preço em até 6x sem juros', 'Preço "de" (peças avulsas)', 'Desconto', 'Disponível', 'Vendidos', 'No site'],
     [16, 24, 16, 16, 26, 10, 10, 15, 14, 16, 18, 11, 12, 11, 11],
     true,
   )
   r = 5
-  for (const p of CATALOG.filter((x) => x.kind === 'Conjunto')) {
-    const parts = SET_PARTS[p.ref]
-    const cost = parts ? parts.reduce((sum, ref) => sum + (PIECES[ref]?.cost ?? 0), 0) : null
+  const refOf = (id: string) => STOCK_PIECES.find((x) => x.id === id)?.ref ?? id
+  for (const p of CATALOG.filter((x) => x.parts)) {
+    const cost = p.parts!.reduce((sum, part) => sum + (PIECES[refOf(part.id)]?.cost ?? 0), 0)
     const { price, pix, compareAt, active } = prices(p)
     for (const { color } of p.variants) {
       for (const size of p.sizes) {
@@ -193,8 +206,9 @@ export async function buildWorkbook(): Promise<Buffer> {
         const discount = compareAt ? 1 - price / compareAt : ''
         put(setWs, r, 1, `${p.ref}-${code}-${size}`, { input: true })
         put(setWs, r, 2, p.name, { input: true })
-        put(setWs, r, 3, parts ? `${parts[0]}-${code}-${size}` : null, { input: true })
-        put(setWs, r, 4, parts ? `${parts[1]}-${code}-${size}` : null, { input: true })
+        const [first, second] = stockPiecesOf(p.id, color.name, size)
+        put(setWs, r, 3, `${refOf(first.id)}-${colorCode(first.color)}-${size}`, { input: true })
+        put(setWs, r, 4, `${refOf(second.id)}-${colorCode(second.color)}-${size}`, { input: true })
         put(setWs, r, 5, color.name, { input: true })
         put(setWs, r, 6, GENDER[p.gender], { input: true })
         put(setWs, r, 7, size, { input: true })
@@ -214,7 +228,7 @@ export async function buildWorkbook(): Promise<Buffer> {
   note(
     setWs,
     r + 2,
-    'Custo = soma das duas peças (aba Estoque). Preço "de" e Desconto vêm do painel (Preços). Disponível = estoque do conjunto no painel; “sem controle” = sempre disponível no site.',
+    'Custo = soma das duas peças (aba Estoque). Preço "de" e Desconto vêm do painel (Preços). Disponível = quantos dá para montar com o estoque das duas peças; “sem controle” = sempre disponível no site.',
   )
 
   // ——— Vendas (totais) ———
@@ -333,7 +347,7 @@ export async function buildWorkbook(): Promise<Buffer> {
     'COMO USAR',
     `1. Esta planilha foi exportada do painel da loja (www.blessfitstore.com.br/admin) em ${generatedAt}.`,
     '2. Aba Estoque: peças avulsas. Saldo = estoque atual no painel; Saídas = vendidas pelo site; Entradas = Saldo + Saídas.',
-    '3. Aba Conjuntos: no site cada conjunto tem estoque próprio (coluna Disponível) e Vendidos = conjuntos vendidos pelo site.',
+    '3. Aba Conjuntos: o conjunto não tem estoque próprio; Disponível = quantos dá para montar com as peças e Vendidos = conjuntos vendidos pelo site (cada um sai das duas peças na aba Estoque).',
     '4. Abas Vendas e Pedidos: só pedidos pagos (pago, a conferir, enviado e entregue). Valor pago inclui juros do parcelamento, quando houver.',
     '5. Mudanças feitas aqui NÃO voltam para o site: estoque e preços se editam no painel (Estoque e Preços).',
     '6. Células amarelas = dados que você costuma preencher. Saldo e Desconto são fórmulas.',

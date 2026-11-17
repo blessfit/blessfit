@@ -1,6 +1,6 @@
 import Form from 'next/form'
 import Link from 'next/link'
-import { CATALOG } from '@/data/catalog'
+import { CATALOG, STOCK_ONLY, type CatalogProduct } from '@/data/catalog'
 import { IMAGES } from '@/data/images'
 import { stockOf } from '@/data/live'
 import { LOW_STOCK, restockList } from '@/server/admin'
@@ -28,11 +28,11 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
   const lowIds = new Set(restock.map((r) => r.product.id))
   const q = normalize(params.q?.trim() ?? '')
 
-  const products = CATALOG.filter(
+  const products = PIECES_AND_SETS.filter(
     (p) =>
       (!params.linha || p.gender === params.linha) &&
-      (!params.tipo || (params.tipo === 'Conjunto' ? p.kind === 'Conjunto' : p.kind !== 'Conjunto')) &&
-      (!params.baixo || lowIds.has(p.id)) &&
+      (!params.tipo || (params.tipo === 'Conjunto' ? !!p.parts : !p.parts)) &&
+      (!params.baixo || lowIds.has(p.id) || partsOf(p).some((part) => lowIds.has(part.id))) &&
       (!q || normalize(`${p.name} ${p.ref} ${p.category}`).includes(q)),
   )
 
@@ -41,7 +41,10 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
       <div className={s.pageHead}>
         <div>
           <h1>Estoque</h1>
-          <p>Quantidade de cada cor e tamanho. As vendas pagas dão baixa sozinhas.</p>
+          <p>
+            Quantidade de cada peça, cor e tamanho. As vendas pagas dão baixa sozinhas; o conjunto vendido dá baixa nas
+            duas peças dele.
+          </p>
         </div>
         <ExportButton />
       </div>
@@ -89,7 +92,10 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
 
       <div className={s.products}>
         {products.map((product) => {
-          const out = restock.filter((r) => r.product.id === product.id && r.quantity === 0).length
+          const out = product.variants.reduce(
+            (sum, v) => sum + product.sizes.filter((size) => stockOf(live, product.id, v.color.name, size) === 0).length,
+            0,
+          )
           const cover = IMAGES.products[product.variants[0].images].main.src
           return (
             <section key={product.id} id={product.id} className={s.card} style={{ scrollMarginTop: 80 }}>
@@ -100,6 +106,18 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
                   <p>
                     Ref. {product.ref} · {product.category}
                   </p>
+                  {product.parts && (
+                    <p>
+                      Sem estoque próprio: monta com{' '}
+                      {partsOf(product).map((part, i) => (
+                        <span key={part.id}>
+                          {i > 0 && ' + '}
+                          <Link href={`#${part.id}`}>{part.name}</Link>
+                        </span>
+                      ))}
+                      . Mostra quantos dá para montar.
+                    </p>
+                  )}
                 </div>
                 {out > 0 && <span className={s.tag}>{out} esgotado(s)</span>}
               </div>
@@ -107,6 +125,7 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
                 productId={product.id}
                 sizes={product.sizes}
                 lowStock={LOW_STOCK}
+                readOnly={!!product.parts}
                 colors={product.variants.map((v) => ({
                   name: v.color.name,
                   hex: v.color.hex,
@@ -128,3 +147,9 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
     </>
   )
 }
+
+const PIECES_AND_SETS = [...CATALOG, ...STOCK_ONLY]
+
+/** As peças de um conjunto (vazio para peça avulsa). */
+const partsOf = (product: CatalogProduct) =>
+  (product.parts ?? []).flatMap((part) => PIECES_AND_SETS.filter((p) => p.id === part.id))
