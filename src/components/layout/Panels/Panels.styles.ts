@@ -105,7 +105,8 @@ export const SelectAll = styled.li`
  */
 export const Line = styled.li<{ $muted?: boolean }>`
   display: grid;
-  grid-template-columns: 20px 88px 1fr auto;
+  /* minmax(0, …): a coluna do meio pode encolher (sem isso os tamanhos empurram ou quebram a linha) */
+  grid-template-columns: 20px 88px minmax(0, 1fr) auto;
   gap: 12px;
   padding: 16px 0;
   border-bottom: 1px solid var(--line);
@@ -149,6 +150,22 @@ export const PickSize = styled.div`
   legend {
     color: var(--petrol-deep);
     font-weight: 700;
+  }
+
+  /* P, M, G e GG sempre numa linha: com preço largo na coluna da direita, os botões encolhem em vez de quebrar */
+  fieldset > div {
+    flex-wrap: nowrap;
+  }
+
+  fieldset > div > * {
+    flex: 0 1 40px;
+    min-width: 32px;
+  }
+
+  label {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 0;
   }
 `
 
