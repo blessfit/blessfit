@@ -1,15 +1,45 @@
 import type { Product, Size, Variant } from '@/data/products'
 import { SHOP } from '@/data/shop'
+import { blouseTier, isBlouse, nextBlouseTier } from './campaign'
 import { whatsappUrl } from './links'
 import { formatBRL } from './price'
 
 export type BagLine = { product: Product; variant: Variant; size: Size; qty: number }
 
+/** Desconto da Black Friday nas blusas da sacola, em reais (cartão e Pix). `percent` 0 = sem promoção. */
+export type BagPromo = {
+  blouses: number
+  percent: number
+  card: number
+  pix: number
+  /** Próximo degrau (quantas blusas faltam e quanto dá), ou null no máximo / fora da campanha. */
+  next: { missing: number; percent: number } | null
+}
+
+/** Mesma conta do checkout (src/lib/campaign.ts): arredondada por unidade, em centavos. */
+export function bagPromo(lines: BagLine[], blackFriday: boolean): BagPromo {
+  const blouses = lines.reduce((n, l) => n + (isBlouse(l.product) ? l.qty : 0), 0)
+  const percent = blackFriday ? blouseTier(blouses) : 0
+  const off = (unit: (l: BagLine) => number) =>
+    lines.reduce(
+      (sum, l) => sum + (percent && isBlouse(l.product) ? Math.round((Math.round(unit(l) * 100) * percent) / 100) * l.qty : 0),
+      0,
+    ) / 100
+  return {
+    blouses,
+    percent,
+    card: off((l) => l.product.price),
+    pix: off((l) => l.product.pix),
+    next: blackFriday ? nextBlouseTier(blouses) : null,
+  }
+}
+
 /**
  * Link de WhatsApp com todos os itens da sacola (nome, cor, tamanho e quantidade de cada um).
  * `freeFrom`: valor do frete grátis em reais; null = sem frete grátis por valor (Black Friday).
+ * `promo`: desconto da Black Friday nas blusas, que vai na mensagem com o total já descontado.
  */
-export function checkoutUrl(lines: BagLine[], freeFrom: number | null = SHOP.freeShippingFrom): string {
+export function checkoutUrl(lines: BagLine[], freeFrom: number | null = SHOP.freeShippingFrom, promo?: BagPromo): string {
   const total = lines.reduce((sum, l) => sum + l.product.price * l.qty, 0)
   const pix = lines.reduce((sum, l) => sum + l.product.pix * l.qty, 0)
   const items = lines.flatMap((l, i) => [
@@ -20,11 +50,18 @@ export function checkoutUrl(lines: BagLine[], freeFrom: number | null = SHOP.fre
     `• Valor: ${formatBRL(l.product.price * l.qty)}`,
     '',
   ])
+  const discounted = promo && promo.percent > 0
   const message = [
     `Olá! Quero finalizar este pedido na ${SHOP.name}:`,
     '',
     ...items,
-    `*Total: ${formatBRL(total)}* (ou ${formatBRL(pix)} no Pix)`,
+    ...(discounted
+      ? [
+          `Subtotal: ${formatBRL(total)} (ou ${formatBRL(pix)} no Pix)`,
+          `Black Friday (${promo.blouses} blusas, ${promo.percent}%): − ${formatBRL(promo.card)} (− ${formatBRL(promo.pix)} no Pix)`,
+          `*Total: ${formatBRL(total - promo.card)}* (ou ${formatBRL(pix - promo.pix)} no Pix)`,
+        ]
+      : [`*Total: ${formatBRL(total)}* (ou ${formatBRL(pix)} no Pix)`]),
     ...(freeFrom !== null && total >= freeFrom ? ['Frete grátis ✓'] : []),
   ].join('\n')
   return whatsappUrl(message)

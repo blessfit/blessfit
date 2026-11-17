@@ -15,7 +15,7 @@ import { mask, UFS } from '@/lib/customer'
 import { digits, isCpf, normalizeCep } from '@/lib/documents'
 import { external, whatsappUrl } from '@/lib/links'
 import { blouseTier, discountTotals, freeShippingFrom, isBlouse, lineDiscounts, nextBlouseTier, type DiscountLine } from '@/lib/campaign'
-import { checkoutUrl, type BagLine } from '@/lib/orders'
+import { bagPromo, checkoutUrl, type BagLine } from '@/lib/orders'
 import { formatBRL } from '@/lib/price'
 import { ONLINE_CHECKOUT } from '@/lib/site'
 import { useCampaign } from '@/store/campaignContext'
@@ -337,7 +337,7 @@ export function CartPage() {
           <p>Seu pedido vai montado na mensagem: é só enviar que combinamos o pagamento e a entrega com você.</p>
           {needSize.length > 0 && <S.Error role="alert">Escolha o tamanho de todas as peças na sacola antes de finalizar.</S.Error>}
           {checkoutLines.length > 0 && (
-            <Button variant="primary" glyph={WhatsApp} href={checkoutUrl(checkoutLines, freeFrom)} {...external}>
+            <Button variant="primary" glyph={WhatsApp} href={checkoutUrl(checkoutLines, freeFrom, bagPromo(checkoutLines, blackFriday))} {...external}>
               Finalizar pelo WhatsApp
             </Button>
           )}
@@ -654,7 +654,7 @@ export function CartPage() {
 
           <S.Alt>
             Prefere?{' '}
-            <a href={checkoutUrl(checkoutLines, freeFrom)} {...external}>
+            <a href={checkoutUrl(checkoutLines, freeFrom, bagPromo(checkoutLines, blackFriday))} {...external}>
               Finalize pelo WhatsApp
             </a>
           </S.Alt>

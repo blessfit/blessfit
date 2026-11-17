@@ -4,12 +4,12 @@ import type { Size } from '@/data/catalog'
 import { CATEGORIES } from '@/data/content'
 import { NAV, SHOP } from '@/data/shop'
 import { external, instagramUrl, whatsappUrl } from '@/lib/links'
-import { checkoutUrl } from '@/lib/orders'
+import { bagPromo, checkoutUrl } from '@/lib/orders'
 import { formatBRL } from '@/lib/price'
 import { ONLINE_CHECKOUT } from '@/lib/site'
 import { firstName, useMe } from '@/hooks/useMe'
 import { useSignOut } from '@/hooks/useSignOut'
-import { useFreeShippingFrom } from '@/store/campaignContext'
+import { useCampaign, useFreeShippingFrom } from '@/store/campaignContext'
 import { useStore, type BagItem } from '@/store/storeContext'
 import * as S from './Panels.styles'
 
@@ -193,6 +193,9 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   const freeFrom = useFreeShippingFrom()
   const missing = freeProduct ? 0 : freeFrom === null ? null : Math.max(0, freeFrom - bagTotal)
   const allSelected = bag.every((l) => l.selected)
+  // Black Friday: desconto progressivo nas blusas já na sacola e na mensagem do WhatsApp
+  const promo = bagPromo(checkoutLines, useCampaign().active)
+  const whatsapp = checkoutUrl(checkoutLines, freeFrom, promo)
 
   const footer =
     bag.length > 0 ? (
@@ -217,16 +220,26 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
           <span>
             Subtotal ({checkoutCount} {checkoutCount === 1 ? 'peça' : 'peças'})
           </span>
-          <strong>{formatBRL(bagTotal)}</strong>
+          <strong>{formatBRL(bagTotal - promo.card)}</strong>
         </S.Total>
-        <S.Pix>ou {formatBRL(bagPixTotal)} no Pix</S.Pix>
+        <S.Pix>ou {formatBRL(bagPixTotal - promo.pix)} no Pix</S.Pix>
+        {promo.percent > 0 && (
+          <S.Pix>
+            Black Friday: {promo.percent}% em {promo.blouses} blusas (− {formatBRL(promo.pix)} no Pix)
+          </S.Pix>
+        )}
+        {promo.next && (
+          <S.Pix>
+            Adicione mais {promo.next.missing} {promo.next.missing === 1 ? 'blusa' : 'blusas'} e ganhe {promo.next.percent}% nas blusas
+          </S.Pix>
+        )}
         {needSize.length > 0 && (
           <S.NeedSize role="status">
             Escolha o tamanho de {needSize.length === 1 ? '1 peça' : `${needSize.length} peças`} para incluir no pedido.
           </S.NeedSize>
         )}
         {checkoutLines.length > 0 && !ONLINE_CHECKOUT ? (
-          <Button variant="primary" block glyph={WhatsApp} href={checkoutUrl(checkoutLines, freeFrom)} {...external}>
+          <Button variant="primary" block glyph={WhatsApp} href={whatsapp} {...external}>
             Finalizar pelo WhatsApp
           </Button>
         ) : checkoutLines.length > 0 ? (
@@ -236,7 +249,7 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
             </Button>
             <S.Alt>
               ou{' '}
-              <a href={checkoutUrl(checkoutLines, freeFrom)} {...external}>
+              <a href={whatsapp} {...external}>
                 finalize pelo WhatsApp
               </a>
             </S.Alt>
