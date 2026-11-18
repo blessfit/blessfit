@@ -4,7 +4,7 @@ import type { Size } from '@/data/catalog'
 import { CATEGORIES } from '@/data/content'
 import { NAV, SHOP } from '@/data/shop'
 import { external, instagramUrl, whatsappUrl } from '@/lib/links'
-import { bagPromo, checkoutUrl } from '@/lib/orders'
+import { bagPromo } from '@/lib/orders'
 import { formatBRL } from '@/lib/price'
 import { ONLINE_CHECKOUT } from '@/lib/site'
 import { firstName, useMe } from '@/hooks/useMe'
@@ -193,9 +193,8 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   const freeFrom = useFreeShippingFrom()
   const missing = freeProduct ? 0 : freeFrom === null ? null : Math.max(0, freeFrom - bagTotal)
   const allSelected = bag.every((l) => l.selected)
-  // Black Friday: desconto progressivo nas peças já na sacola e na mensagem do WhatsApp
+  // Black Friday: desconto progressivo nas peças já na sacola
   const promo = bagPromo(checkoutLines, useCampaign().active)
-  const whatsapp = checkoutUrl(checkoutLines, freeFrom, promo)
 
   const footer =
     bag.length > 0 ? (
@@ -239,8 +238,8 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
           </S.NeedSize>
         )}
         {checkoutLines.length > 0 && !ONLINE_CHECKOUT ? (
-          <Button variant="primary" block glyph={WhatsApp} href={whatsapp} {...external}>
-            Finalizar pelo WhatsApp
+          <Button variant="primary" block href="/carrinho">
+            Continuar
           </Button>
         ) : checkoutLines.length > 0 ? (
           <>
@@ -249,7 +248,7 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
             </Button>
             <S.Alt>
               ou{' '}
-              <a href={whatsapp} {...external}>
+              <a href="/carrinho?via=whatsapp">
                 finalize pelo WhatsApp
               </a>
             </S.Alt>
