@@ -34,35 +34,62 @@ export function bagPromo(lines: BagLine[], blackFriday: boolean): BagPromo {
   }
 }
 
+/** Pedido montado no /carrinho (mesmos passos da compra pelo site) para finalizar pelo WhatsApp. */
+export type WhatsAppOrder = {
+  lines: BagLine[]
+  customer: { name: string; phone: string; cpf: string; email: string }
+  address: { cep: string; street: string; number: string; complement: string; district: string; city: string; uf: string }
+  shipping: { name: string; price: number; free: boolean; days: string }
+  method: 'pix' | 'card'
+  /** Valores em centavos, já na forma de pagamento escolhida (o mesmo resumo da tela). */
+  totals: { items: number; promo: number; promoLabel?: string; shipping: number; total: number }
+  installments: number
+}
+
 /**
- * Link de WhatsApp com todos os itens da sacola (nome, cor, tamanho e quantidade de cada um).
- * `freeFrom`: valor do frete grátis em reais; null = sem frete grátis por valor (Black Friday).
- * `promo`: desconto da Black Friday nas peças, que vai na mensagem com o total já descontado.
+ * Link de WhatsApp com o pedido completo: itens, dados da cliente, endereço, frete e forma de pagamento.
+ * A loja confere e manda o link de pagamento pelo WhatsApp.
  */
-export function checkoutUrl(lines: BagLine[], freeFrom: number | null = SHOP.freeShippingFrom, promo?: BagPromo): string {
-  const total = lines.reduce((sum, l) => sum + l.product.price * l.qty, 0)
-  const pix = lines.reduce((sum, l) => sum + l.product.pix * l.qty, 0)
-  const items = lines.flatMap((l, i) => [
+export function whatsappOrderUrl(order: WhatsAppOrder): string {
+  const brl = (centavos: number) => formatBRL(centavos / 100)
+  const unit = (l: BagLine) => (order.method === 'pix' ? l.product.pix : l.product.price)
+  const { customer: c, address: a, shipping: s, totals: t } = order
+  const items = order.lines.flatMap((l, i) => [
     `*${i + 1}. ${l.product.name}* (Ref. ${l.product.ref})`,
-    `• Cor: ${l.variant.color.name}`,
-    `• Tamanho: ${l.size}`,
-    `• Quantidade: ${l.qty}`,
-    `• Valor: ${formatBRL(l.product.price * l.qty)}`,
-    '',
+    `• ${l.variant.color.name} · Tam. ${l.size} · ${l.qty} un.`,
+    `• ${formatBRL(unit(l) * l.qty)}`,
   ])
-  const discounted = promo && promo.percent > 0
+  const pay =
+    order.method === 'pix'
+      ? 'Pix (à vista)'
+      : `Cartão de crédito (até ${order.installments}x de ${brl(Math.floor(t.total / order.installments))} sem juros)`
   const message = [
     `Olá! Quero finalizar este pedido na ${SHOP.name}:`,
     '',
+    '*🛍️ Peças*',
     ...items,
-    ...(discounted
-      ? [
-          `Subtotal: ${formatBRL(total)} (ou ${formatBRL(pix)} no Pix)`,
-          `Black Friday (${promo.count} peças, ${promo.percent}%): − ${formatBRL(promo.card)} (− ${formatBRL(promo.pix)} no Pix)`,
-          `*Total: ${formatBRL(total - promo.card)}* (ou ${formatBRL(pix - promo.pix)} no Pix)`,
-        ]
-      : [`*Total: ${formatBRL(total)}* (ou ${formatBRL(pix)} no Pix)`]),
-    ...(freeFrom !== null && total >= freeFrom ? ['Frete grátis ✓'] : []),
+    '',
+    '*👤 Meus dados*',
+    `Nome: ${c.name.trim()}`,
+    `CPF: ${c.cpf}`,
+    `Celular: ${c.phone}`,
+    `E-mail: ${c.email.trim()}`,
+    '',
+    '*📦 Endereço de entrega*',
+    `${a.street.trim()}, ${a.number.trim()}${a.complement.trim() ? ` – ${a.complement.trim()}` : ''}`,
+    `${a.district.trim()} – ${a.city.trim()}/${a.uf}`,
+    `CEP ${a.cep}`,
+    '',
+    '*🚚 Envio*',
+    `${s.name} – ${s.free ? 'Grátis' : formatBRL(s.price)} (${s.days})`,
+    '',
+    '*💳 Pagamento*',
+    pay,
+    '',
+    `Subtotal: ${brl(t.items)}`,
+    ...(t.promo > 0 ? [`${t.promoLabel ?? 'Desconto'}: − ${brl(t.promo)}`] : []),
+    `Frete: ${s.free ? 'Grátis' : brl(t.shipping)}`,
+    `*Total: ${brl(t.total)}*`,
   ].join('\n')
   return whatsappUrl(message)
 }

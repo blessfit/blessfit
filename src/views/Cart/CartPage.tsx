@@ -5,6 +5,9 @@
  * sacola e totais à direita. "Finalizar pedido" cria o pedido em /api/checkout e leva
  * para o pagamento na InfinitePay.
  *
+ * Pelo WhatsApp (pagamento pelo site desligado, ou ?via=whatsapp / "Prefere? Finalize pelo WhatsApp"),
+ * os passos são os mesmos e o fim abre o WhatsApp com o pedido completo: dados, endereço, frete e pagamento.
+ *
  * Os valores mostrados aqui são só uma prévia: o servidor recalcula itens e frete.
  * O rascunho do formulário (sem o CPF) fica salvo no navegador.
  */
@@ -15,7 +18,7 @@ import { mask, UFS } from '@/lib/customer'
 import { digits, isCpf, normalizeCep } from '@/lib/documents'
 import { external, whatsappUrl } from '@/lib/links'
 import { promoTier, discountTotals, freeShippingFrom, inPromo, lineDiscounts, nextPromoTier, type DiscountLine } from '@/lib/campaign'
-import { bagPromo, checkoutUrl, type BagLine } from '@/lib/orders'
+import { whatsappOrderUrl, type BagLine } from '@/lib/orders'
 import { formatBRL } from '@/lib/price'
 import { ONLINE_CHECKOUT } from '@/lib/site'
 import { useCampaign } from '@/store/campaignContext'
@@ -97,6 +100,16 @@ export function CartPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [loaded, setLoaded] = useState(false)
+  // finalizar pelo WhatsApp: sempre, com o pagamento pelo site desligado; senão, se a cliente escolher
+  const [viaWhatsApp, setViaWhatsApp] = useState(!ONLINE_CHECKOUT)
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('via') === 'whatsapp') setViaWhatsApp(true)
+  }, [])
+  const chooseWhatsApp = (on: boolean) => {
+    setViaWhatsApp(on)
+    setSubmitError(null)
+    window.history.replaceState(null, '', on ? '/carrinho?via=whatsapp' : '/carrinho')
+  }
 
   // rascunho salvo (sem CPF); o servidor não tem o localStorage, então entra depois da 1ª renderização
   useEffect(() => {
@@ -227,22 +240,45 @@ export function CartPage() {
   const freeFrom = freeShippingFrom(blackFriday)
   const missing = freeProduct ? 0 : freeFrom === null ? null : Math.max(0, freeFrom - bagTotal)
 
-  const submit = async () => {
+  /** Confere tamanhos, campos e frete (os mesmos passos para o site e para o WhatsApp). */
+  const ready = (): boolean => {
     setShowErrors(true)
     setSubmitError(null)
     if (needSize.length > 0) {
       setSubmitError('Escolha o tamanho de todas as peças da sacola.')
       document.getElementById('escolha-tamanho')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      return
+      return false
     }
     if (Object.keys(errors).length > 0) {
       document.querySelector('[data-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      return
+      return false
     }
     if (!option) {
       setSubmitError('Escolha uma opção de frete')
-      return
+      document.getElementById('passo-3')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      return false
     }
+    return true
+  }
+
+  const sendWhatsApp = () => {
+    if (!ready() || !option) return
+    const url = whatsappOrderUrl({
+      lines: checkoutLines,
+      customer: { name: form.name, phone: form.phone, cpf: form.cpf, email: form.email },
+      address: { cep: form.cep, street: form.street, number: form.number, complement: form.complement, district: form.district, city: form.city, uf: form.uf },
+      shipping: { name: `${option.carrier} ${option.name}`, price: option.price, free: option.free, days: days(option.days) },
+      method,
+      totals: { ...current, promoLabel: `Black Friday (${count} peças, ${promoPercent}%)` },
+      installments: SHOP.installments,
+    })
+    // pop-up bloqueado: abre o WhatsApp nesta mesma aba ('noopener' faria o open devolver null sempre)
+    if (!window.open(url, '_blank')) window.location.href = url
+  }
+
+  const submit = async () => {
+    if (viaWhatsApp) return sendWhatsApp()
+    if (!ready() || !option) return
     setSubmitting(true)
     // a aba do pagamento abre já no clique (depois do await o navegador bloquearia); esta aba acompanha o status
     const tab = window.open('', '_blank')
@@ -289,24 +325,6 @@ export function CartPage() {
           <Button variant="primary" href="/#conjuntos">
             Ver produtos
           </Button>
-        </S.Empty>
-      </CheckoutShell>
-    )
-  }
-
-  // pagamento pelo site desligado (lib/site.ts): o pedido segue montado para o WhatsApp
-  if (!ONLINE_CHECKOUT) {
-    return (
-      <CheckoutShell>
-        <S.Empty>
-          <h1>Finalize seu pedido pelo WhatsApp</h1>
-          <p>Seu pedido vai montado na mensagem: é só enviar que combinamos o pagamento e a entrega com você.</p>
-          {needSize.length > 0 && <S.Error role="alert">Escolha o tamanho de todas as peças na sacola antes de finalizar.</S.Error>}
-          {checkoutLines.length > 0 && (
-            <Button variant="primary" glyph={WhatsApp} href={checkoutUrl(checkoutLines, freeFrom, bagPromo(checkoutLines, blackFriday))} {...external}>
-              Finalizar pelo WhatsApp
-            </Button>
-          )}
         </S.Empty>
       </CheckoutShell>
     )
@@ -409,7 +427,16 @@ export function CartPage() {
           </S.Card>
 
           <S.Card aria-labelledby="passo-4">
-            <StepHead n={4} id="passo-4" title="Pagamento" text="Você paga no ambiente seguro da InfinitePay." />
+            <StepHead
+              n={4}
+              id="passo-4"
+              title="Pagamento"
+              text={
+                viaWhatsApp
+                  ? 'Escolha como prefere pagar. Mandamos o link de pagamento pelo WhatsApp.'
+                  : 'Você paga no ambiente seguro da InfinitePay.'
+              }
+            />
             <S.PayOptions role="radiogroup" aria-label="Forma de pagamento">
               <S.Option $checked={method === 'pix'}>
                 <input type="radio" name="pagamento" checked={method === 'pix'} onChange={() => setMethod('pix')} />
@@ -555,18 +582,32 @@ export function CartPage() {
             </p>
           </S.Grand>
 
-          <Button as="button" variant="primary" block onClick={submit} disabled={submitting} aria-busy={submitting}>
-            {submitting
-              ? 'Abrindo o pagamento…'
-              : method === 'pix'
-                ? `Pagar ${formatBRL(current.total / 100)} no Pix`
-                : `Pagar no cartão em até ${SHOP.installments}x`}
-          </Button>
-          <S.Alt>
-            O pagamento abre numa nova aba, no ambiente seguro da InfinitePay. Lá, escolha{' '}
-            <strong>{method === 'pix' ? 'Pix' : 'cartão de crédito'}</strong> para manter este valor. Esta página mostra quando o
-            pagamento for aprovado.
-          </S.Alt>
+          {viaWhatsApp ? (
+            <>
+              <Button as="button" variant="primary" block glyph={WhatsApp} onClick={submit}>
+                Finalizar pelo WhatsApp
+              </Button>
+              <S.Alt>
+                O WhatsApp abre com seu pedido completo: peças, dados, endereço, envio e forma de pagamento. É só enviar a
+                mensagem que confirmamos e mandamos o link de pagamento.
+              </S.Alt>
+            </>
+          ) : (
+            <>
+              <Button as="button" variant="primary" block onClick={submit} disabled={submitting} aria-busy={submitting}>
+                {submitting
+                  ? 'Abrindo o pagamento…'
+                  : method === 'pix'
+                    ? `Pagar ${formatBRL(current.total / 100)} no Pix`
+                    : `Pagar no cartão em até ${SHOP.installments}x`}
+              </Button>
+              <S.Alt>
+                O pagamento abre numa nova aba, no ambiente seguro da InfinitePay. Lá, escolha{' '}
+                <strong>{method === 'pix' ? 'Pix' : 'cartão de crédito'}</strong> para manter este valor. Esta página mostra quando o
+                pagamento for aprovado.
+              </S.Alt>
+            </>
+          )}
           {submitError && <S.Error role="alert">{submitError}</S.Error>}
 
           <S.Trust>
@@ -581,12 +622,37 @@ export function CartPage() {
             </li>
           </S.Trust>
 
-          <S.Alt>
-            Prefere?{' '}
-            <a href={checkoutUrl(checkoutLines, freeFrom, bagPromo(checkoutLines, blackFriday))} {...external}>
-              Finalize pelo WhatsApp
-            </a>
-          </S.Alt>
+          {ONLINE_CHECKOUT && (
+            <S.Alt>
+              {viaWhatsApp ? (
+                <>
+                  Prefere pagar agora?{' '}
+                  <a
+                    href="/carrinho"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      chooseWhatsApp(false)
+                    }}
+                  >
+                    Pague pelo site
+                  </a>
+                </>
+              ) : (
+                <>
+                  Prefere?{' '}
+                  <a
+                    href="/carrinho?via=whatsapp"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      chooseWhatsApp(true)
+                    }}
+                  >
+                    Finalize pelo WhatsApp
+                  </a>
+                </>
+              )}
+            </S.Alt>
+          )}
         </S.Aside>
       </S.Layout>
     </CheckoutShell>
