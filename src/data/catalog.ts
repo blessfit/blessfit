@@ -55,7 +55,7 @@ export type CatalogProduct = {
 
 /**
  * Peça de um conjunto. Sem `color`, a peça tem a mesma cor do conjunto; com `color`, troca a cor da peça
- * em alguma cor do conjunto (ex.: o Conjunto Brisa Branco vem com a legging Preto).
+ * em alguma cor do conjunto (ex.: o Conjunto Brisa Branco e o Azul Marinho vêm com a legging Preto).
  */
 export type SetPart = { id: string; color?: Record<string, string> }
 
@@ -118,12 +118,12 @@ export const CATALOG: CatalogProduct[] = [
     ],
     pieces: ['Regata estampada', 'Legging cós alto'],
     description:
-      'Regata leve com a estampa blessfit e barra arredondada, com legging de cós alto que não marca. Na cor Branco, a regata vem com legging preta.',
+      'Regata leve com a estampa blessfit e barra arredondada, com legging de cós alto que não marca. Nas cores Branco e Azul Marinho, a regata vem com legging preta.',
     price: 159.9,
     pix: 149.9,
     compareAt: 179.8,
     sizes: ['P', 'M', 'G', 'GG'],
-    parts: [{ id: 'regata-brisa' }, { id: 'legging-brisa', color: { Branco: 'Preto' } }],
+    parts: [{ id: 'regata-brisa' }, { id: 'legging-brisa', color: { Branco: 'Preto', 'Azul Marinho': 'Preto' } }],
   },
 
   // ——— Conjuntos masculinos ———
@@ -186,7 +186,7 @@ export const CATALOG: CatalogProduct[] = [
     gender: 'Feminino',
     kind: 'Legging',
     category: 'Legging feminina',
-    variants: [v(C.preto, 'legging-brisa-preto'), v(C.marinho, 'legging-brisa-marinho')],
+    variants: [v(C.preto, 'legging-brisa-preto')],
     pieces: ['Cós alto', 'Não marca nem fica transparente'],
     description: 'Legging de cós alto com logo b.f na lateral e blessfit nas costas, do agachamento ao cardio.',
     price: 104.9,

@@ -245,7 +245,7 @@ const brisa = folder(
 const BRISA = {
   conjuntoPretoFrente: brisa('conjunto-preto-frente', 'Modelo de frente com o Conjunto Brisa preto: regata estampada e legging', '50% 30%'),
   conjuntoPretoCostas: brisa('conjunto-preto-costas', 'Modelo de costas com o Conjunto Brisa preto e o logo blessfit no cós', '50% 30%'),
-  conjuntoMarinhoFrente: brisa('conjunto-marinho-frente', 'Modelo de frente com o Conjunto Brisa azul marinho: regata estampada e legging', '50% 30%'),
+  conjuntoMarinhoFrente: brisa('conjunto-marinho-frente', 'Modelo de frente com o Conjunto Brisa azul marinho: regata estampada azul e legging preta', '50% 30%'),
   conjuntoMarinhoCostas: brisa('conjunto-marinho-costas', 'Modelo de costas com o Conjunto Brisa azul marinho e o logo blessfit no cós', '50% 30%'),
   conjuntoBrancoFrente: brisa('conjunto-branco-frente', 'Modelo de frente com a regata branca estampada e legging preta', '50% 30%'),
   conjuntoBrancoCostas: brisa('conjunto-branco-costas', 'Modelo de costas com a regata branca e legging preta com o logo blessfit', '50% 30%'),
@@ -371,8 +371,8 @@ export const IMAGES = {
       gallery: [
         BRISA.regataMarinhoFrente,
         BRISA.regataMarinhoCostas,
-        BRISA.leggingMarinhoFrente,
-        BRISA.leggingMarinhoCostas,
+        BRISA.leggingPretoFrente,
+        BRISA.leggingPretoCostas,
       ],
     },
     'conjunto-brisa-branco': {
