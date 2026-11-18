@@ -14,7 +14,7 @@ import { SHOP } from '@/data/shop'
 import { mask, UFS } from '@/lib/customer'
 import { digits, isCpf, normalizeCep } from '@/lib/documents'
 import { external, whatsappUrl } from '@/lib/links'
-import { blouseTier, discountTotals, freeShippingFrom, isBlouse, lineDiscounts, nextBlouseTier, type DiscountLine } from '@/lib/campaign'
+import { promoTier, discountTotals, freeShippingFrom, inPromo, lineDiscounts, nextPromoTier, type DiscountLine } from '@/lib/campaign'
 import { bagPromo, checkoutUrl, type BagLine } from '@/lib/orders'
 import { formatBRL } from '@/lib/price'
 import { ONLINE_CHECKOUT } from '@/lib/site'
@@ -203,15 +203,15 @@ export function CartPage() {
 
   const option = quote.status === 'ok' ? quote.options.find((o) => o.id === serviceId) ?? null : null
 
-  // Black Friday (painel → Campanha): desconto progressivo nas blusas. O checkout recalcula igual (src/lib/campaign.ts)
+  // Black Friday (painel → Campanha): desconto progressivo nas peças. O checkout recalcula igual (src/lib/campaign.ts)
   const { active: blackFriday } = useCampaign()
-  const blouses = checkoutLines.reduce((n, l) => n + (isBlouse(l.product) ? l.qty : 0), 0)
-  const promoPercent = blackFriday ? blouseTier(blouses) : 0
-  const nextTier = blackFriday ? nextBlouseTier(blouses) : null
+  const count = checkoutLines.reduce((n, l) => n + (inPromo(l.product) ? l.qty : 0), 0)
+  const promoPercent = blackFriday ? promoTier(count) : 0
+  const nextTier = blackFriday ? nextPromoTier(count) : null
 
   const totals = useMemo(() => {
     const at = (m: Method) => {
-      const lines: DiscountLine[] = checkoutLines.map((l) => ({ unitCents: unitCents(l, m), qty: l.qty, blouse: isBlouse(l.product) }))
+      const lines: DiscountLine[] = checkoutLines.map((l) => ({ unitCents: unitCents(l, m), qty: l.qty, inPromo: inPromo(l.product) }))
       const items = lines.reduce((sum, l) => sum + l.unitCents * l.qty, 0)
       const split = discountTotals(lines, lineDiscounts(lines, { promoPercent, couponPercent: 0 }))
       const shipping = option ? cents(option.price) : 0
@@ -513,12 +513,12 @@ export function CartPage() {
             <S.Alt role="status">
               {nextTier ? (
                 <>
-                  <strong>Black Friday:</strong> adicione mais {nextTier.missing} {nextTier.missing === 1 ? 'blusa' : 'blusas'} e
-                  ganhe {nextTier.percent}% nas blusas.
+                  <strong>Black Friday:</strong> adicione mais {nextTier.missing} {nextTier.missing === 1 ? 'peça' : 'peças'} e
+                  ganhe {nextTier.percent}% nas peças.
                 </>
               ) : (
                 <>
-                  <strong>Black Friday:</strong> você ganhou o desconto máximo de {promoPercent}% nas blusas.
+                  <strong>Black Friday:</strong> você ganhou o desconto máximo de {promoPercent}% nas peças.
                 </>
               )}{' '}
               Cupom e promoção não somam: cada peça fica com o maior desconto.
@@ -533,7 +533,7 @@ export function CartPage() {
             {current.promo > 0 && (
               <div>
                 <dt>
-                  Black Friday ({blouses} blusas, {promoPercent}%)
+                  Black Friday ({count} peças, {promoPercent}%)
                 </dt>
                 <S.Discount>− {formatBRL(current.promo / 100)}</S.Discount>
               </div>

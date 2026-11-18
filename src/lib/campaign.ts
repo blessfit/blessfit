@@ -22,43 +22,43 @@ export const isBlackFriday = (campaign: Campaign | null | undefined, now = new D
 
 /**
  * Valor mínimo (em reais) para o frete grátis, ou null quando não há frete grátis por valor.
- * Na Black Friday ele sai (a margem já vai no desconto das blusas). Produto marcado com frete grátis
+ * Na Black Friday ele sai (a margem já vai no desconto progressivo). Produto marcado com frete grátis
  * no painel → Preços continua valendo.
  */
 export const freeShippingFrom = (blackFriday: boolean): number | null => (blackFriday ? null : SHOP.freeShippingFrom)
 
-/** Desconto progressivo nas blusas avulsas: quantidade mínima de blusas → % de desconto. */
-export const BLOUSE_TIERS = [
+/** Desconto progressivo em todas as peças: quantidade mínima de peças → % de desconto. */
+export const PROMO_TIERS = [
   { min: 2, percent: 10 },
   { min: 3, percent: 15 },
   { min: 4, percent: 20 },
 ] as const
 
-export const MAX_BLOUSE_PERCENT = BLOUSE_TIERS[BLOUSE_TIERS.length - 1].percent
+export const MAX_PROMO_PERCENT = PROMO_TIERS[PROMO_TIERS.length - 1].percent
 
-/** Só blusas vendidas sozinhas entram na conta (a blusa dentro de um conjunto não conta). */
-export const isBlouse = (product: { kind: string } | undefined) => product?.kind === 'Blusa'
+/** Todas as peças entram na promoção (blusas, shorts, leggings e conjuntos; um conjunto conta como 1 peça). */
+export const inPromo = (product: { kind: string } | undefined) => !!product
 
-/** % de desconto para esta quantidade de blusas (0 abaixo de 2). */
-export function blouseTier(count: number): number {
+/** % de desconto para esta quantidade de peças (0 abaixo de 2). */
+export function promoTier(count: number): number {
   let percent = 0
-  for (const tier of BLOUSE_TIERS) if (count >= tier.min) percent = tier.percent
+  for (const tier of PROMO_TIERS) if (count >= tier.min) percent = tier.percent
   return percent
 }
 
-/** Próximo degrau: quantas blusas faltam e quanto ele dá. null quando já está no máximo. */
-export function nextBlouseTier(count: number): { missing: number; percent: number } | null {
-  const next = BLOUSE_TIERS.find((tier) => count < tier.min)
+/** Próximo degrau: quantas peças faltam e quanto ele dá. null quando já está no máximo. */
+export function nextPromoTier(count: number): { missing: number; percent: number } | null {
+  const next = PROMO_TIERS.find((tier) => count < tier.min)
   return next ? { missing: next.min - count, percent: next.percent } : null
 }
 
-/** Uma linha do pedido para o cálculo: preço de uma unidade em centavos, quantidade e se é blusa. */
-export type DiscountLine = { unitCents: number; qty: number; blouse: boolean }
+/** Uma linha do pedido para o cálculo: preço de uma unidade em centavos, quantidade e se entra na promoção. */
+export type DiscountLine = { unitCents: number; qty: number; inPromo: boolean }
 
 export type LineDiscount = {
   /** Desconto de uma unidade, em centavos. */
   unit: number
-  /** De onde veio: a promoção das blusas, o cupom, ou nenhum. */
+  /** De onde veio: a promoção progressiva, o cupom, ou nenhum. */
   source: 'promo' | 'coupon' | null
   percent: number
 }
@@ -69,7 +69,7 @@ export type LineDiscount = {
  */
 export function lineDiscounts(lines: DiscountLine[], opts: { promoPercent: number; couponPercent: number }): LineDiscount[] {
   return lines.map((line) => {
-    const promo = line.blouse ? opts.promoPercent : 0
+    const promo = line.inPromo ? opts.promoPercent : 0
     const percent = Math.max(promo, opts.couponPercent)
     if (percent <= 0) return { unit: 0, source: null, percent: 0 }
     return {
@@ -92,5 +92,5 @@ export function discountTotals(lines: DiscountLine[], discounts: LineDiscount[])
   return { promo, coupon, total: promo + coupon }
 }
 
-/** Quantas blusas tem nas linhas. */
-export const blouseCount = (lines: DiscountLine[]) => lines.reduce((n, l) => n + (l.blouse ? l.qty : 0), 0)
+/** Quantas peças da promoção tem nas linhas. */
+export const promoCount = (lines: DiscountLine[]) => lines.reduce((n, l) => n + (l.inPromo ? l.qty : 0), 0)

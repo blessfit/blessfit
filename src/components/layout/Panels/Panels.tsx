@@ -193,7 +193,7 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   const freeFrom = useFreeShippingFrom()
   const missing = freeProduct ? 0 : freeFrom === null ? null : Math.max(0, freeFrom - bagTotal)
   const allSelected = bag.every((l) => l.selected)
-  // Black Friday: desconto progressivo nas blusas já na sacola e na mensagem do WhatsApp
+  // Black Friday: desconto progressivo nas peças já na sacola e na mensagem do WhatsApp
   const promo = bagPromo(checkoutLines, useCampaign().active)
   const whatsapp = checkoutUrl(checkoutLines, freeFrom, promo)
 
@@ -225,12 +225,12 @@ function BagPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
         <S.Pix>ou {formatBRL(bagPixTotal - promo.pix)} no Pix</S.Pix>
         {promo.percent > 0 && (
           <S.Pix>
-            Black Friday: {promo.percent}% em {promo.blouses} blusas (− {formatBRL(promo.pix)} no Pix)
+            Black Friday: {promo.percent}% em {promo.count} peças (− {formatBRL(promo.pix)} no Pix)
           </S.Pix>
         )}
         {promo.next && (
           <S.Pix>
-            Adicione mais {promo.next.missing} {promo.next.missing === 1 ? 'blusa' : 'blusas'} e ganhe {promo.next.percent}% nas blusas
+            Adicione mais {promo.next.missing} {promo.next.missing === 1 ? 'peça' : 'peças'} e ganhe {promo.next.percent}% nas peças
           </S.Pix>
         )}
         {needSize.length > 0 && (

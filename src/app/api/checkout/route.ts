@@ -9,13 +9,13 @@
  *   shipping: { serviceId, price },  // a opção que o cliente viu em /api/shipping/quote
  *   coupon?: 'BLESS10'               // desconto só nos itens
  * }
- * Na Black Friday (ligada em /admin/campanha) as blusas ganham o desconto progressivo de src/lib/campaign.ts.
+ * Na Black Friday (ligada em /admin/campanha) todas as peças ganham o desconto progressivo de src/lib/campaign.ts.
  * Cupom e promoção não somam: cada peça fica com o maior.
  * Resposta: { orderId, url } — o site manda o cliente para `url`.
  * O frete é cotado de novo aqui. Se a opção sumiu ou o preço mudou: 409 { code: 'shipping_changed', options }.
  */
 import { CATALOG } from '@/data/catalog'
-import { blouseCount, blouseTier, discountTotals, freeShippingFrom, isBlackFriday, isBlouse, lineDiscounts, type DiscountLine } from '@/lib/campaign'
+import { promoCount, promoTier, discountTotals, freeShippingFrom, isBlackFriday, inPromo, lineDiscounts, type DiscountLine } from '@/lib/campaign'
 import { digits, isCpf, normalizeCep } from '@/lib/documents'
 import { ONLINE_CHECKOUT } from '@/lib/site'
 import { getCampaign } from '@/server/campaign'
@@ -108,7 +108,7 @@ export async function POST(request: Request): Promise<Response> {
   const atCardPrice = priceCart(body.lines, 'card', live)
   if ('error' in atCardPrice) return json({ error: atCardPrice.error }, 400)
 
-  // Black Friday lida do banco agora (o painel pode ter desligado): desconto nas blusas e sem frete grátis por valor
+  // Black Friday lida do banco agora (o painel pode ter desligado): desconto nas peças e sem frete grátis por valor
   const blackFriday = isBlackFriday(await getCampaign())
 
   let quote
@@ -143,13 +143,13 @@ export async function POST(request: Request): Promise<Response> {
   }
   const itemsTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
-  // Black Friday: desconto progressivo nas blusas
+  // Black Friday: desconto progressivo nas peças
   const discountLines: DiscountLine[] = items.map((item) => ({
     unitCents: item.price,
     qty: item.quantity,
-    blouse: isBlouse(CATALOG.find((p) => p.id === item.id)),
+    inPromo: inPromo(CATALOG.find((p) => p.id === item.id)),
   }))
-  const promoPercent = blackFriday ? blouseTier(blouseCount(discountLines)) : 0
+  const promoPercent = blackFriday ? promoTier(promoCount(discountLines)) : 0
   const discounts = lineDiscounts(discountLines, { promoPercent, couponPercent: coupon?.percent ?? 0 })
   const totals = discountTotals(discountLines, discounts)
   const discount = totals.total
@@ -168,7 +168,7 @@ export async function POST(request: Request): Promise<Response> {
       items_total_cents: itemsTotal,
       shipping_cents: shipping.priceCents,
       coupon_code: usedCoupon?.code ?? null,
-      promo: totals.promo > 0 ? `black-friday-blusas-${promoPercent}` : null,
+      promo: totals.promo > 0 ? `black-friday-${promoPercent}` : null,
       discount_cents: discount,
       total_cents: itemsTotal - discount + shipping.priceCents,
       customer,

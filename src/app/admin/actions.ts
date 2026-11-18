@@ -130,7 +130,7 @@ export async function savePrices(
 }
 
 /**
- * Liga ou desliga a Black Friday (tema, banner e desconto progressivo nas blusas).
+ * Liga ou desliga a Black Friday (tema, banner e desconto progressivo nas peças).
  * `endsAt` vem do `datetime-local` no horário de Brasília; vazio = só termina quando desligar.
  */
 export async function setCampaign(input: { blackFriday: boolean; endsAt: string }): Promise<ActionResult> {

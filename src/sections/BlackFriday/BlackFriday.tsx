@@ -4,7 +4,7 @@
 import type { CSSProperties } from 'react'
 import { ArrowRight, Button, Container, Picture, Section, SectionHeader } from '@/components/ui'
 import { IMAGES } from '@/data/images'
-import { BLOUSE_TIERS, isBlouse } from '@/lib/campaign'
+import { PROMO_TIERS, inPromo } from '@/lib/campaign'
 import { formatBRL } from '@/lib/price'
 import { useCampaign } from '@/store/campaignContext'
 import { useCatalog } from '@/store/catalogContext'
@@ -28,7 +28,7 @@ export function BlackFridayHero() {
         <S.Title id="bf-title">
           Black <span>Friday</span>
         </S.Title>
-        <S.Text>Quanto mais blusas, maior o desconto. Vale para tops, regatas e camisetas, no Pix ou no cartão.</S.Text>
+        <S.Text>Quanto mais peças, maior o desconto. Vale para toda a loja: blusas, shorts, leggings e conjuntos, no Pix ou no cartão.</S.Text>
 
         {endsAt && (
           <S.Countdown aria-label="Tempo restante da Black Friday">
@@ -48,8 +48,8 @@ export function BlackFridayHero() {
           </S.Countdown>
         )}
 
-        <S.Ladder aria-label="Desconto por quantidade de blusas" style={{ '--steps': BLOUSE_TIERS.length } as CSSProperties}>
-          {BLOUSE_TIERS.map((tier, i) => (
+        <S.Ladder aria-label="Desconto por quantidade de peças" style={{ '--steps': PROMO_TIERS.length } as CSSProperties}>
+          {PROMO_TIERS.map((tier, i) => (
             <li key={tier.min}>
               <b>{tier.percent}%</b>
               <span>{tierLabel(i)}</span>
@@ -58,7 +58,7 @@ export function BlackFridayHero() {
         </S.Ladder>
 
         <S.Actions>
-          <Button variant="light" icon={ArrowRight} href="#blusas">
+          <Button variant="light" icon={ArrowRight} href="#pecas-todas">
             Montar meu combo
           </Button>
           <Button variant="outlineLight" href="#categorias">
@@ -74,7 +74,7 @@ export function BlackFridayHero() {
 export function BlackFridayTicker() {
   const items = [
     'Black Friday Blessfit',
-    ...BLOUSE_TIERS.map((t, i) => `${i === BLOUSE_TIERS.length - 1 ? `${t.min}+` : t.min} blusas ${t.percent}% off`),
+    ...PROMO_TIERS.map((t, i) => `${i === PROMO_TIERS.length - 1 ? `${t.min}+` : t.min} peças ${t.percent}% off`),
     'Vale no Pix e no cartão',
   ]
   return (
@@ -88,23 +88,23 @@ export function BlackFridayTicker() {
   )
 }
 
-/** "Quanto mais blusas, maior o desconto": um cartão por degrau, com exemplo na blusa mais barata. */
+/** "Quanto mais peças, maior o desconto": um cartão por degrau, com exemplo na peça mais barata. */
 export function BlackFridaySteps() {
   const { pieces } = useCatalog()
-  const blouses = pieces.filter(isBlouse)
-  const cheapest = blouses.reduce<(typeof blouses)[number] | undefined>((min, p) => (!min || p.pix < min.pix ? p : min), undefined)
+  const promoPieces = pieces.filter(inPromo)
+  const cheapest = promoPieces.reduce<(typeof promoPieces)[number] | undefined>((min, p) => (!min || p.pix < min.pix ? p : min), undefined)
 
   return (
     // sem espaço embaixo: "Compre por categoria" vem logo depois, também branca, e os dois espaços somavam
     <Section id="black-friday" $tone="white" aria-labelledby="bf-steps-title" style={{ paddingBottom: 0 }}>
       <Container>
-        <SectionHeader id="bf-steps-title" eyebrow="Black Friday · desconto progressivo" title="Quanto mais blusas, maior o desconto" />
-        <S.Steps style={{ '--steps': BLOUSE_TIERS.length } as CSSProperties}>
-          {BLOUSE_TIERS.map((tier, i) => {
+        <SectionHeader id="bf-steps-title" eyebrow="Black Friday · desconto progressivo" title="Quanto mais peças, maior o desconto" />
+        <S.Steps style={{ '--steps': PROMO_TIERS.length } as CSSProperties}>
+          {PROMO_TIERS.map((tier, i) => {
             const full = cheapest ? cheapest.pix * tier.min : 0
             const total = Math.round(full * (100 - tier.percent)) / 100
             return (
-              <S.Step key={tier.min} $max={i === BLOUSE_TIERS.length - 1}>
+              <S.Step key={tier.min} $max={i === PROMO_TIERS.length - 1}>
                 <span>{tierLabel(i)}</span>
                 <b>{tier.percent}% off</b>
                 {cheapest && (

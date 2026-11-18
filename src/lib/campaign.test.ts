@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { blouseCount, blouseTier, discountTotals, isBlackFriday, lineDiscounts, nextBlouseTier, type DiscountLine } from './campaign'
+import { inPromo, promoCount, promoTier, discountTotals, isBlackFriday, lineDiscounts, nextPromoTier, type DiscountLine } from './campaign'
 
 describe('isBlackFriday', () => {
   const now = new Date('2026-11-28T12:00:00-03:00')
@@ -16,27 +16,27 @@ describe('isBlackFriday', () => {
   })
 })
 
-describe('blouseTier', () => {
+describe('promoTier', () => {
   it('segue a escada 2/3/4+ (máximo de 20%)', () => {
-    expect([0, 1, 2, 3, 4, 5, 9].map(blouseTier)).toEqual([0, 0, 10, 15, 20, 20, 20])
+    expect([0, 1, 2, 3, 4, 5, 9].map(promoTier)).toEqual([0, 0, 10, 15, 20, 20, 20])
   })
 
   it('diz quanto falta para o próximo degrau', () => {
-    expect(nextBlouseTier(1)).toEqual({ missing: 1, percent: 10 })
-    expect(nextBlouseTier(3)).toEqual({ missing: 1, percent: 20 })
-    expect(nextBlouseTier(4)).toBeNull()
+    expect(nextPromoTier(1)).toEqual({ missing: 1, percent: 10 })
+    expect(nextPromoTier(3)).toEqual({ missing: 1, percent: 20 })
+    expect(nextPromoTier(4)).toBeNull()
   })
 })
 
 describe('lineDiscounts', () => {
   const lines: DiscountLine[] = [
-    { unitCents: 6990, qty: 2, blouse: true }, // regatas no Pix
-    { unitCents: 7490, qty: 1, blouse: true }, // top no Pix
-    { unitCents: 12990, qty: 1, blouse: false }, // conjunto
+    { unitCents: 6990, qty: 2, inPromo: true }, // regatas no Pix
+    { unitCents: 7490, qty: 1, inPromo: true }, // top no Pix
+    { unitCents: 12990, qty: 1, inPromo: false }, // linha fora da promoção
   ]
 
-  it('3 blusas: 15% só nas blusas', () => {
-    const promoPercent = blouseTier(blouseCount(lines))
+  it('3 peças na promoção: 15% só nelas', () => {
+    const promoPercent = promoTier(promoCount(lines))
     expect(promoPercent).toBe(15)
     const d = lineDiscounts(lines, { promoPercent, couponPercent: 0 })
     expect(d.map((x) => x.unit)).toEqual([1049, 1124, 0])
@@ -52,7 +52,7 @@ describe('lineDiscounts', () => {
     ])
   })
 
-  it('cupom maior que a promoção vale também nas blusas', () => {
+  it('cupom maior que a promoção vale também nas peças', () => {
     const d = lineDiscounts(lines, { promoPercent: 10, couponPercent: 20 })
     expect(d.every((x) => x.source === 'coupon' && x.percent === 20)).toBe(true)
   })
@@ -60,5 +60,12 @@ describe('lineDiscounts', () => {
   it('sem promoção nem cupom não dá desconto', () => {
     const d = lineDiscounts(lines, { promoPercent: 0, couponPercent: 0 })
     expect(discountTotals(lines, d).total).toBe(0)
+  })
+})
+
+describe('inPromo', () => {
+  it('vale para todas as peças da loja, conjuntos inclusive', () => {
+    expect(['Blusa', 'Shorts', 'Legging', 'Conjunto'].every((kind) => inPromo({ kind }))).toBe(true)
+    expect(inPromo(undefined)).toBe(false)
   })
 })

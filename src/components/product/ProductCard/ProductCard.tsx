@@ -8,7 +8,7 @@ import {
   Swatches,
 } from '@/components/ui'
 import type { Product } from '@/data/products'
-import { BLOUSE_TIERS, isBlouse, MAX_BLOUSE_PERCENT } from '@/lib/campaign'
+import { PROMO_TIERS, inPromo, MAX_PROMO_PERCENT } from '@/lib/campaign'
 import { discountPercent } from '@/lib/price'
 import { useCampaign } from '@/store/campaignContext'
 import { usePurchase } from '../usePurchase'
@@ -18,8 +18,8 @@ import * as S from './ProductCard.styles'
 export function ProductCard({ product }: { product: Product }) {
   const p = usePurchase(product)
   const off = discountPercent(product.price, product.compareAt)
-  // Black Friday: blusa avulsa mostra o desconto progressivo no lugar dos selos normais
-  const blouseDeal = useCampaign().active && isBlouse(product)
+  // Black Friday: toda peça mostra o desconto progressivo no lugar dos selos normais
+  const promoDeal = useCampaign().active && inPromo(product)
 
   return (
     <S.Card aria-labelledby={`${product.id}-name`}>
@@ -32,10 +32,10 @@ export function ProductCard({ product }: { product: Product }) {
         </S.ImageButton>
 
         <S.Badges>
-          {blouseDeal ? (
+          {promoDeal ? (
             <>
-              <S.Badge $tone="sale">Até -{MAX_BLOUSE_PERCENT}%</S.Badge>
-              <S.Badge>Leve {BLOUSE_TIERS[0].min}+</S.Badge>
+              <S.Badge $tone="sale">Até -{MAX_PROMO_PERCENT}%</S.Badge>
+              <S.Badge>Leve {PROMO_TIERS[0].min}+</S.Badge>
             </>
           ) : (
             <>

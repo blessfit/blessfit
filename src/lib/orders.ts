@@ -1,43 +1,43 @@
 import type { Product, Size, Variant } from '@/data/products'
 import { SHOP } from '@/data/shop'
-import { blouseTier, isBlouse, nextBlouseTier } from './campaign'
+import { promoTier, inPromo, nextPromoTier } from './campaign'
 import { whatsappUrl } from './links'
 import { formatBRL } from './price'
 
 export type BagLine = { product: Product; variant: Variant; size: Size; qty: number }
 
-/** Desconto da Black Friday nas blusas da sacola, em reais (cartão e Pix). `percent` 0 = sem promoção. */
+/** Desconto da Black Friday nas peças da sacola, em reais (cartão e Pix). `percent` 0 = sem promoção. */
 export type BagPromo = {
-  blouses: number
+  count: number
   percent: number
   card: number
   pix: number
-  /** Próximo degrau (quantas blusas faltam e quanto dá), ou null no máximo / fora da campanha. */
+  /** Próximo degrau (quantas peças faltam e quanto dá), ou null no máximo / fora da campanha. */
   next: { missing: number; percent: number } | null
 }
 
 /** Mesma conta do checkout (src/lib/campaign.ts): arredondada por unidade, em centavos. */
 export function bagPromo(lines: BagLine[], blackFriday: boolean): BagPromo {
-  const blouses = lines.reduce((n, l) => n + (isBlouse(l.product) ? l.qty : 0), 0)
-  const percent = blackFriday ? blouseTier(blouses) : 0
+  const count = lines.reduce((n, l) => n + (inPromo(l.product) ? l.qty : 0), 0)
+  const percent = blackFriday ? promoTier(count) : 0
   const off = (unit: (l: BagLine) => number) =>
     lines.reduce(
-      (sum, l) => sum + (percent && isBlouse(l.product) ? Math.round((Math.round(unit(l) * 100) * percent) / 100) * l.qty : 0),
+      (sum, l) => sum + (percent && inPromo(l.product) ? Math.round((Math.round(unit(l) * 100) * percent) / 100) * l.qty : 0),
       0,
     ) / 100
   return {
-    blouses,
+    count,
     percent,
     card: off((l) => l.product.price),
     pix: off((l) => l.product.pix),
-    next: blackFriday ? nextBlouseTier(blouses) : null,
+    next: blackFriday ? nextPromoTier(count) : null,
   }
 }
 
 /**
  * Link de WhatsApp com todos os itens da sacola (nome, cor, tamanho e quantidade de cada um).
  * `freeFrom`: valor do frete grátis em reais; null = sem frete grátis por valor (Black Friday).
- * `promo`: desconto da Black Friday nas blusas, que vai na mensagem com o total já descontado.
+ * `promo`: desconto da Black Friday nas peças, que vai na mensagem com o total já descontado.
  */
 export function checkoutUrl(lines: BagLine[], freeFrom: number | null = SHOP.freeShippingFrom, promo?: BagPromo): string {
   const total = lines.reduce((sum, l) => sum + l.product.price * l.qty, 0)
@@ -58,7 +58,7 @@ export function checkoutUrl(lines: BagLine[], freeFrom: number | null = SHOP.fre
     ...(discounted
       ? [
           `Subtotal: ${formatBRL(total)} (ou ${formatBRL(pix)} no Pix)`,
-          `Black Friday (${promo.blouses} blusas, ${promo.percent}%): − ${formatBRL(promo.card)} (− ${formatBRL(promo.pix)} no Pix)`,
+          `Black Friday (${promo.count} peças, ${promo.percent}%): − ${formatBRL(promo.card)} (− ${formatBRL(promo.pix)} no Pix)`,
           `*Total: ${formatBRL(total - promo.card)}* (ou ${formatBRL(pix - promo.pix)} no Pix)`,
         ]
       : [`*Total: ${formatBRL(total)}* (ou ${formatBRL(pix)} no Pix)`]),
